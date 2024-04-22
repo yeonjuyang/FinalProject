@@ -32,8 +32,8 @@ public class S3Service  {
     public S3GetResponseDto find(String bucket, String prefix) {
         List<String> fileNames = new ArrayList<>();
 
-        String accessKeyId = "AKIAZQ3DREBNLHW5DO7N";
-	    String secretAccessKey = "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";
+        String accessKeyId = "";
+	    String secretAccessKey = "";
 
 	    // S3 클라이언트를 생성합니다
 	    AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
@@ -63,8 +63,8 @@ public class S3Service  {
     public S3GetResponseDto findOld(String bucket, String prefix) {
         List<String> fileNames = new ArrayList<>();
 
-        String accessKeyId = "AKIAZQ3DREBNLHW5DO7N";
-	    String secretAccessKey = "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";
+        String accessKeyId = "";
+	    String secretAccessKey = "";
 
 	    // S3 클라이언트를 생성합니다
 	    AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
@@ -114,8 +114,8 @@ public class S3Service  {
         List<Date> dates= new ArrayList<>();
 
         // AWS 액세스 키 설정
-        String accessKeyId = "AKIAZQ3DREBNLHW5DO7N";
-	    String secretAccessKey = "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";
+        String accessKeyId = "";
+	    String secretAccessKey = "";
 
 
         // S3 클라이언트 생성
@@ -168,8 +168,8 @@ public class S3Service  {
         List<String> fileExtensions = new ArrayList<>();
         List<Date> dates= new ArrayList<>();
         // AWS 액세스 키 설정
-        String accessKeyId = "AKIAZQ3DREBNLHW5DO7N";
-   	    String secretAccessKey = "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";
+        String accessKeyId = "";
+   	    String secretAccessKey = "";
 
         // S3 클라이언트 생성
         AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
