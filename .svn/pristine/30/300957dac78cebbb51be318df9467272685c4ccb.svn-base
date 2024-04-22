@@ -1,0 +1,21 @@
+package com.team1.workforest.dashboard.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.team1.workforest.dashboard.mapper.DashboardMapper;
+import com.team1.workforest.dashboard.service.DashboardService;
+import com.team1.workforest.dashboard.vo.DashboardVO;
+
+@Service
+public class DashboardServiceImpl implements DashboardService {
+
+	@Autowired
+	DashboardMapper dashboardMapper;
+	
+	@Override
+	public int updateDashboard(DashboardVO dashboardVO) {
+		return this.dashboardMapper.updateDashboard(dashboardVO);
+	}
+
+}

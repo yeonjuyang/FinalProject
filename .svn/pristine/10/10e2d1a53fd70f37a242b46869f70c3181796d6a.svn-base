@@ -1,0 +1,842 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>    
+<style>
+.yearClassify{
+	height:50px;
+	
+}
+.yearClassify1{
+	display: flex;
+	flex-direction: column;
+}
+.box1{
+	width: 170px;
+	height: 120px;
+	text-align: center;
+	padding-top: 30px;
+}
+.box2{
+	width: 200px;
+	height: 120px;
+	text-align: center;
+}
+.box2 .heading1{
+	position: relative;
+	top: 10px;
+}
+.box3{
+	width: 495px;
+	height: 350px;
+	margin-top: 30px;
+}
+.moreInfo{
+	width: 100%;
+	position: relative;
+	top: 5px;
+}
+.line2{
+	margin-top: 20px;
+	height: 320px;
+}
+.align-center{
+	text-align: center;
+}
+.chart-container{
+	height: 300px;
+	margin: 0 auto;
+	display: flex;
+  	justify-content: center; /* 내부 요소를 가운데 정렬 */
+}
+.genderBox{
+	width: 300px;
+	height: 460px;
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+let myYChart = "";
+let myPositionYChart = "";
+let myDeptYChart = "";
+
+let myChart = "";
+let myAgeChart = "";
+let myRetireChart = "";
+
+let myGenderChart = "";
+let myLocationChart = "";
+let myStateChart = "";
+let paramYear = "";
+paramYear = "2024"
+let deptDetailNo = "DEPT01"
+function drawAgeChart(chartDiv, chartLabels, chartData){
+	
+	const ctx = document.getElementById(chartDiv);
+	
+	myAgeChart = new Chart(ctx, {
+		type: 'bar',
+		data: {
+			labels: chartLabels,
+			datasets: [{
+				label: '사원 수',
+				data: chartData,
+				borderWidth: 1
+			}]
+		},
+		options: {
+			scales: {
+				y: {
+					beginAtZero: true
+				}
+			}
+		}
+	});
+}
+
+function drawLocationChart(chartDiv, chartLabels, chartData){
+	
+	const ctx = document.getElementById(chartDiv);
+	
+	myLocationChart = new Chart(ctx, {
+		type: 'bar',
+		data: {
+			labels: chartLabels,
+			datasets: [{
+				label: '사원 수',
+				data: chartData,
+				borderWidth: 1
+			}]
+		},
+		options: {
+			scales: {
+				y: {
+					beginAtZero: true
+				}
+			}
+		}
+	});
+}
+
+function drawRetireChart(chartDiv, chartLabels, chartData){
+	
+	const ctx = document.getElementById(chartDiv);
+	
+	myRetireChart = new Chart(ctx, {
+		type: 'bar',
+		data: {
+			labels: chartLabels,
+			datasets: [{
+				label: '사원 수',
+				data: chartData,
+				borderWidth: 1
+			}]
+		},
+		options: {
+			scales: {
+				y: {
+					beginAtZero: true
+				}
+			}
+		}
+	});
+}
+
+function drawYChart(chartDiv, chartLabels, chartData){
+	
+	const ctx = document.getElementById(chartDiv);
+	
+	myYChart = new Chart(ctx, {
+		type: 'bar',
+		data: {
+			labels: chartLabels,
+			datasets: [{
+				axis: 'y',
+				label: '사원 수',
+				data: chartData,
+				borderWidth: 1
+			}]
+		},
+		options: {
+			indexAxis: 'y',
+			scales: {
+				x: {
+					beginAtZero: true,
+					min:0,
+					max:10
+				}
+			}
+		}
+	});
+}
+
+function drawDeptYChart(chartDiv, chartLabels, chartData){
+	
+	const ctx = document.getElementById(chartDiv);
+	
+	myDeptYChart = new Chart(ctx, {
+		type: 'bar',
+		data: {
+			labels: chartLabels,
+			datasets: [{
+				axis: 'y',
+				label: '사원 수',
+				data: chartData,
+				borderWidth: 1
+			}]
+		},
+		options: {
+			indexAxis: 'y',
+			scales: {
+				x: {
+					beginAtZero: true,
+					min:0,
+					max:20
+				}
+			}
+		}
+	});
+}
+
+function drawPositionYChart(chartDiv, chartLabels, chartData){
+	
+	const ctx = document.getElementById(chartDiv);
+	
+	myPositionYChart = new Chart(ctx, {
+		type: 'bar',
+		data: {
+			labels: chartLabels,
+			datasets: [{
+				axis: 'y',
+				label: '사원 수',
+				data: chartData,
+				borderWidth: 1
+			}]
+		},
+		options: {
+			indexAxis: 'y',
+			scales: {
+				x: {
+					beginAtZero: true
+				}
+			}
+		}
+	});
+}
+
+function drawDoughnutChart(chartDiv, chartLabels, chartData){
+	
+	const ctx = document.getElementById(chartDiv);
+	
+	myGenderChart = new Chart(ctx, {
+		type: 'doughnut',
+		data:{
+			labels:chartLabels,
+			datasets: [{
+				label: chartLabels,
+				data: chartData,
+				backgroundColor: [
+				  'rgb(54, 162, 235)',
+				  'rgb(255, 99, 132)',
+				],
+				hoverOffset: 4
+			}]
+		},
+		options: {
+			plugins: {
+			    tooltip: {
+			        callbacks: {
+			            label: function(context) {
+			            	let label = context.label || '';
+
+	                        if (label) {
+	                            label += ': ';
+	                        }
+	                        	console.log("context:");
+	                        if (context.dataset.data[context.dataIndex] !== null) {
+	                            label += context.dataset.data[context.dataIndex] + "%";
+	                        }
+	                        return label;
+			            }
+			       }
+			   }
+			}
+		}
+	})	
+}
+
+function drawStateChart(chartDiv, chartLabels, chartData){
+	
+	const ctx = document.getElementById(chartDiv);
+	
+	myStateChart = new Chart(ctx, {
+		type: 'doughnut',
+		data:{
+			labels:chartLabels,
+			datasets: [{
+				label: chartLabels,
+				data: chartData,
+				hoverOffset: 4
+			}]
+		},
+		options: {
+			plugins: {
+			    tooltip: {
+			        callbacks: {
+			            label: function(context) {
+			            	let label = context.label || '';
+
+	                        if (label) {
+	                            label += ': ';
+	                        }
+	                        	console.log("context:");
+	                        if (context.dataset.data[context.dataIndex] !== null) {
+	                            label += context.dataset.data[context.dataIndex] + "%";
+	                        }
+	                        return label;
+			            }
+			       }
+			   }
+			}
+		}
+	})	
+}
+
+function empStatics(paramYear){
+	$(function(){
+		
+		// 나이 분포 그래프
+		let ageData = [];
+		let ageLabels = ['21-25','26-30','31-35','36-40','41-45','46-50','50+']
+		$.ajax({
+			url:"/adminEmp/getAgeGraph",
+			data:{"year":paramYear},
+			type:"get",
+			success:function(res){
+				ageData = res
+				
+				if (myAgeChart && myAgeChart.data.labels) { 
+					
+					newLabels = ageLabels
+					newData = ageData
+					
+					myAgeChart.data.labels = newLabels
+			        // 기존 차트의 데이터를 업데이트
+				    myAgeChart.data.datasets[0].data = newData; // 새로운 데이터로 업데이트
+			        // 차트 업데이트
+			        myAgeChart.update();
+			        
+			    }else{
+			    	drawAgeChart("myChart", ageLabels, ageData)
+			    }
+			}
+		})
+		
+		// 평균 나이
+		$.ajax({
+			url:"/adminEmp/getAvgAge",
+			data:{"year":paramYear},
+			type:"get",
+			success:function(res){
+				$(".avgage").html(res)
+			}
+		})
+		
+		// 사원 수
+		$.ajax({
+			url:"/adminEmp/getEmpCount",
+			data:{"year":paramYear},
+			type:"get",
+			success:function(res){
+				$(".allEmpCount").html(res)
+			}
+		})
+		
+		// 남녀 성비
+		$.ajax({
+			url:"/adminEmp/getGenderRate",
+			data:{"year":paramYear},
+			type:"get",
+			success:function(res){
+				
+				let genderLabels = ["Male","Female"];
+				let genderData = [];
+				
+				let maleCount = res[0];
+				let femaleCount = res[1];
+				
+				// 소수2번째자리에서 끊어서 100%가 안되는것 때문에 그냥 100에서 한쪽값을 빼는거로...
+				let maleRate = parseInt(maleCount/(maleCount+femaleCount) * 10000)/100;
+				let femaleRate = parseInt(femaleCount/(maleCount+femaleCount) * 10000)/100
+				
+				genderData = [maleRate, femaleRate]
+				
+				$(".maleRate").html(maleCount)
+				$(".femaleRate").html(femaleCount)
+				
+				
+				if (myGenderChart && myGenderChart.data.labels) { 
+					
+					newLabels = genderLabels
+					newData = genderData
+					
+					myGenderChart.data.labels = newLabels
+			        // 기존 차트의 데이터를 업데이트
+				    myGenderChart.data.datasets[0].data = newData; // 새로운 데이터로 업데이트
+			        // 차트 업데이트
+			        myGenderChart.update();
+			        
+			    }else{
+			    	drawDoughnutChart("genderChart", genderLabels, genderData)
+			    }
+			}
+		})
+		
+		// 퇴사자 수, 퇴사자 유형별 수
+		$.ajax({
+			url:"/adminEmp/getRetireCount",
+			data:{"year":paramYear},
+			type:"get",
+			success:function(res){
+				let sumCount = res[0] + res[1];
+				// 정년퇴직자
+				let retire1 = res[0];
+				// 그냥퇴직자
+				let retire2 = res[1];
+				
+				$(".retireCount").html(sumCount)
+				$(".retire1").html(retire1)
+				$(".retire2").html(retire2)
+				
+			}
+		})
+		
+		// 고용자 수
+		$.ajax({
+			url:"/adminEmp/getHireCount",
+			data:{"year":paramYear},
+			type:"get",
+			success:function(res){
+				
+				$(".hireCount").html(res)
+			}
+		})
+		
+		let deptDetail = []
+		let deptDetailData = []
+		
+		// deptNo 매개변수로 주고 불러오면 해당 부서의 하위부서들 그래프
+		function getDeptDetailGraph(deptDetailNo){
+			
+			deptDetail = []
+			deptDetailData = []
+			
+			$.ajax({
+				url:"/adminEmp/getDeptName",
+				data:{"year":paramYear},
+				type:"get",
+				success:function(res){
+					$.each(res,function(i,v){
+						if(v.deptNo.substr(0,6) == deptDetailNo){
+							deptDetail.push(v.deptNm)
+						}
+					})
+					
+					$.ajax({
+						url:"/adminEmp/getDeptCount",
+						data:{
+							"year":paramYear,
+						},
+						type:"get",
+						success:function(res){
+							$.each(res,function(i,v){
+								
+								let deptNo = v.split("_")[0]
+								let empCount = parseInt(v.split("_")[1])
+								
+								if(deptNo.substr(0,6) == deptDetailNo){
+									deptDetailData.push(empCount)
+								}
+							})
+							
+							// 차트가 없으면 새로 생성, 차트가 있으면 업데이트
+							if (myYChart && myYChart.data.labels[0].substr(-2,2) == "본부") { 
+								
+								newLabels = deptDetail
+								newData = deptDetailData
+								console.log("myYChart.data.datasets[0].data:",myYChart.data.datasets[0].data)
+								
+								myYChart.data.labels = newLabels
+						        // 기존 차트의 데이터를 업데이트
+							    myYChart.data.datasets[0].data = newData; // 새로운 데이터로 업데이트
+						        // 차트 업데이트
+						        myYChart.update();
+						        
+						    }else{
+								drawYChart("deptDetailChart",deptDetail,deptDetailData)
+						    }
+						    
+						}
+					
+					})
+					
+				}
+			})
+			
+			
+			
+			
+		}
+		
+		// 상위부서들 차트
+		$.ajax({
+			url:"/adminEmp/getDeptCount",
+			data:{"year":paramYear},
+			type:"get",
+			success:function(res){
+				
+				// 이것을 데이터 베이스에서 가져오려면 부서분류가 필요할듯함
+				let deptChartLabels = ["기획","경영","영업","마케팅","개발"]
+				let deptChartData = [];
+				let dept01 = 0;
+				let dept02 = 0;
+				let dept03 = 0;
+				let dept04 = 0;
+				let dept05 = 0;
+				
+				$.each(res,function(i,v){
+					let deptNo = v.split("_")[0]
+					let empCount = parseInt(v.split("_")[1])
+					
+					if(deptNo.substr(0,6) == "DEPT01"){
+						dept01 += empCount
+					}
+					if(deptNo.substr(0,6) == "DEPT02"){
+						dept02 += empCount
+					}
+					if(deptNo.substr(0,6) == "DEPT03"){
+						dept03 += empCount
+					}
+					if(deptNo.substr(0,6) == "DEPT04"){
+						dept04 += empCount
+					}
+					if(deptNo.substr(0,6) == "DEPT05"){
+						dept05 += empCount
+					}
+				})
+				
+				deptChartData.push(dept01)
+				deptChartData.push(dept02)
+				deptChartData.push(dept03)
+				deptChartData.push(dept04)
+				deptChartData.push(dept05)
+				
+				
+				// 차트가 없으면 새로 생성, 차트가 있으면 업데이트
+				if (myDeptYChart && myDeptYChart.data.labels) { 
+					
+					newLabels = deptChartLabels
+					newData = deptChartData
+					
+					myDeptYChart.data.labels = newLabels
+			        // 기존 차트의 데이터를 업데이트
+				    myDeptYChart.data.datasets[0].data = newData; // 새로운 데이터로 업데이트
+			        // 차트 업데이트
+			        myDeptYChart.update();
+			        
+			    }else{
+			    	drawDeptYChart("deptChart",deptChartLabels,deptChartData)
+			    }
+				
+				
+			}
+		})
+		
+		/* $.ajax({
+			url:"/adminEmp/getRetireRate",
+			data:{"year":paramYear},
+			type:"get",
+			success:function(res){
+				console.log(res)
+				let chartLabels = ["01","02","03","04","05","06","07","08","09","10","11","12"]
+				let chartData = res
+				
+				if (myRetireChart && myRetireChart.data.labels) { 
+					
+					newLabels = chartLabels
+					newData = chartData
+					
+					myRetireChart.data.labels = newLabels
+			        // 기존 차트의 데이터를 업데이트
+				    myRetireChart.data.datasets[0].data = newData; // 새로운 데이터로 업데이트
+			        // 차트 업데이트
+			        myRetireChart.update();
+			        
+			    }else{
+			    	drawRetireChart("retireChart",chartLabels,chartData)
+			    	myRetireChart.data.datasets[0].label = "퇴사율(%)"
+					myRetireChart.update()
+			    }
+			}
+		}) */
+		$.ajax({
+			url:"/adminEmp/getLoaclCount",
+			data:{"year":paramYear},
+			type:"get",
+			success:function(res){
+				
+				let chartLabels = []
+				let chartData = []
+				
+				$.each(res,function(i,v){
+					
+					chartLabels.push(v.workLocation)
+					chartData.push(v.count)
+					
+				})
+				
+				if (myLocationChart && myLocationChart.data.labels) { 
+					newLabels = chartLabels
+					newData = chartData
+					
+					myLocationChart.data.labels = newLabels
+			        // 기존 차트의 데이터를 업데이트
+				    myLocationChart.data.datasets[0].data = newData; // 새로운 데이터로 업데이트
+			        // 차트 업데이트
+			        myLocationChart.update();
+			        
+			    }else{
+			    	drawLocationChart("localChart",chartLabels,chartData)
+			    }
+				
+			}
+		})
+		
+		$.ajax({
+			url:"/adminEmp/getWorkerCount",
+			data:{"year":paramYear},
+			type:"get",
+			success:function(res){
+				
+				let chartLabels = []
+				let chartData = []
+				
+				$.each(res,function(i,v){
+					
+					chartLabels.push(v.workState)
+					chartData.push(v.count)
+					
+				})
+				
+				if (myStateChart && myStateChart.data.labels) { 
+					newLabels = chartLabels
+					newData = chartData
+					
+					myStateChart.data.labels = newLabels
+			        // 기존 차트의 데이터를 업데이트
+				    myStateChart.data.datasets[0].data = newData; // 새로운 데이터로 업데이트
+			        // 차트 업데이트
+			        myStateChart.update();
+			        
+			    }else{
+			    	drawStateChart("workerChart",chartLabels,chartData)
+			    }
+				
+			}
+		})
+		
+		$.ajax({
+			url:"/adminEmp/getPositionGraph",
+			data:{"year":paramYear},
+			type:"get",
+			success:function(res){
+				
+				let chartLabels = []
+				let chartData = []
+				
+				console.log("res:",res)
+				$.each(res,function(i,v){
+					
+					chartLabels.push(v.position)
+					chartData.push(v.count)
+					
+				})
+				
+				if (myPositionYChart && myPositionYChart.data.labels) { 
+					console.log("myPositionYChart.data.labels:",myPositionYChart.data.labels)
+					newLabels = chartLabels
+					newData = chartData
+					
+					myPositionYChart.data.labels = newLabels
+			        // 기존 차트의 데이터를 업데이트
+				    myPositionYChart.data.datasets[0].data = newData; // 새로운 데이터로 업데이트
+			        // 차트 업데이트
+			        myPositionYChart.update();
+			        
+			    }else{
+			    	drawPositionYChart("positionChart",chartLabels,chartData)
+			    }
+				
+				
+			}
+		})
+		
+		// 첫 화면 디폴트로 dept01 부서의 하위부서 그래프
+		getDeptDetailGraph(deptDetailNo)
+		
+		$("#deptSelect").on("change",function(){
+			
+			deptDetailNo = $(this).val()
+			
+			getDeptDetailGraph(deptDetailNo)
+			
+		})
+		
+	  
+	})
+}
+
+empStatics(paramYear)
+$(function(){
+	$(".yearClassify").on("click",function(){
+		console.log("asdfasdasf")
+		paramYear = $(this).find("p").text();
+		empStatics(paramYear)
+	})
+})
+</script>
+<div class="wf-main-container">
+	<div class="wf-tit-wrap">
+		<h1 class="page-tit">사원 통계</h1>
+	</div>
+	<div class="wf-flex-box">
+		<div>
+			<div class="wf-content-wrap wf-flex-box line1">
+			
+				<div class="wf-content-area box2">
+					<p class="heading1 align-center">사원</p>
+					<p class="heading1 align-center">관리/통계</p>
+				</div>
+				<div class="wf-content-area box1" style="margin-top: 0px;">
+					<p class="heading1 align-center">전체 사원 수</p>
+					<p class="heading1 align-center allEmpCount">&nbsp;</p>
+				</div>
+				<div class="wf-content-area box1" style="margin-top: 0px;">
+					<p class="heading1 align-center">고용자 수</p>
+					<p class="heading1 align-center hireCount">&nbsp;</p>
+				</div>
+				<div class="wf-content-area box1" style="margin-top: 0px;">
+					<p class="heading1 align-center">퇴사자 수(정년)</p>
+					<p class="heading1 align-center retire1">&nbsp;</p>
+				</div>
+				<div class="wf-content-area box1" style="margin-top: 0px;">
+					<p class="heading1 align-center">퇴사자 수(이직)</p>
+					<p class="heading1 align-center retire2">&nbsp;</p>
+				</div>
+				<div class="wf-content-area box1" style="margin-top: 0px;">
+					<p class="heading1 align-center">평균 나이</p>
+					<p class="heading1 align-center avgage">&nbsp;</p>
+				</div>
+				
+			</div>
+			<div class="wf-flex-box line2">
+				<div class="yearClassify1" style="height: 320px; overflow: scroll;">
+					<div class="wf-content-area yearClassify" style="margin-top: 10px; width:70px;">
+						<p class="heading2 align-center yearChoice">2024</p>
+					</div>
+					<div class="wf-content-area yearClassify" style="margin-top: 10px; width:70px;">
+						<p class="heading2 align-center">2023</p>
+					</div>
+					<div class="wf-content-area yearClassify" style="margin-top: 10px; width:70px;">
+						<p class="heading2 align-center">2022</p>
+					</div>
+					<div class="wf-content-area yearClassify" style="margin-top: 10px; width:70px;">
+						<p class="heading2 align-center">2021</p>
+					</div>
+					<div class="wf-content-area yearClassify" style="margin-top: 10px; width:70px;">
+						<p class="heading2 align-center">2020</p>
+					</div>
+					<div class="wf-content-area yearClassify" style="margin-top: 10px; width:70px;">
+						<p class="heading2 align-center">2019</p>
+					</div>
+					<div class="wf-content-area yearClassify" style="margin-top: 10px; width:70px;">
+						<p class="heading2 align-center">2018</p>
+					</div>
+					<div class="wf-content-area yearClassify" style="margin-top: 10px; width:70px;">
+						<p class="heading2 align-center">2017</p>
+					</div>
+					<div class="wf-content-area yearClassify" style="margin-top: 10px; width:70px;">
+						<p class="heading2 align-center">2016</p>
+					</div>
+				</div>
+				<div class="wf-content-area line2 box" style="margin-top: 0px;">
+					<p class="heading2 align-center">직급 분포도</p>
+					<div class="chart-container2">
+						<canvas id="positionChart" width="300" height="250"></canvas>
+					</div>
+				</div>
+				<div class="wf-content-area line2">
+					<p class="heading2 align-center">부서 그래프</p>
+					<div class="chart-container2">
+						<canvas id="deptChart" width="300" height="200"></canvas>
+					</div>
+				</div>
+				
+				<div class="wf-content-area line2" style="margin-top: 0px;">
+					<p class="heading2 align-center">부서별 인원수</p>
+					<select name="deptSelect" id="deptSelect">
+                        <option value="DEPT01">기획</option>
+                        <option value="DEPT02">경영</option>
+                        <option value="DEPT03">영업</option>
+                        <option value="DEPT04">마케팅</option>
+                        <option value="DEPT05">개발</option>
+                    </select>
+					<div id="deptDetailChart-container">
+						<canvas id="deptDetailChart" width="300" height="200"></canvas>
+					</div>
+				</div>
+				
+			</div>
+		
+		</div>
+		
+		<div class="wf-content-area genderBox" style="margin-top: 0px;">
+			<div class="wf-flex-box">
+				<div style="margin: 0px auto;">
+					<p class="heading2 align-center">이미지 남자</p>
+					<p class="heading1 align-center maleRate">&nbsp;</p>
+				</div>
+				<div style="margin: 0px auto;">
+					<p class="heading2 align-center">이미지 여자</p>
+					<p class="heading1 align-center femaleRate">&nbsp;</p>
+				</div>
+			</div>
+			<div>
+				<canvas id="genderChart"></canvas>
+			</div>
+		</div>
+		
+	</div>
+	<div class="wf-flex-box line3">
+		<div class="wf-content-area box3">
+			<p class="heading2 align-center">나이 분포도</p>
+			<div class="chart-container">
+				<canvas id="myChart"></canvas>
+			</div>
+		</div>
+		<div class="wf-content-area box3" style="margin-top: 30px;">
+			<p class="heading2 align-center">지역별 사원</p>
+			<div class="chart-container">
+				<canvas id="localChart"></canvas>
+			</div>
+		</div>
+		<div class="wf-content-area box3" style="margin-top: 30px;">
+			<p class="heading2 align-center">재직자 통계</p>
+			<div class="chart-container">
+				<canvas id="workerChart"></canvas>
+			</div>
+		</div>
+		
+	</div>
+</div>

@@ -1,0 +1,157 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<script type="text/javascript">
+$(function(){
+	
+	//검색
+	$("#btn4").on("click", function(){
+		let keyword = $.trim($("input[name='keyword']").val());
+		
+		console.log("keyword : " + keyword);
+		
+		///stud/list?currentPage=1 or /stud/list
+		//검색 시 페이지번호는 1로 초기화
+		let currentPage = "1";
+		
+		//json 오브젝트
+		let data = {
+			"keyword":keyword,
+			"currentPage":currentPage
+		};
+		
+		console.log("data : ", data);
+		
+		//아작났어유..(피)씨다타써
+		//contentType : 보내는 타입
+		//dataType : 응답 타입
+		$.ajax({
+			url:"/emp/list",
+			contentType:"application/json;charset=utf-8",
+			data:JSON.stringify(data),
+			type:"post",
+			dataType:"json",
+			beforeSend:function(xhr){
+				xhr.setRequestHeader("${_csrf.headerName}","${_csrf.token}");
+			},
+			success:function(result){
+				//result : List<StudVO>
+//	 			console.log("result",result);
+				//console.log("result : " + JSON.stringify(result));
+				//result : List<StudVO>
+				
+				let str = "";
+				let studPwStr = "";
+				
+				//목록을 초기화
+				$("#studBody").html("");
+				
+				$.each(result.content,function(idx,studVO){
+					console.log("studVO["+idx+"] : ", studVO);
+					//{rnum: 1, studId: 'a001', studNm: '김은대', studPw: 'asdfasdf', enabled: '1'}
+					str += "<tr>";
+					str += "<td>"+studVO.rnum+"</td>";
+					str += "<td>"+studVO.studId+"</td>";
+					str += "<td>"+studVO.studNm+"</td>";
+					if(studVO.enabled=="1"){
+						studPwStr = "회원";
+					}else{
+						studPwStr = "탈퇴회원";
+					}
+					str += "<td><span class='tag tag-success'>"+studPwStr+"</span></td>";
+					str += "<td>"+studVO.studPw+"</td>";
+					str += "</tr>";
+				});
+				//요소.append : 누적, 요소.html : 새로고침, 요소.innerHTML : JavaScript에서 새로고침
+				$("#studBody").append(str);
+				//페이징 처리
+				$("#divPaging").html(result.pagingArea);
+			}
+		});
+	});
+	
+});
+</script>
+                <div class="wf-main-container">
+                    <!-- =============== body 시작 =============== -->
+                    <!-- =============== 상단타이틀영역 시작 =============== -->
+                    <div class="wf-tit-wrap">
+                        <h1 class="page-tit">주소록</h1>
+                        <!-- 검색 시작 -->
+                        	<div class="wf-search-area">
+                                <div class="select-box">
+                                    <select name="" id="">
+                                        <option value="">사원명</option>
+                                        <option value="">부서명</option>
+                                        <option value="">근무지역</option>
+                                    </select>
+                                </div>
+                                <input type="text" placeholder="검색어를 입력해주세요">
+                                <button type="button" class="btn4">
+                                    <i class="xi-search"></i>
+                                </button>
+                            </div>
+                            <!-- 검색 끝 -->
+                         <form action="/excel/empdownload" method="get">
+                        <button type="submit" class="btn5">Excel <i class="xi-download"></i></button>
+                        </form>
+                        
+                    </div>
+                    <br>
+                    <!-- =============== 상단타이틀영역 끝 =============== -->
+                    <!-- =============== 컨텐츠 영역 시작 =============== -->
+                    <div class="wf-content-wrap">
+
+                        <div class="wf-content-area">
+                            <table class="wf-table">
+                                <colgroup>
+                                    <col style="width: 12%;">
+                                    <col style="width: 12%;">
+                                    <col style="width: 12%;">
+                                    <col style="width: 15%;">
+                                    <col style="width: 12%;">
+                                    <col style="width: 12%;">
+                                    <col style="width: 12%;">
+                                    <col style="width: 13%;">
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                       
+                                        <th>사원번호</th>
+                                        <th>사원명</th>
+                                        <th>근무지역</th>
+                                        <th>내선번호</th>
+                                        <th>부서명</th>
+                                        <th>직책</th>
+                                        <th>직급</th>
+                                        <th>이메일주소</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="empTBody">
+                                 <c:forEach var="empVO" items="${data.content}" varStatus="stat">
+								        <tr>
+								    
+								            <td>${empVO.empNo}</td>
+								            <td>${empVO.empNm}</td>
+								            <td>${empVO.workLocation}</td>
+								            <td>${empVO.lxtn}</td>
+								            <td>${empVO.deptNm}</td>
+								            <td>${empVO.position}</td>
+								            <td>${empVO.rspnsblCtgryNm}</td>
+								            <td>${empVO.email}</td>
+								        </tr>
+    							</c:forEach>
+                                 
+                                </tbody>
+                            </table>
+                           
+                        </div>
+
+                        <!-- 페이지네이션 시작 -->
+                      ${data.getPagingArea()}
+                        <!-- 페이지네이션 끝 -->
+               
+                    </div>
+                    <!-- =============== 컨텐츠 영역 끝 =============== -->
+                    <!-- =============== body 끝 =============== -->
+                </div>

@@ -1,0 +1,28 @@
+package com.team1.workforest.schedule.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.team1.workforest.schedule.vo.ScheduleVO;
+
+public interface ScheduleService {
+	
+	public List<ScheduleVO> getMySchedules(String empNo);
+
+	public List<ScheduleVO> getTeamSchedules(String empNo);
+
+	public List<ScheduleVO> getDeptSchedules(String empNo);
+
+	public List<ScheduleVO> getCompSchedules(String empNo);
+
+	public int createSchedule(ScheduleVO scheduleVO);
+
+	public int updateSchedule(ScheduleVO scheduleVO);
+
+	public int deleteSchedule(String schdulNo);
+
+	public ScheduleVO getSchedule(String schdulNo);
+
+	
+
+}

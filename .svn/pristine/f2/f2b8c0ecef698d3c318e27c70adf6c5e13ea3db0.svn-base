@@ -1,0 +1,11 @@
+package com.team1.workforest.test123.mapper;
+
+import java.util.Map;
+
+public interface ChatMapper {
+
+	public String alram(Map<String, String> map);
+
+	public int addAlram(Map<String, String> map);
+
+}

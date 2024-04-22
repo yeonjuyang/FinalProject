@@ -1,0 +1,43 @@
+package com.team1.workforest.admin.reservation.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.team1.workforest.admin.reservation.service.AdminCarResveService;
+import com.team1.workforest.reservation.car.vo.CarReservationVO;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RestController
+@RequestMapping("/admin")
+public class AdminCarResveController {
+
+	@Autowired
+	AdminCarResveService adminCarResveService;
+
+	// 차량 예약 목록 불러오기
+	@GetMapping("/reservations/car")
+	public List<CarReservationVO> adminGetCarResveList(@RequestParam Map<String, Object> map) {
+		return adminCarResveService.adminGetCarResveList(map);
+	}
+
+	// 반납 처리해야하는 차량 목록 불러오기
+	@GetMapping("/reservations/car/waitReturn")
+	public List<CarReservationVO> adminGetWaitReturnCarResveList(@RequestParam Map<String, Object> map) {
+		return adminCarResveService.adminGetWaitReturnCarResveList(map);
+	}
+
+	// 지난 차량 예약 목록 불러오기
+	@GetMapping("/reservations/car/past")
+	public List<CarReservationVO> adminGetPastCarResveList(@RequestParam Map<String, Object> map) {
+		return adminCarResveService.adminGetPastCarResveList(map);
+	}
+
+}

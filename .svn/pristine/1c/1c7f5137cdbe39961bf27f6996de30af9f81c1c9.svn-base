@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.team1.workforest.employee.info.mapper.EmployeeMapper">
+	<select id="detail" parameterType="String">
+		SELECT B.DEPT_NM, C1.CMMN_CD_NM, D.RSPNSBL_CTGRY_NM, A.EMP_NM,
+			A.LXTN, A.EMAIL, A.CNTCNO, A.ZIP, A.BASIS_ADRES, A.DETAIL_ADRES, A.ECNY_DATE, A.BDATE, C2.CMMN_CD_NM
+		FROM EMPLOYEE A
+		JOIN DEPARTMENT B ON A.DEPT_NO = B.DEPT_NO
+		JOIN COMMON_CODE C1 ON A.POSITION_CD = C1.CMMN_CD
+		JOIN COMMON_CODE C2 ON A.WORK_LOC_CD = C2.CMMN_CD
+		JOIN RESPONSIBILITY_CATEGORY D ON A.RSPNSBL_CD = D.RSPNSBL_CD
+		WHERE A.EMP_NO = #{empNo}
+		AND C1.CMMN_CD_GROUP = 'EMP002'
+		AND C2.CMMN_CD_GROUP = 'EMP005';
+	</select>
+
+</mapper>

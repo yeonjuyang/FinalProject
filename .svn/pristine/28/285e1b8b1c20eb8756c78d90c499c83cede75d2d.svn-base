@@ -1,0 +1,21 @@
+package com.team1.workforest.vacation.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.team1.workforest.vacation.vo.EmpVacationManageVO;
+import com.team1.workforest.vacation.vo.VacationRecordVO;
+
+public interface VacationService {
+
+	public List<EmpVacationManageVO> getMyVacationList(String empNo);
+
+	public EmpVacationManageVO getMyVacation(Map<String, String> params);
+	
+	public List<VacationRecordVO> getMyVacationRecordList(String empNo);
+
+	public int getVacationRecordsCount(String empNo);
+
+
+
+}

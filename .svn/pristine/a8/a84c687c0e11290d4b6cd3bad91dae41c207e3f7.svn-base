@@ -1,0 +1,51 @@
+package com.team1.workforest.board.suggestion.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.team1.workforest.board.suggestion.vo.SuggestionReplyVO;
+import com.team1.workforest.board.suggestion.vo.SuggestionVO;
+
+public interface SuggestionService {
+
+	// 행의 수
+	public int getTotal();
+
+	// 건의 게시판 목록
+	public List<SuggestionVO> list(Map<String, Object> map);
+
+	// 조회수
+	public int suggestionView(String sugestBrdNo);
+	
+	// 건의 게시판 상세조회
+	public SuggestionVO detail(String sugestBrdNo);
+	
+	// 건의 게시판 삭제
+	public int deleteSuggestion(SuggestionVO vo);
+	
+	// 댓글 조회
+	public List<SuggestionReplyVO> suggestReplylist(SuggestionReplyVO vo);
+	
+	// 댓글 등록
+	public int SuggestionReplyInsert(SuggestionReplyVO vo);
+	
+	// insert한 날짜 가져오기
+	public SuggestionReplyVO insertdate(SuggestionReplyVO vo);
+	
+	
+	// 댓글 입력 완료 후
+	public SuggestionReplyVO insertSuggestionReplyVO(SuggestionReplyVO vo);
+	
+	// 댓글 삭제
+	public int deleteSuggestionReplyVO(SuggestionReplyVO vo);
+	
+	// 게시글 등록
+	public int createSuggest(SuggestionVO suggestionVO);
+	
+	// 대댓글 리스트 출력
+	public List<SuggestionReplyVO> suggestionReplyReList(SuggestionReplyVO vo);
+	
+	
+	
+	
+}

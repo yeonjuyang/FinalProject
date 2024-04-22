@@ -1,0 +1,116 @@
+package com.team1.workforest.mail.service.impl;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.team1.workforest.mail.mapper.EmailMapper;
+import com.team1.workforest.mail.service.MailService;
+import com.team1.workforest.mail.vo.EmailRecipientVO;
+import com.team1.workforest.mail.vo.EmailVO;
+
+@Service
+public class MailServiceImpl implements MailService{
+
+	@Autowired
+	EmailMapper emailMapper;
+
+	@Override
+	public List<EmailVO> getMailList(Map<String, Object> map) {
+		return this.emailMapper.getMailList(map);
+	}
+
+	@Override
+	public int getTotal(Map<String, Object> map) {
+		return this.emailMapper.getTotal(map);
+	}
+
+	@Override
+	public EmailVO getMailDetail(String emailNo) {
+		return this.emailMapper.getMailDetail(emailNo);
+	}
+
+	@Override
+	public int getMailCount(Map<String, Object> map) {
+		return this.emailMapper.getMailCount(map);
+	}
+
+	@Override
+	public int getSendMailCount(Map<String, Object> map) {
+		return this.emailMapper.getSendMailCount(map);
+	}
+
+	@Override
+	public List<EmailVO> getSendList(Map<String, Object> map) {
+		return this.emailMapper.getSendList(map);
+	}
+
+	@Override
+	public int getNoreadCount(Map<String, Object> map) {
+		return this.emailMapper.getNoreadCount(map);
+	}
+
+	@Override
+	public int insertMail(EmailVO emailVO) {
+		int result=this.emailMapper.insertMail(emailVO);
+		String[] list = emailVO.getEmailRVOList();		
+		for(int i=0; i<list.length; i++) {
+			EmailRecipientVO emailRecipientVO=new EmailRecipientVO();
+			
+			emailRecipientVO.setEmpNo(list[i]);
+			result+=this.emailMapper.insertRMail(emailRecipientVO);
+		}
+		
+		return result;
+	}
+
+	@Override
+	public int temporaryMail(EmailRecipientVO emailRVO) {
+		return this.emailMapper.temporaryMail(emailRVO);
+	}
+
+	@Override
+	public int getTemporaryMailCount(Map<String, Object> map) {
+		return this.emailMapper.getTemporaryMailCount(map);
+	}
+
+	@Override
+	public List<EmailVO> getTemporaryList(Map<String, Object> map) {
+		return this.emailMapper.getTemporaryList(map);
+	}
+
+	@Override
+	public List<EmailVO> getUnreadList(Map<String, Object> map) {
+		return this.emailMapper.getUnreadList(map);
+	}
+
+	@Override
+	public int insertTemporaryMail(EmailVO emailVO) {
+		int result=this.emailMapper.insertTemporaryMail(emailVO);
+		String[] list = emailVO.getEmailRVOList();
+		for(int i=0; i<list.length; i++) {
+			EmailRecipientVO emailRecipientVO=new EmailRecipientVO();
+			
+			emailRecipientVO.setEmpNo(list[i]);
+			result+=this.emailMapper.insertTemporaryRMail(emailRecipientVO);
+		}
+		return result;
+	}
+
+	@Override
+	public int putCnfirmDate(EmailVO emailVO) {
+		return this.emailMapper.putCnfirmDate(emailVO);
+	}
+
+	@Override
+	public List<EmailVO> getDeleteList(Map<String, Object> map) {
+		return this.emailMapper.getDeleteList(map);
+	}
+
+
+
+
+	
+}

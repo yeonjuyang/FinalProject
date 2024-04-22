@@ -1,0 +1,41 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<div class="wf-tit-wrap">
+    <h1 class="page-tit">휴가</h1>
+</div>
+<div class="wf-content-area">
+    <p class="heading1">휴가 등록</p>
+    <div class="wf-flex-box">
+        <div class="wf-content-box">
+            <p class="box-heading1">연차</p>
+            <p>남은 휴가 표시</p>
+        </div>
+        <div class="wf-content-box">
+            <p class="box-heading1">생일</p>
+            <p>신청 시 1일 지급</p>
+        </div>
+        <div class="wf-content-box">
+            <p class="box-heading1">건강검진</p>
+            <p>신청 시 1일 지급</p>
+        </div>
+        <div class="wf-content-box">
+            <p class="box-heading1">리프레시</p>
+            <p>6일</p>
+        </div>
+        <div class="wf-content-box">
+            <p class="box-heading1">조의 - 부모/배우자/자녀</p>
+            <p>신청 시 5일 지급</p>
+        </div>
+        <div class="wf-content-box">
+            <p class="box-heading1">조의 - 조부모/형제/자매</p>
+            <p>신청 시 3일 지급</p>
+        </div>
+        <div class="wf-content-box">
+            <p class="box-heading1">결혼 - 본인</p>
+            <p>신청 시 5일 지급</p>
+        </div>
+        <div class="wf-content-box">
+            <p class="box-heading1">보건</p>
+            <p>신청 시 1일 지급</p>
+        </div>
+    </div>
+</div>

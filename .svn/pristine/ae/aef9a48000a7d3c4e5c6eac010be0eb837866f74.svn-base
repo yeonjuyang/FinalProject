@@ -1,0 +1,12 @@
+package com.team1.workforest.chat.mapper;
+
+import java.util.List;
+import java.util.Map;
+
+import com.team1.workforest.chat.vo.ChatRoomEmployeeVO;
+
+public interface ChattingMapper {
+
+	List<ChatRoomEmployeeVO> getChatRoom(Map<String, String> map);
+
+}

@@ -1,0 +1,31 @@
+package com.team1.workforest.board.notice.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.team1.workforest.board.notice.vo.NoticeBoardVO;
+import com.team1.workforest.vo.AttachedFileVO;
+
+public interface NoticeService {
+	
+	// 검색한 키워드의 행수
+	public int getkeywordTotal(Map<String, Object> map);
+	
+	// 목록 창
+	public List<NoticeBoardVO> list(Map<String, Object> map);
+	
+	
+	// 조회수 증가
+	public int noticeView(String noticeBrdNo);
+	
+	// 공지게시글 등록
+	public int createNotice(NoticeBoardVO noticeVO);
+	
+	
+	// 상세 조회
+	public NoticeBoardVO detail(String noticeBrdNo);
+	
+	// 파일 존재 여부
+	public List<AttachedFileVO> noticeAtchList(String atchmnflNo);
+
+}

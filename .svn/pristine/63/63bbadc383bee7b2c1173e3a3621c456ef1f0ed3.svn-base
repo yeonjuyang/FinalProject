@@ -1,0 +1,55 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+
+<!-- =============== 상단타이틀영역 시작 =============== -->
+<div class="wf-tit-wrap">
+    <h1 class="page-tit">전자결재</h1>
+    <div class="side-util"></div>
+</div>
+<!-- =============== 상단타이틀영역 끝 =============== -->
+<!-- =============== 컨텐츠 영역 시작 =============== -->
+<div class="wf-content-wrap">
+
+    <div class="wf-content-area">
+        <p class="heading1">자주쓰는 양식</p>
+        <div class="wf-flex-box approval-top-area box4">
+            <div class="wf-content-box">
+                <p class="box-heading1">품의서</p>
+
+                <div class="button-wrap">
+                    <button class="btn1">삭제하기</button>
+                    <a href="/approval/createView" class="btn2">작성하기</a>
+                </div>
+            </div>
+            <div class="wf-content-box">
+                <p class="box-heading1">품의서</p>
+
+                <div class="button-wrap">
+                    <button class="btn1">삭제하기</button>
+                    <a href="/approval/createView" class="btn2">작성하기</a>
+                </div>
+            </div>
+            <div class="wf-content-box">
+                <p class="box-heading1">품의서</p>
+
+                <div class="button-wrap">
+                    <button class="btn1">삭제하기</button>
+                    <a href="/approval/createView" class="btn2">작성하기</a>
+                </div>
+            </div>
+            <div class="wf-content-box">
+                <p class="box-heading1">품의서</p>
+
+                <div class="button-wrap">
+                    <button class="btn1">삭제하기</button>
+                    <a href="/approval/createView" class="btn2">작성하기</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="wf-content-area">
+        <p class="heading1">결재 진행 현황</p>
+        <div style="border: 1px solid #ddd; height: 400px;"></div>
+    </div>
+</div>
+<!-- =============== 컨텐츠 영역 끝 =============== -->

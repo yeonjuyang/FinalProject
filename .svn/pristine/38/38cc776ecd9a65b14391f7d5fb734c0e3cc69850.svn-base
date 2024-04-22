@@ -1,0 +1,26 @@
+package com.team1.workforest.employee.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.team1.workforest.employee.vo.EmployeeVO;
+import com.team1.workforest.vo.DepartmentVO;
+
+public interface EmployeeService {
+
+	//사원 정보(내 정보)
+	public EmployeeVO detail(String empNo);
+
+	//내 정보 수정
+	public int modDetail(EmployeeVO empVO);
+
+	//주소록(사원목록)
+	public List<EmployeeVO> list(Map<String, Object> map);
+	
+	//페이징에 필요 - 행 수
+	public int getTotal(Map<String, Object> map);
+	
+	//조직도(jstree)
+	public List<DepartmentVO> treeAjax();
+
+}

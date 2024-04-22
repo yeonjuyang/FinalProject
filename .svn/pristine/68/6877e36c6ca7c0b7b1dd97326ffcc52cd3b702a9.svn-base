@@ -1,0 +1,149 @@
+// 파라미터 조회
+const _queryString = window.location.search;
+const _params = new URLSearchParams(_queryString);
+const _apvNo = _params.get('apvNo');
+
+$(function () {
+
+    // 회수
+    $('#docReturn_btn').on('click', docReturn);
+
+    // 승인
+    $('#approval_btn').on('click', approval);
+
+    // 반려
+    $('#refuse_btn').on('click', refuse);
+
+
+    // 내용 줄바꿈 처리
+    let data = $('#apvCn_val').val();
+    let convert = convertText(data)
+    $('#apvCn > .convert-txt').append(convert);
+
+    //================================================================
+    // jsPDF 다운로드
+    let jsPDF = jspdf.jsPDF;
+
+    // pdf download
+    $("#pdf_btn").on("click", function () {
+        html2canvas($('#pdfViewer')[0]).then(function (canvas) {
+            var imgData = canvas.toDataURL('image/png');
+            var imgWidth = 210;
+            var pageHeight = imgWidth * 1.414;
+            var imgHeight = parseInt(canvas.height * imgWidth / canvas.width);
+            var heightLeft = imgHeight;
+            var margin = 0;
+
+            var doc = new jsPDF('p', 'mm', 'a4');
+            var position = 0;
+
+            // 첫 페이지 출력
+            doc.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            // 페이지가 더 있을 경우 루프 돌면서 출력
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                doc.addPage();
+                doc.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+
+            let doc_name = $('.doc-name').text();
+
+            doc.save(`${doc_name}.pdf`);
+        });
+    });
+    //================================================================
+    // PDF 다운로드 후 Blob URL 생성 및 프리뷰에 바인딩
+    function createBlobUrl(doc) {
+        let blobPDF = new Blob(
+            [doc.output('blob')],
+            { type: 'application/pdf' }
+        );
+
+        // Blob URL 생성
+        let blobUrl = window.URL.createObjectURL(blobPDF); // 서버에 저장할 url
+
+        // iframe에 url 바인딩
+        $('#pdf_preview').attr('src', blobUrl);
+    }
+
+    //================================================================
+});
+
+
+// 문자열 컨버트 함수
+function convertText(text) {
+    return text.replace(/\r?\n/g, '<br>');
+}
+
+// 회수
+function docReturn() {
+
+    let data = {
+        apvNo: _apvNo,
+        apvEmpNo: $('#empNo').val()
+    }
+
+    console.log(data);
+
+    $.ajax({
+        url: "/approval/docReturn",
+        type: "put",
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        dataType: "json",
+        success: function (result) {
+            if (result > 0) {
+                alert(_msg.approval.returnSuccessAlert);
+                location.href = "/approval/listView";
+            } else {
+                alert(_msg.approval.returnFailAlert);
+            }
+        }
+    });
+}
+
+
+// 승인
+function approval() {
+
+    $.ajax({
+        url: "/approval/approval",
+        type: "post",
+        contentType: 'application/json',
+        data: JSON.stringify(_apvNo),
+        dataType: "json",
+        success: function (result) {
+            if (result > 0) {
+                alert(_msg.approval.approvalSuccessAlert);
+                location.href = "/approval/mainView";
+            } else {
+                alert(_msg.approval.approvalFailAlert);
+            }
+        }
+    });
+}
+
+// 반려
+function refuse() {
+
+    console.log("결재번호 -> " + _apvNo);
+
+    $.ajax({
+        url: "/approval/refuse",
+        type: "put",
+        contentType: 'application/json',
+        data: JSON.stringify(_apvNo),
+        dataType: "json",
+        success: function (result) {
+            if (result > 0) {
+                alert('반려되었습니다.');
+                location.href = "/approval/mainView";
+            } else {
+                alert('반려 실패!!');
+            }
+        }
+    });
+}

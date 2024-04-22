@@ -1,0 +1,13 @@
+@charset "UTF-8";
+/* 예약자 박스 */
+#rsvEmpNameBox {
+    display: none;
+}
+/* 반납 상태 박스 */
+#rturnSttsBox {
+    display: none;
+}
+/* 수정 관련 버튼 */
+#updateBtnGroup {
+    display: none;
+}

@@ -1,0 +1,413 @@
+// ajax 요청 결과 캐싱을 위한 flag 변수
+let flag = false;
+
+$(function () {
+
+	getTabData1('tab1');
+	getTabData2('tab2');
+	getTabData3('tab3');
+	getTabData4('tab4');
+	getTabData5('tab5');
+	//getTabData4('tab4');
+
+	// 결재진행 탭의 서브 탭 클릭 이벤트
+	$('.type3-btn').on('click', function () {
+		let tab = $(this).data('pro');
+		console.log("tab ->", tab);
+
+		getProgressAll(tab);
+	});
+
+	$('.tab-btn').on('click', function () {
+		let tab = $(this).data('tab');
+
+		if (!flag) {
+			switch (tab) {
+				case "tab1":
+					getTabData1('tab1');
+					flag = true;
+					break;
+				case "tab2":
+					getTabData2('tab2');
+					flag = true;
+					break;
+				case "tab3":
+					getTabData3('tab3');
+					flag = true;
+					break;
+				case "tab4":
+					getTabData4('tab4');
+					flag = true;
+					break;
+				case "tab5":
+					getTabData5('tab5');
+					flag = true;
+					break;
+
+				default:
+					break;
+			}
+		}
+	});
+
+	// 파라미터별 화면 출력
+	let paramOriginal = window.location.search;
+	let param = paramOriginal.slice(-1);
+
+	switch (param) {
+		case "1": // 대기
+			$('[data-tab="tab1"]').addClass('active').siblings('[data-tab^="tab"]').removeClass('active');
+			break;
+		case "2": // 진행
+			$('[data-tab="tab2"]').addClass('active').siblings('[data-tab^="tab"]').removeClass('active');
+			$('.tab-indicator').css({ width: '55.2188px', transform: 'translateX(95.5312px)' });
+			break;
+		case "3": // 완료
+			$('[data-tab="tab3"]').addClass('active').siblings('[data-tab^="tab"]').removeClass('active');
+			$('.tab-indicator').css({ width: '55.2188px', transform: 'translateX(191.062px)' });
+			break;
+		case "4": // 반려
+			$('[data-tab="tab4"]').addClass('active').siblings('[data-tab^="tab"]').removeClass('active');
+			$('.tab-indicator').css({ width: '25.9375px', transform: 'translateX(191.062px)' });
+			break;
+	}
+
+});
+
+// 문서 유형
+function docFormNo(data) {
+	switch (data) {
+		case '1':
+			return "품의서";
+		case '2':
+			return "출장신청서";
+		case '3':
+			return "도서구입신청서";
+		default:
+			break;
+	}
+}
+
+// 결재 대기
+function getTabData1(tab) {
+
+	let tabCont1 = $('.tab-content1');
+
+	$.ajax({
+		url: `/approval/listView/${tab}`,
+		type: "GET",
+		dataType: "json",
+		success: function (result) {
+
+			console.log("결재 대기 -> ", result);
+
+			const $tbody = tabCont1.find('tbody');
+			$tbody.empty();
+
+			if (Array.isArray(result) && result.length > 0) {
+				result.forEach((e, i) => {
+
+					let docType = docFormNo(e.docFormNo);
+
+					let HTML = `
+						<tr data-apv-no='${e.apvNo}'>
+							<td>${i + 1}</td>
+							<td>${docType}</td>
+							<td>${e.apvSj}</td>
+							<td>${e.empNm}</td>
+							<td>${e.apvPosition}/${e.apvRspnsbl}</td>
+							<td>${e.deptNm}</td>
+							<td>${e.drftDate}</td>
+						</tr>		
+					`;
+
+					tabCont1.find('tbody').append(HTML);
+				});
+
+			} else {
+				let HTML = noDate();
+				tabCont1.find('tbody').append(HTML);
+			}
+		}
+	});
+}
+
+// 결재 진행 (내 기안문서)
+function getTabData2(tab) {
+
+	const tab1 = $('[data-pro="tab1"]');
+
+	// 내가 작성한 문서
+	$.ajax({
+		url: `/approval/listView/${tab}`,
+		type: "GET",
+		dataType: "json",
+		success: function (result) {
+
+			console.log("결재 진행 -> ", result);
+
+			const $tbody = tab1.find('tbody');
+			$tbody.empty();
+
+			if (Array.isArray(result) && result.length > 0) {
+				result.forEach((e, i) => {
+
+					let docType = docFormNo(e.docFormNo);
+
+					let HTML = `
+						<tr data-apv-no='${e.apvNo}'>
+							<td>${i + 1}</td>
+							<td>${docType}</td>
+							<td>${e.apvSj}</td>
+							<td>${e.drftDate}</td>
+						</tr>		
+					`;
+
+					tab1.find('tbody').append(HTML);
+				});
+
+			} else {
+				let HTML = noDate();
+				tab1.find('tbody').append(HTML);
+			}
+		}
+	});
+}
+
+// 결재 진행 (내 결재 업무)
+function getProgressAll(tab) {
+
+	const tab2 = $('[data-pro="tab2"]');
+
+	$.ajax({
+		url: `/approval/listView/progress/${tab}`,
+		type: "GET",
+		dataType: "json",
+		success: function (result) {
+			console.log("내 결재 업무 -> ", result);
+
+			let length = result.length;
+
+			const $tbody = tab2.find('tbody');
+			$tbody.empty();
+
+			if (Array.isArray(result) && result.length > 0) {
+				result.forEach((e, i) => {
+
+					let docType = docFormNo(e.docFormNo);
+
+					let HTML = `
+						<tr data-apv-no='${e.apvNo}'>
+							<td>${i + 1}</td>
+							<td>${docType}</td>
+							<td>${e.apvSj}</td>
+							<td>${e.empNm}</td>
+							<td>${e.apvPosition}/${e.apvRspnsbl}</td>
+							<td>${e.deptNm}</td>
+							<td>${e.drftDate}</td>
+						</tr>		
+					`;
+
+					tab2.find('tbody').append(HTML);
+				});
+
+				$('.type3-btn').find('.cnt').text(length);
+			}
+			else {
+				let HTML = noDate();
+				tab2.find('tbody').append(HTML);
+			}
+		}
+	});
+}
+
+
+// 결재 완료
+function getTabData3(tab) {
+
+	const tabCont3 = $('.tab-content3');
+
+	$.ajax({
+		url: `/approval/listView/${tab}`,
+		type: "GET",
+		dataType: "json",
+		success: function (result) {
+			console.log("결재완료 -> ", result);
+
+			const $tbody = tabCont3.find('tbody');
+			$tbody.empty();
+
+			if (Array.isArray(result) && result.length > 0) {
+				result.forEach((e, i) => {
+
+					let docType = docFormNo(e.docFormNo);
+
+					let HTML = `
+						<tr data-apv-no='${e.apvNo}'>
+							<td>${i + 1}</td>
+							<td>${docType}</td>
+							<td>${e.apvSj}</td>
+							<td>${e.empNm}</td>
+							<td>${e.apvPosition}/${e.apvRspnsbl}</td>
+							<td>${e.deptNm}</td>
+							<td>${e.drftDate}</td>
+							<td>${e.apvDate}</td>
+						</tr>		
+					`;
+
+					tabCont3.find('tbody').append(HTML);
+				});
+			}
+			else {
+				let HTML = noDate();
+				tabCont3.find('tbody').append(HTML);
+			}
+		}
+	});
+
+}
+
+// 반려
+function getTabData4(tab) {
+
+	const tabCont4 = $('.tab-content4');
+
+	$.ajax({
+		url: `/approval/listView/${tab}`,
+		type: "GET",
+		dataType: "json",
+		success: function (result) {
+			console.log("반려 -> ", result);
+
+			const $tbody = tabCont4.find('tbody');
+			$tbody.empty();
+
+			if (Array.isArray(result) && result.length > 0) {
+				result.forEach((e, i) => {
+
+					let docType = docFormNo(e.docFormNo);
+
+					let HTML = `
+						<tr data-apv-no='${e.apvNo}'>
+							<td>${i + 1}</td>
+							<td>${docType}</td>
+							<td>${e.apvSj}</td>
+							<td>${e.drftDate}</td>
+							<td>${e.refuseDate}</td>
+						</tr>		
+					`;
+					tabCont4.find('tbody').append(HTML);
+				});
+			}
+			else {
+				let HTML = noDate();
+				tabCont4.find('tbody').append(HTML);
+			}
+		}
+	});
+}
+
+// 회수
+function getTabData5(tab) {
+
+	const tabCont5 = $('.tab-content5');
+
+	$.ajax({
+		url: `/approval/listView/${tab}`,
+		type: "GET",
+		dataType: "json",
+		success: function (result) {
+			console.log("회수 -> ", result);
+
+			if (Array.isArray(result) && result.length > 0) {
+				result.forEach((e, i) => {
+					let docType = docFormNo(e.docFormNo);
+
+					let HTML = `
+						<tr data-apv-no='${e.apvNo}'>
+							<td>${i + 1}</td>
+							<td>${docType}</td>
+							<td>${e.apvSj}</td>
+							<td>${e.drftDate}</td>
+							<td>
+								<a href="javascript:void(0)" style="padding: 5px 20px;" class="btn7">재기안</a>
+								<a href="javascript:void(0)" style="padding: 5px 20px;" class="btn5">삭제</a>
+							</td>
+						</tr>		
+					`;
+
+					tabCont5.find('tbody').append(HTML);
+				});
+			}
+			else {
+				let HTML = noDate();
+				tabCont5.find('tbody').append(HTML);
+			}
+		}
+	});
+}
+
+// 임시 저장함
+function getTabData6(tab) {
+
+	const tabCont6 = $('.tab-content6');
+
+	$.ajax({
+		url: `/approval/listView/${tab}`,
+		type: "GET",
+		dataType: "json",
+		success: function (result) {
+			console.log("임시 저장함 -> ", result);
+
+			if (Array.isArray(result) && result.length > 0) {
+				result.forEach((e, i) => {
+					let docType = docFormNo(e.docFormNo);
+
+					let HTML = `
+						<tr data-apv-no='${e.apvNo}'>
+							<td>${i + 1}</td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td>
+								<a href="javascript:void(0)" style="padding: 5px 20px;" class="btn7">재기안</a>
+								<a href="javascript:void(0)" style="padding: 5px 20px;" class="btn5">삭제</a>
+							</td>
+						</tr>		
+					`;
+
+					tabCont6.find('tbody').append(HTML);
+				});
+			}
+			else {
+				let HTML = noDate();
+				tabCont6.find('tbody').append(HTML);
+			}
+		}
+	});
+}
+
+// 데이터 없을 경우
+function noDate() {
+	return `<tr><td colspan='7' style="text-align: center;">문서가 없습니다.</td></tr>`;
+}
+
+// 상세 조회
+$(document).on('click', '.wf-table tbody tr', function () {
+
+	let apvNo = $(this).data('apvNo');
+
+	$.ajax({
+		url: '/approval/approvalDetailView?apvNo=' + apvNo,
+		type: 'get',
+		dataType: 'text',
+		success: function () {
+
+			location.href =
+				"/approval/approvalDetailView?apvNo=" + apvNo;
+
+		}
+	});
+
+});
+

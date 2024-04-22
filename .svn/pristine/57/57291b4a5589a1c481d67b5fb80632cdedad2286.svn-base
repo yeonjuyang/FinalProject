@@ -1,0 +1,322 @@
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<!-- =============== 상단타이틀영역 시작 =============== -->
+<div class="wf-tit-wrap">
+    <h1 class="page-tit">결재 확인</h1>
+    <div class="wf-util">
+        <button type="button" class="btn5">PDF <i class="xi-download"></i></button>
+        <button type="button" class="btn7">반려하기(결재자만)</button>
+        <button type="button" class="btn3">회수하기(기안자만)</button>
+        <button type="button" class="btn2">결재하기(결재자만)</button>
+    </div>
+</div>
+<!-- =============== 상단타이틀영역 끝 =============== -->
+
+<!-- =============== 컨텐츠 영역 시작 =============== -->
+<div class="wf-content-wrap">
+    <div class="wf-content-area">
+       	<div class="tab-type tab-type1">
+	        <div class="tab-menu">
+	            <button data-tab="tab1" type="button" class="tab-btn active">결재선 이력</button>
+	            <button data-tab="tab2" type="button" class="tab-btn">참조자</button>
+	            <div class="tab-indicator"></div>
+	        </div>
+	
+	        <!-- tab1  -->
+	        <div data-tab="tab1" class="tab-content active">
+	            <div class="tab-board-lst">
+                    <table class="wf-table read-table">
+			            <colgroup>
+			                <col style="width: 10%;">
+			                <col style="width: 10%;">
+			                <col style="width: 10%;">
+			                <col style="width: 10%;">
+			                <col style="width: 10%;">
+			                <col style="width: 10%;">
+			                <col style="width: 10%;">
+			            </colgroup>
+			            <thead>
+			                <tr>
+			                    <th>번호</th>
+			                    <th>결재방법</th>
+			                    <th>소속 부서</th>
+			                    <th>결재자</th>
+			                    <th>직급</th>
+			                    <th>결재일</th>
+			                    <th>결재상태</th>
+			                </tr>
+			            </thead>
+			            <tbody></tbody>
+		        	</table>
+	            </div>
+	        </div>
+	
+	        <!-- tab2  -->
+	        <div data-tab="tab2" class="tab-content">
+	            <div class="tab-board-lst">
+					<table class="wf-table read-table">
+			            <colgroup>
+			                <col style="width: 10%;">
+			                <col style="width: 10%;">
+			                <col style="width: 10%;">
+			            </colgroup>
+			            <thead>
+			                <tr>
+			                    <th>번호</th>
+			                    <th>소속 부서</th>
+			                    <th>참조인</th>
+			                </tr>
+			            </thead>
+			            <tbody></tbody>
+		        	</table>
+	            </div>
+	        </div>
+        </div>
+    </div>
+    
+    <div class="wf-content-area">
+        <div class="approval-confirm-cont">
+            <div class="pdfViewer">
+           	   <div class="modal-content-area">
+			       <div class="apv-doc-form-wrap">
+			           <div class="apv-doc-form">
+			               <table>
+			                   <colgroup>
+			                       <col style="width: 10%;">
+			                       <col style="width: 25%;">
+			                       <col style="width: 10%;">
+			                       <col style="width: auto;">
+			                       <col style="width: 7%;">
+			                       <col style="width: auto;">
+			                   </colgroup>
+			                   <tbody>
+			                       <tr>
+			                           <td colspan="2"><span class="form-tit">품의서</span></td>
+			                           <td colspan="4">
+			                               <table class="apv-sign-table">
+			                                   <colgroup>
+			                                       <col style="width: 5%;">
+			                                       <col style="width: 20%;">
+			                                       <col style="width: 20%;">
+			                                       <col style="width: 20%;">
+			                                   </colgroup>
+			                                   <tbody>
+			                                       <tr>
+			                                           <th rowspan="4">결재</th>
+			                                           <td></td>
+			                                           <td></td>
+			                                           <td></td>
+			                                       </tr>
+			                                       <tr>
+			                                           <td></td>
+			                                           <td></td>
+			                                           <td></td>
+			                                       </tr>
+			                                       <tr>
+			                                           <td></td>
+			                                           <td></td>
+			                                           <td></td>
+			                                       </tr>
+			                                   </tbody>
+			                               </table>
+			                           </td>
+			                       </tr>
+			                       <tr>
+			                           <th>기안부서</th>
+			                           <td></td>
+			                           <th>기 안 일</th>
+			                           <td colspan="4"></td>
+			                           <!-- <th>문서번호</th>
+										<td><span class="data"></span></td> -->
+			                       </tr>
+			                       <tr>
+			                           <th>기안자</th>
+			                           <td></td>
+			                           <th>보존년한</th>
+			                           <td colspan="4">3년</td>
+			                           <!-- <th>비밀등급</th>
+									<td><span class="data"></span></td> -->
+			                       </tr>
+			                       <tr>
+			                           <th>제목</th>
+			                           <td colspan="5"></td>
+			                       </tr>
+			                       <tr>
+			                           <td colspan="6"></td>
+			                       </tr>
+			                   </tbody>
+			               </table>
+			           </div>
+			        </div>
+				</div>
+            </div>
+            <div class="right">
+                <!-- 첨부파일 시작 -->
+                <div class="approval-attach-box">
+                    <div class="tit-wrap">
+                        <p class="heading2">첨부파일</p>
+                    </div>
+                    <ul class="file-lst" style="display: flex; align-items: center; justify-content: center;">
+                    	<li><div class="no-data">등록된 첨부파일이 없습니다.</div></li>
+                    </ul>
+                    <!--<ul class="file-lst bul-lst01">
+                         <li>
+                            <div class="wrap wrap1">
+                                <span class="file-name">결재이름 결재이름 결재이름 결재이름 결재이름 결재이름 결재이름</span>
+                                <span class="user-info">개발본부 개발팀 이소망 주임</span>
+                            </div>
+                            <div class="wrap wrap2">
+                                <span class="file-size">512KB</span>
+                                <span class="date">2024-03-12</span>
+                            </div>
+                            <button type="button" class="file-download"></button>
+                        </li>
+                        <li>
+                            <div class="wrap wrap1">
+                                <span class="file-name">결재이름 결재이름 결재이름 결재이름 결재이름 결재이름 결재이름</span>
+                                <span class="user-info">개발본부 개발팀 이소망 주임</span>
+                            </div>
+                            <div class="wrap wrap2">
+                                <span class="file-size">512KB</span>
+                                <span class="date">2024-03-12</span>
+                            </div>
+                            <button type="button" class="file-download"></button>
+                        </li>
+                        <li>
+                            <div class="wrap wrap1">
+                                <span class="file-name">결재이름 결재이름 결재이름 결재이름 결재이름 결재이름 결재이름</span>
+                                <span class="user-info">개발본부 개발팀 이소망 주임</span>
+                            </div>
+                            <div class="wrap wrap2">
+                                <span class="file-size">512KB</span>
+                                <span class="date">2024-03-12</span>
+                            </div>
+                            <button type="button" class="file-download"></button>
+                        </li>
+                    </ul> -->
+                </div>
+                <!-- 첨부파일 끝 -->
+                <!-- 댓글, 코멘트 영역 시작 -->
+                <div class="comment-area">
+                    <p class="heading2">의견</p>
+                    <ul>
+                       <!--  <li>
+                            <div class="user-wrap">
+                                <span class="user-thumb">
+                                    <img src="/resources/img/icon/avatar.png" alt="예시이미지">
+                                </span>
+                                <div class="user-info">
+                                    <div>
+                                        <span class="user-name">양연주</span>
+                                        <span class="user-position">과장</span>
+                                    </div>
+                                    <div>
+                                        <span class="user-team">개발본부 개발팀</span>
+                                        <span class="user-date">2023-05-04 13:20</span>
+                                    </div>
+                                </div>
+                                <div class="user-btn">
+                                    <button type="button" class="add-btn"><i
+                                            class="xi-pen"></i></button>
+                                    <button type="button" class="del-btn"><i
+                                            class="xi-trash"></i></button>
+                                </div>
+                            </div>
+                            <div class="txt">
+                                wow, amazing 💜
+                            </div>
+                        </li>
+                        <li>
+                            <div class="user-wrap">
+                                <span class="user-thumb">
+                                    <img src="/resources/img/icon/avatar.png" alt="예시이미지">
+                                </span>
+                                <div class="user-info">
+                                    <div>
+                                        <span class="user-name">양연주</span>
+                                        <span class="user-position">과장</span>
+                                    </div>
+                                    <div>
+                                        <span class="user-team">개발본부 개발팀</span>
+                                        <span class="user-date">2023-05-04 13:20</span>
+                                    </div>
+                                </div>
+                                <div class="user-btn">
+                                    <button type="button" class="add-btn"><i
+                                            class="xi-pen"></i></button>
+                                    <button type="button" class="del-btn"><i
+                                            class="xi-trash"></i></button>
+                                </div>
+                            </div>
+                            <div class="txt">
+                                thanks 🤞
+                            </div>
+                        </li>
+                        <li>
+                            <div class="user-wrap">
+                                <span class="user-thumb">
+                                    <img src="/resources/img/icon/avatar.png" alt="예시이미지">
+                                </span>
+                                <div class="user-info">
+                                    <div>
+                                        <span class="user-name">양연주</span>
+                                        <span class="user-position">과장</span>
+                                    </div>
+                                    <div>
+                                        <span class="user-team">개발본부 개발팀</span>
+                                        <span class="user-date">2023-05-04 13:20</span>
+                                    </div>
+                                </div>
+                                <div class="user-btn">
+                                    <button type="button" class="add-btn"><i
+                                            class="xi-pen"></i></button>
+                                    <button type="button" class="del-btn"><i
+                                            class="xi-trash"></i></button>
+                                </div>
+                            </div>
+                            <div class="txt">
+                                I don’t think so
+                            </div>
+                        </li>
+                        <li>
+                            <div class="user-wrap">
+                                <span class="user-thumb">
+                                    <img src="/resources/img/icon/avatar.png" alt="예시이미지">
+                                </span>
+                                <div class="user-info">
+                                    <div>
+                                        <span class="user-name">양연주</span>
+                                        <span class="user-position">과장</span>
+                                    </div>
+                                    <div>
+                                        <span class="user-team">개발본부 개발팀</span>
+                                        <span class="user-date">2023-05-04 13:20</span>
+                                    </div>
+                                </div>
+                                <div class="user-btn">
+                                    <button type="button" class="add-btn"><i
+                                            class="xi-pen"></i></button>
+                                    <button type="button" class="del-btn"><i
+                                            class="xi-trash"></i></button>
+                                </div>
+                            </div>
+                            <div class="txt">
+                                I think so !
+                            </div>
+                        </li> -->
+                    </ul>
+                    <div class="input-wrap">
+                        <span class="user-thumb">
+                            <img src="/resources/img/icon/avatar.png" alt="예시이미지">
+                        </span>
+                        <input type="text" placeholder="댓글을 입력하세요">
+                        <button class="btn4">등록</button>
+                    </div>
+                </div>
+                <!-- 댓글, 코멘트 영역 끝 -->
+            </div>
+        </div>
+    </div>
+
+</div>
+<!-- =============== 컨텐츠 영역 끝 =============== -->

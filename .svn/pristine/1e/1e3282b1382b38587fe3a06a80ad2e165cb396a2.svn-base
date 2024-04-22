@@ -1,0 +1,131 @@
+package com.team1.workforest.attendance.service.impl;
+
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.Map;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.team1.workforest.attendance.mapper.AttendanceMapper;
+import com.team1.workforest.attendance.service.AttendanceService;
+import com.team1.workforest.attendance.vo.AttendanceManageVO;
+
+@Service
+public class AttendanceServiceImpl implements AttendanceService{
+
+	@Autowired
+	AttendanceMapper attendanceMapper;
+	
+
+	@Override
+	public List<AttendanceManageVO> getAttendanceList(Map<String, String> map) {
+		
+		return this.attendanceMapper.getAttendanceList(map);
+	}
+
+
+	@Override
+	public String getPlusTime(Map<String, String> map) {
+		return this.attendanceMapper.getPlusTime(map);
+	}
+
+
+	@Override
+	public String getMinusTime(Map<String, String> map) {
+		return this.attendanceMapper.getMinusTime(map);
+	}
+
+
+	@Override
+	public String getOverTime(Map<String, String> map) {
+		return this.attendanceMapper.getOverTime(map);
+	}
+
+
+	@Override
+	public String getAvgAttend(Map<String, String> map) {
+		return this.attendanceMapper.getAvgAttend(map);
+	}
+
+
+	@Override
+	public String getAvgLeave(Map<String, String> map) {
+		return this.attendanceMapper.getAvgLeave(map);
+	}
+
+
+	@Override
+	public String getAvgWork(Map<String, String> map) {
+		return this.attendanceMapper.getAvgWork(map);
+	}
+
+
+	@Override
+	public String getLateCount(Map<String, String> map) {
+		return this.attendanceMapper.getLateCount(map);
+	}
+
+
+	@Override
+	public String getRestCount(Map<String, String> map) {
+		return this.attendanceMapper.getRestCount(map);
+	}
+
+
+	@Override
+	public String getOut1Count(Map<String, String> map) {
+		return this.attendanceMapper.getOut1Count(map);
+	}
+
+
+	@Override
+	public String getOut2Count(Map<String, String> map) {
+		return this.attendanceMapper.getOut2Count(map);
+	}
+
+
+	@Override
+	public String getOut3Count(Map<String, String> map) {
+		return this.attendanceMapper.getOut3Count(map);
+	}
+
+
+	@Override
+	public int insertAttend(Map<String, String> map) {
+		return this.attendanceMapper.insertAttend(map);
+	}
+
+	@Override
+	public int insertLvffc(Map<String, String> map) {
+		return this.attendanceMapper.insertLvffc(map);
+	}
+
+	@Override
+	public String getAttendTime(Map<String, String> map) {
+		return this.attendanceMapper.getAttendTime(map);
+	}
+	
+	@Override
+	public String getLvffcTime(Map<String, String> map) {
+		return this.attendanceMapper.getLvffcTime(map);
+	}
+
+
+	@Override
+	public String getTodayWorkTime(Map<String, String> map) {
+		return this.attendanceMapper.getTodayWorkTime(map);
+	}
+	
+	@Override
+	public List<String> getWeekWorkTime(Map<String, String> map) {
+		return this.attendanceMapper.getWeekWorkTime(map);
+	}
+
+
+
+
+
+}

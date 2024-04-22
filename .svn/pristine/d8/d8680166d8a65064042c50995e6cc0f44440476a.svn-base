@@ -1,0 +1,10 @@
+package com.team1.workforest.approval.mapper;
+
+import java.util.Map;
+
+public interface ApprovalMapper {
+
+	// 결재 등록
+	public int create(Map<String, Object> map);
+
+}

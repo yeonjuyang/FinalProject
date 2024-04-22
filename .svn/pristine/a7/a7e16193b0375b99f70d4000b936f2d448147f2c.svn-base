@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.team1.workforest.chat.mapper.ChattingMapper">
+	
+	<select id="getChatRoom" parameterType="hashMap" resultType="chatRoomEmployeeVO">
+		SELECT CE.CHAT_ROOM_NO, CR.CHAT_ROOM_NM, CE.EMP_NO
+		FROM  CHATROOM_EMPLOYEE CE, CHAT_ROOM CR
+		WHERE CE.CHAT_ROOM_NO = CR.CHAT_ROOM_NO
+		AND CE.EMP_NO = #{empNo}	
+	</select>
+	
+	
+</mapper>

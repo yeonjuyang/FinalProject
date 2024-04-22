@@ -1,0 +1,974 @@
+<%@page import="java.text.SimpleDateFormat"%>
+<%@page import="java.util.Date"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<!-- <script src="/resources/js/attendance.js"></script> -->
+<style>
+#chart_div {
+	width: 300px;
+	height: 250px;
+}
+
+.align-center {
+	text-align: center;
+}
+
+.wf-content-wrap {
+	display: flex;
+	flex-direction: column;
+}
+
+.attendance-box1 {
+	width: 20%;
+}
+
+.attendance-box2 {
+	width: 80%;
+}
+
+.attendance-box3 {
+	margin-top: 30px;
+	flex-direction: column;
+}
+
+header {
+	flex-direction: row;
+}
+
+.attendanceBtn-container {
+	text-align: center;
+}
+
+.attendanceBtn-container button {
+	margin: 0px 10px;
+}
+
+.avgDiv {
+	width: 180px;
+	margin-left: 3%;
+}
+
+.avgBadgeDiv {
+	margin-left: 10px;
+}
+
+.weekDayDiv {
+	margin-left: 4%;
+	width: 50px;
+	height: 200px;
+	text-align: center;
+}
+
+.weekDayGraph {
+	height: 150px;
+	margin-top: 20px;
+	width: 20px;
+	margin-left: 15px;
+	border-radius: 4px;
+}
+
+.monthDayDiv {
+	margin-left: 2.7px;
+	width: 30px;
+	height: 200px;
+	text-align: center;
+}
+
+.monthDayGraph {
+	height: 150px;
+	margin: 20px auto 0px;
+	width: 20px;
+	border-radius: 4px;
+}
+.monthSpanTime{
+/* 	display: block; */
+/* 	width: 50px; */
+/* 	font-size: 0.8rem; */
+/* 	text-align: center; */
+/* 	position: relative; */
+/* 	right: 9px; */
+}
+</style>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://www.gstatic.com/charts/loader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+<%session.setAttribute("empNo", "2020001");%>
+
+let sessionEmpNo = <%=session.getAttribute("empNo")%>
+
+$.ajax({
+	url:"/attendance/getAttendTime",
+	type:"get",
+	data:{"empNo":<%=session.getAttribute("empNo")%>},
+	success:function(res){
+		console.log("출근시간:",res)
+		let attendTime = "";
+		attendTime = res.substr(11,8);
+		$(".attendTime").html(attendTime)
+	}
+})
+
+$.ajax({
+	url:"/attendance/getLvffcTime",
+	type:"get",
+	data:{"empNo":<%=session.getAttribute("empNo")%>},
+	success:function(res){
+		console.log("퇴근시간:",res)
+		if(res != null){
+			let lvffcTime = "";
+			lvffcTime = res.substr(11,8);
+			$(".lvffcTime").html(lvffcTime)
+		}
+	}
+})
+
+getAvgTime = function(){
+	let dateRange = $(".weekDay2").text();
+	startDay = dateRange.substr(2,4) + dateRange.substr(7,2) + dateRange.substr(10,2);
+	endDay = dateRange.substr(18,4) + dateRange.substr(23,2) + dateRange.substr(26,2)
+	if(dateRange.length < 28){
+		endDay = dateRange.substr(15,4) + dateRange.substr(20,2) + dateRange.substr(23,2)
+	}
+	console.log("endDay",endDay)
+	
+	let param = {
+		"firstDay":startDay,
+		"lastDay": endDay,
+		"empNo": <%=session.getAttribute("empNo")%>
+	}
+	
+	$.ajax({
+		url:"/attendance/getAvgAttend",
+		type:"get",
+		data:param,
+		success:function(res){
+			$(".avgAttend").html(" " +res);
+			let resInt = 0;
+			resInt = parseInt(res.split(":")[0] * 60) + parseInt(res.split(":")[1])
+			if(resInt <= 540){
+				$(".badge-avgAttend").html("<span class='wf-badge2'>Good</span>")
+			}else if(resInt >= 600){
+				$(".badge-avgAttend").html("<span class='wf-badge2'>warn</span>")
+			}else{
+				$(".badge-avgAttend").html("&nbsp;")
+			}
+		}
+	})
+	
+	$.ajax({
+		url:"/attendance/getAvgLeave",
+		type:"get",
+		data:param,
+		success:function(res){
+			$(".avgLeave").html(" " +res)
+		}
+	})
+	
+	$.ajax({
+		url:"/attendance/getAvgWork",
+		type:"get",
+		data:param,
+		success:function(res){
+			$(".avgWork").html(" " +res)
+			let resInt = 0;
+			resInt = parseInt(res.split("h")[0] * 60) + parseInt(res.split("m")[0].substr(-2,2));
+			if(resInt >= 480 && resInt <= 510){
+				$(".badge-avgWork").html("<span class='wf-badge2'>Good</span>")
+			}else if(resInt >= 600){
+				$(".badge-avgWork").html("<span class='wf-badge2'>care yourself</span>")
+			}else{
+				$(".badge-avgWork").html("&nbsp;")
+			}
+		}
+	})
+	
+	$.ajax({
+		url:"/attendance/getLateCount",
+		type:"get",
+		data:param,
+		success:function(res){
+			$(".late").html(" " +res)
+			console.log("지각횟수:",res)
+			if(res == 0){
+		    	$(".badge-late").html("<span class='wf-badge2'>Good</span>")
+			}else if(res >= 2){
+				$(".badge-late").html("<span class='wf-badge2'>warn</span>")
+			}else{
+				$(".badge-late").html("&nbsp;")
+			}
+		}
+	})
+	
+	$.ajax({
+		url:"/attendance/getRestCount",
+		type:"get",
+		data:param,
+		success:function(res){
+			$(".rest").html(" " +res)
+		}
+	})
+	
+	$.ajax({
+		url:"/attendance/getOut1Count",
+		type:"get",
+		data:param,
+		success:function(res){
+			$(".out1").html(" " +res)
+		}
+	})
+	
+	$.ajax({
+		url:"/attendance/getOut2Count",
+		type:"get",
+		data:param,
+		success:function(res){
+			$(".out2").html(" " +res)
+		}
+	})
+	
+	$.ajax({
+		url:"/attendance/getOut3Count",
+		type:"get",
+		data:param,
+		success:function(res){
+			$(".out3").html(" " +res)
+		}
+	})
+        
+	
+	
+}
+
+getWeekWorkData = function(){	// 누적 근무시간, 잔여 근무시간, 초과 근무시간을 페이지에 띄우기 위한 ajax
+
+	let param = {
+		"firstDay":startDay,
+		"lastDay": endDay,
+		"empNo": <%=session.getAttribute("empNo")%>
+	}
+	
+	
+	$.ajax({
+		url:"/attendance/getPlusTime",
+		type:"get",
+		data:param,
+		success:function(res){
+			console.log("누적시간:",res)
+			plusTimetoMinute = parseInt(res.split("h")[0])*60 + parseInt(res.split("h")[1].trim())
+			$(".plusTime").append(res)
+			
+			let minusHours = 0;
+			let minusMinutes = 0;
+			let minusTime = "";
+			
+			let overHours = 0;
+			let overMinutes = 0;
+			let overTime = "";
+			
+			let plusTimeHours = parseInt(res.split("h")[0]);
+			let plusTimeMinutes = 0;
+			plusTimeMinutes = parseInt(res.split("m")[0].substr(-2,2).trim());
+			
+			if(plusTimetoMinute <= 2400){
+				minusHours = 40 - plusTimeHours - 1;
+				minusMinutes = 60 - plusTimeMinutes;
+				if(minusMinutes == 60){
+					minusHours = minusHours + 1;
+					minusMinutes = 0;
+				}
+				minusTime = minusHours + "h " + minusMinutes + "m";
+				$(".minusTime").append(minusTime);
+				$(".overTime").append("0h 0m");
+			}else{
+				overHours = plusTimeHours - 40;
+				overMinutes = plusTimeMinutes;
+				overTime = overHours + "h " + overMinutes + "m";
+				$(".minusTime").append("0h 0m");
+				$(".overTime").append(overTime);
+			}
+			
+			barPlusTime = parseInt(plusTimetoMinute/60*100)/100 *2;
+			barMinusTime = minusHours + ((minusMinutes * 60 / 100) / 100) * 2;
+			barOverTime = ((plusTimetoMinute - 2400)/60*100)/100 *2;
+			console.log(barOverTime)
+			if(barPlusTime/2 <= 40){
+				console.log("40보다 작음")
+				$(".todayWeekBar").css("background-image","linear-gradient(to right, rgba(255, 99, 132, 0.7) 0%, rgba(255, 99, 132, 0.7) " + barPlusTime + "%, rgba(255, 255, 255, 0.7) "+barPlusTime+"%,  rgba(255, 255, 255, 0.7) "+100+"%)").css("width","100%")
+			}else{
+				console.log("40보다 큼")
+				barPlusTime = 80;
+				$(".todayWeekBar").css("background","linear-gradient(to right, rgba(255, 99, 132, 0.7) 0%, rgba(255, 99, 132, 0.7) " + barPlusTime + "%, rgba(54, 162, 235, 0.7) "+barPlusTime+"%, rgba(54, 162, 235, 0.7) "+(barPlusTime+barOverTime)+"%, rgba(255, 255, 255, 0.7) "+(barPlusTime+barOverTime)+"%,  rgba(255, 255, 255, 0.7) "+100+"%)").css("width","100%")
+			}
+			
+		}
+	
+	})
+}	
+
+
+//구글 차트 라이브러리를 로딩
+google.load("visualization","1",{"packages":["corechart"]})
+
+//불러오는 작업이 완료되어 로딩이 되었다면 drawChart() 함수를 호출하는 콜백이 일어남
+google.setOnLoadCallback(drawChart);
+
+//콜백함수
+
+function drawChart(){
+	
+	chartLabel1 = $(".weekDay2").text();
+		
+	firstChartDay = chartLabel1.substr(2,4) + chartLabel1.substr(7,2) + chartLabel1.substr(10,2);
+	lastChartDay = chartLabel1.substr(18,4) + chartLabel1.substr(23,2) + chartLabel1.substr(26,2)
+	
+	let param = {
+		"firstDay":firstChartDay,
+		"lastDay": lastChartDay,
+		"empNo": <%=session.getAttribute("empNo")%>
+	}
+
+	let workTime = "";
+	$.ajax({
+		url:"/attendance/chart02",
+		type:"get",
+		data:param,
+		async:false,
+		success:function(res){
+			workTime = res
+			console.log(workTime);
+			console.log("res:",res);
+		}
+	})
+	
+	let workTimeInt = 0;
+	workTimeInt = parseInt(workTime*100)/100;
+	todayOverTime = 0;
+	todayMinusTime = 0;
+	
+	if(workTimeInt <= 8){
+		todayMinusTime = 8 - workTimeInt;
+	}else{
+		todayOverTime = 0;
+	}
+	if(workTimeInt <= 8){
+		todayOverTime = 0;
+	}else{
+		todayOverTime = workTimeInt - 8.0
+		workTimeInt = 8;
+	}
+	
+	let jsonData = {
+	    "cols": [
+	        {"id":"","label":"근무시간","pattern":"","type":"string"},
+	        {"id":"","label":"시간","pattern":"","type":"number"},
+	        {"id":"","label":"비율","pattern":"","type":"number"}
+	    ],
+	    "rows": [
+	        {"c":[{"v":"현재근무시간"},{"v":workTimeInt},{"v":parseInt(workTimeInt/8 * 10000)/100}]}, // 20%
+	        {"c":[{"v":"잔여근무시간"},{"v":todayMinusTime},{"v":parseInt(todayMinusTime/8 * 10000)/100}]}, // 30%
+	        {"c":[{"v":"초과근무시간"},{"v":todayOverTime},{"v":parseInt(todayOverTime/8 * 10000)/100}]} // 10%
+	    ]
+	};
+	
+	//구글 차트용 데이터 테이블 생성
+	let data = new google.visualization.DataTable(jsonData);
+	
+	//어떤 차트 모양으로 출력할지를 정해주자 => LineChart
+	//LineChart , ColumnChart, PieChart
+	let chart = new google.visualization.PieChart(
+		document.getElementById("chart_div")
+	);
+	
+	// data 데이터를 chart 모양으로 출력해보자
+	chart.draw(data,
+		{
+			pieHole: 0.41,
+			title:"오늘의 근무",
+			width:300,
+			height:250,
+			animation:{
+		        startup: true,
+		        duration: 500 // 애니메이션 지속 시간 (밀리초)
+		    }
+		}		
+	);
+	
+	
+	
+	let weekFirstDay = "";
+	weekFirstDay = $(".weekDay2Span").text().substr(5,8)
+	$(".graphSpan1").html(weekFirstDay)
+	
+	let weekFirstDayInt = 0;
+	let weekLastDayInt = 0;
+	weekFirstDayInt = parseInt(weekFirstDay.substr(3,2))
+	weekLastDayInt = parseInt($(".weekDay2Span").text().substr(24,2))
+	console.log("weekLastDayInt:",weekLastDayInt)
+	
+	let weekMonth = "";
+	let weekDay = "";
+	weekMonth = $(".weekDay2Span").text().substr(5,3)
+	
+	for(let i=1;i<8;i++){
+		
+		if(weekFirstDayInt <10){
+			weekDay = "0" + weekFirstDayInt;
+		}else{
+			weekDay = "" + weekFirstDayInt;
+		}
+		
+		$(".graphSpan"+i).html(weekMonth + weekDay)
+		
+		weekFirstDayInt += 1;
+		if(weekLastDayInt - 7 + i == 0){
+			weekMonth = $(".weekDay2Span").text().substr(21,3)
+			weekFirstDayInt = 1;
+		}
+		$(".weekDayGraph"+i).css("background-color","lightblue")
+	}
+	
+	$.ajax({
+		url:"/attendance/chart03",
+		type:"get",
+		data:param,
+		async:false,
+		success:function(res){
+			console.log("res1111:",res)
+			$(".weekDayGraph").css("background-image","")
+			$(".weekDayGraph").css("background-color","lightblue")
+			for(let i=1;i<8;i++){
+				$(".graphSpan2_"+i).html("")
+				$(".graphSpan2_"+i).html(res[i-1])
+				if(res[i-1] == null){
+					continue;
+				}
+				let weekWorkTime = 0;
+				let weekOverTime = 0;
+				weekWorkTime = parseInt(res[i-1].split("h")[0]) + parseInt(res[i-1].split("m")[0].substr(-2,2)/60*100)/100;
+				console.log("weekWorkTime:",weekWorkTime)
+				if(weekWorkTime > 8){
+					weekOverTime = weekWorkTime - 8
+					weekWorkTime = 8;
+					$(".weekDayGraph"+i).css("background-image","linear-gradient(to top, rgba(255, 99, 132, 0.7) 0%, rgba(255, 99, 132, 0.7) " + parseInt(weekWorkTime/11 * 10000)/100 + "%, yellow "+parseInt(weekWorkTime/11 * 10000)/100+"%,  yellow "+parseInt((weekWorkTime + weekOverTime)/11 * 10000)/100+"%, lightblue " + parseInt((weekWorkTime + weekOverTime)/11 * 10000)/100 + "%, lightblue "+100+"%)").css("width","20px;")
+				}else{
+					$(".weekDayGraph"+i).css("background-image","linear-gradient(to top, rgba(255, 99, 132, 0.7) 0%, rgba(255, 99, 132, 0.7) " + parseInt(weekWorkTime/11 * 10000)/100 + "%, lightblue "+parseInt(weekWorkTime/11 * 10000)/100+"%,  lightblue "+parseInt(8/11 * 10000)/100+"%, lightblue " + parseInt((weekWorkTime + weekOverTime)/11 * 10000)/100 + "%, lightblue "+100+"%)").css("width","20px;")
+				}
+				
+			}
+		}
+	})
+	
+}
+
+getTime = function(date){	// sysdate의 시간 부분을 hh:mm:ss 식으로 추출
+	let hours = date.getHours();
+	let minutes = date.getMinutes();
+	let seconds = date.getSeconds();
+
+	// 한 자리 숫자일 경우 앞에 0을 붙여 두 자리로 만듭니다.
+	hours = (hours < 10) ? '0' + hours : hours;
+	minutes = (minutes < 10) ? '0' + minutes : minutes;
+	seconds = (seconds < 10) ? '0' + seconds : seconds;
+	
+	let sysTime = hours + ":" + minutes + ":" + seconds;
+	
+	return sysTime;
+}
+
+getDate = function(date){	// sysdate의 날짜 부분을 yy.MM.dd 식으로 추출
+	let years = date.getFullYear();
+	let months = date.getMonth() +1;
+	let days = date.getDate(); 
+	
+	months = (months < 10) ? '0' + months : months;
+	days = (days < 10) ? '0' + days : days;
+	
+	let sysDate = years + "." + months + "." + days;
+	
+	return sysDate;
+}
+
+$(function(){
+	let firstDay = new Date(); //해당 주의 월요일로 설정
+	let lastDay = new Date(); // 해당 주의 금요일로 설정
+	let day = ["일","월","화","수","목","금","토"];
+	
+	firstDay.setDate(firstDay.getDate() - firstDay.getDay() + 1); // getDate() - getDay()를 하면 일요일 날짜가 나옴
+	lastDay.setDate(lastDay.getDate() - lastDay.getDay() + 7);
+    
+	firstDayMain = getDate(firstDay);
+	lastDayMain = getDate(lastDay);
+	
+	$(".weekDay1").html("<a class=prevWeek1>< </a>" + firstDayMain + "(월) ~ " + lastDayMain + "(일) <a class=nextWeek1>></a>")
+	$(".weekDay2").html("<a class=prevWeek2 href=#>< </a><span class=weekDay2Span>" + firstDayMain + "(월) ~ " + lastDayMain + "(일) </span><a class=nextWeek2 href=#>></a>")
+	
+	todayWeek = $(".weekDay1").text();
+	
+	todayWeekFirst = todayWeek.substr(2,4) + todayWeek.substr(7,2) + todayWeek.substr(10,2);
+	todayWeekLast = todayWeek.substr(18,4) + todayWeek.substr(23,2) + todayWeek.substr(26,2)
+	
+	plusTimetoMinute = 0;
+	
+	let param = {
+		"firstDay":todayWeekFirst,
+		"lastDay": todayWeekLast,
+		"empNo": <%=session.getAttribute("empNo")%>
+	}
+	
+	// "<" 클릭시 이전 주 월~금
+	$(document).on("click",".prevWeek2",function(){
+		firstDay.setDate(firstDay.getDate() - 7)
+		lastDay.setDate(lastDay.getDate() - 7)
+		
+		firstDayPrev = getDate(firstDay);
+		lastDayPrev = getDate(lastDay);
+		
+		$(".weekDay2").html("<a class=prevWeek2 href=#>< </a><span class=weekDay2Span>" + firstDayPrev + "(월) ~ " + lastDayPrev + "(일) </span><a class=nextWeek2 href=#>></a>")
+		drawChart();
+		getAvgTime(); // 근태분석 주간 데이터를 가져오기 위한 ajax
+	})
+	
+	// ">" 클릭시 다음 주 월~금
+	$(document).on("click",".nextWeek2",function(){
+		firstDay.setDate(firstDay.getDate() + 7)
+		lastDay.setDate(lastDay.getDate() + 7)
+		
+		firstDayPrev = getDate(firstDay);
+		lastDayPrev = getDate(lastDay);
+		
+		$(".weekDay2").html("<a class=prevWeek2 href=#>< </a><span class=weekDay2Span>" + firstDayPrev + "(월) ~ " + lastDayPrev + "(일) </span><a class=nextWeek2 href=#>></a>")
+		drawChart();
+		getAvgTime(); // 근태분석 주간 데이터를 가져오기 위한 ajax
+	})
+	
+	// 이번주 보기 클릭시 이번주 월요일 ~ 금요일로 보이도록
+	$(document).on("click",".mainWeek",function(){
+		firstDay = new Date();
+		lastDay = new Date();
+		firstDay.setDate(firstDay.getDate() - firstDay.getDay() + 1); // getDate() - getDay()를 하면 일요일 날짜가 나옴
+		lastDay.setDate(lastDay.getDate() - lastDay.getDay() + 7);
+		
+		$(".weekDay2").html("<a class=prevWeek2 href=#>< </a><span class=weekDay2Span>" + firstDayMain + "(월) ~ " + lastDayMain + "(일) </span><a class=nextWeek2 href=#>></a>")
+		drawChart();
+		getAvgTime(); // 근태분석 주간 데이터를 가져오기 위한 ajax
+	})
+	
+	$("#modal-qr").on("click",function(){
+		$("#modal-qr").removeClass("open");
+	})
+	
+		
+	showTime = function() {
+		
+		let currentDate = new Date();
+		let currentDay = currentDate.getDay();
+		currentDay = day[currentDay]
+		let sysDate = getDate(currentDate) + "(" + currentDay + ")";
+		let sysTime = getTime(currentDate);
+		
+		document.querySelector("#sysDate").innerHTML = sysDate;
+		document.querySelector("#sysTime").innerHTML = sysTime;
+    }
+
+    
+    
+    var generateQRButton1 = document.querySelector("#attendBtn");
+    var qrCodeContainer1 = document.querySelector(".qr-modal-cont");
+    
+    generateQRButton1.addEventListener("click", function() {
+    	$(".qr-modal-cont").html("")
+        // QR 코드 생성을 위한 데이터
+        var qrCodeData = "http://192.168.146.64/attendance/attendConfirm?empNo="+<%=session.getAttribute("empNo")%> // 원하는 URL 또는 데이터
+        
+        // QR 코드 생성
+        var qrCode = new QRCode(qrCodeContainer1, {
+            text: qrCodeData,
+            width: 64,
+            height: 64,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+        
+        $(".qr-modal-cont img").css("width","200px").css("height","200px")
+        
+    });
+    
+    var generateQRButton2 = document.querySelector("#lvffcBtn");
+    var qrCodeContainer2 = document.querySelector(".qr-modal-cont");
+    
+    generateQRButton2.addEventListener("click", function() {
+    	$(".qr-modal-cont").html("")
+        // QR 코드 생성을 위한 데이터
+        var qrCodeData2 = "http://192.168.146.64/attendance/lvffcConfirm?empNo="+<%=session.getAttribute("empNo")%> // 원하는 URL 또는 데이터
+        
+        // QR 코드 생성
+        var qrCode = new QRCode(qrCodeContainer2, {
+            text: qrCodeData2,
+            width: 64,
+            height: 64,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+        
+        $(".qr-modal-cont img").css("width","200px").css("height","200px")
+        
+    });
+    
+    $(".weekTab").on("click",function(){
+    	
+    	firstDay = new Date();
+		lastDay = new Date();
+		firstDay.setDate(firstDay.getDate() - firstDay.getDay() + 1); // getDate() - getDay()를 하면 일요일 날짜가 나옴
+		lastDay.setDate(lastDay.getDate() - lastDay.getDay() + 7);
+		
+    	$(".weekDay2").html("<a class=prevWeek2 href=#>< </a><span class=weekDay2Span>" + firstDayMain + "(월) ~ " + lastDayMain + "(일) </span><a class=nextWeek2 href=#>></a>")
+    	$(".workGraphDiv").css("display","flex")
+    	$(".workGraphDiv2").css("display","none")
+    	$(".avgMonthDiv").css("display","none")
+    	$(".mainWeek").css("display","block")
+    	
+    	getAvgTime();
+    	drawChart();
+    })
+    
+    
+    
+    $(".monthTab").on("click",function(){
+    	firstDay = new Date();
+		lastDay = new Date();
+    	// 현재 날짜를 가져옵니다.
+    	currentDate = new Date();
+    	// 월은 0부터 시작하므로, 현재 월의 첫 번째 날로 설정합니다.
+    	currentDate.setDate(1);
+
+    	// 첫 번째 날의 요일을 가져옵니다.
+    	dayOfWeek = currentDate.getDay();
+
+    	// 요일을 문자열로 변환합니다.
+    	dayOfWeekNames = ["일", "월", "화", "수", "목", "금", "토"];
+    	dayName = dayOfWeekNames[dayOfWeek];
+    	
+//     	let currentDate = new Date();
+    	firstMonthDay = new Date();
+    	firstMonthDay = getDate(firstMonthDay);
+    	lastMonthDay = new Date(parseInt(firstMonthDay.substr(0,4)),parseInt(firstMonthDay.substr(5,2)),0)
+    	lastMonthDay = getDate(lastMonthDay)
+    	firstMonthDay = firstMonthDay.substr(0,8) + "01"
+    	
+    	$(".weekDay2").html("<a class=prevMonth href=#>< </a><span class=weekDay2Span>" + firstMonthDay + " ~ " + lastMonthDay + " </span><a class=nextMonth href=#>></a>")
+    	getAvgTime();
+    	
+    	monthGraphStr = ""
+    	
+    	for(let i=1; i<=parseInt(lastMonthDay.substr(8,2));i++){
+    		
+    		dayName = dayOfWeekNames[(dayOfWeek+i-1)%7]
+	    	let monthDay = "" + i;
+	    	if(i < 10){
+	    		monthDay = "0" + i
+	    	}
+	    	
+	    	let monthGraphDay = monthDay
+    		
+	    	monthGraphStr += `
+	    		<div class="monthDayDiv monthDayDiv\${i}"> <div class="monthDayGraph monthDayGraph\${i}"></div><span class="monthSpan\${i}">\${monthGraphDay}</span><span class="monthSpan_\${i}">(\${dayName})</span><br><span class="monthSpanTime monthSpan2_\${i}" ></span> </div>
+	    	`
+	    	
+    	}
+    	
+    	$(".workGraphDiv").css("display","none")
+    	$(".workGraphDiv2").html("")
+    	$(".workGraphDiv2").prepend(monthGraphStr)
+    	$(".workGraphDiv2").css("display","flex")
+    	$(".avgMonthDiv").css("display","block")
+    	$(".mainWeek").css("display","none")
+    	drawMonthChart = function(){
+    		
+	    	$.ajax({
+				url:"/attendance/chart03",
+				type:"get",
+				data:{
+					"firstDay":firstMonthDay.replaceAll(".",""),
+					"lastDay": lastMonthDay.replaceAll(".",""),
+					"empNo": <%=session.getAttribute("empNo")%>
+				},
+				async:false,
+				success:function(res){
+					console.log("chart03:",res)
+					$(".monthDayGraph").css("background-image","")
+					$(".monthDayGraph").css("background-color","lightblue")
+					for(let i=1;i<res.length+1;i++){
+						$(".monthSpan2_"+i).html("")
+						$(".monthSpan2_"+i).html(res[i-1])
+						if(res[i-1] == null){
+							continue;
+						}
+						let weekWorkTime = 0;
+						weekWorkTime = parseInt(res[i-1].split("h")[0]) + parseInt(res[i-1].split("m")[0].substr(-2,2)/60*100)/100;
+						$(".monthDayGraph"+i).css("background-image","linear-gradient(to top, rgba(255, 99, 132, 0.7) 0%, rgba(255, 99, 132, 0.7) " + parseInt(weekWorkTime/8 * 10000)/100 + "%, lightblue "+parseInt(weekWorkTime/8 * 10000)/100+"%,  lightblue "+100+"%)").css("width","20px;")
+						
+					}
+				}
+			})
+    	}
+    	
+		drawMonthChart();
+		getAvgTime();
+    	
+    })
+    
+    $(document).on("click",".prevMonth",function(){
+    	firstDay.setDate(0)
+    	firstDay.setDate(1)
+		lastDay.setDate(0)
+		
+		firstDayPrev = getDate(firstDay);
+		lastDayPrev = getDate(lastDay);
+		
+		firstMonthDay = firstDayPrev
+		lastMonthDay = lastDayPrev
+		
+		// 첫 번째 날의 요일을 가져옵니다.
+    	dayOfWeek = firstDay.getDay();
+
+    	// 요일을 문자열로 변환합니다.
+    	dayOfWeekNames = ["일", "월", "화", "수", "목", "금", "토"];
+    	dayName = dayOfWeekNames[dayOfWeek];
+		
+		$(".weekDay2").html("<a class=prevMonth href=#>< </a><span class=weekDay2Span>" + firstDayPrev + " ~ " + lastDayPrev + " </span><a class=nextMonth href=#>></a>")
+		
+		for(let i=1; i<=parseInt(lastMonthDay.substr(8,2));i++){
+			
+    		dayName = dayOfWeekNames[(dayOfWeek+i-1)%7]
+    		$(".monthSpan_"+i).html("(" + dayName + ")")
+    		
+		}
+		
+		drawMonthChart();
+		getAvgTime(); // 근태분석 주간 데이터를 가져오기 위한 ajax
+    })
+    
+    $(document).on("click",".nextMonth",function(){
+    	firstDay.setMonth(firstDay.getMonth() + 1)
+    	firstDay.setDate(1)
+    	lastDay.setMonth(lastDay.getMonth() + 2)
+    	lastDay.setDate(0)
+    	
+		firstDayPrev = getDate(firstDay);
+		lastDayPrev = getDate(lastDay);
+		
+		firstMonthDay = firstDayPrev
+		lastMonthDay = lastDayPrev
+		
+		$(".weekDay2").html("<a class=prevMonth href=#>< </a><span class=weekDay2Span>" + firstDayPrev + " ~ " + lastDayPrev + " </span><a class=nextMonth href=#>></a>")
+		
+		for(let i=1; i<=parseInt(lastMonthDay.substr(8,2));i++){
+    		
+    		dayName = dayOfWeekNames[(dayOfWeek+i-1)%7]
+	    	let monthDay = "" + i;
+	    	if(i < 10){
+	    		monthDay = "0" + i
+	    	}
+	    	
+	    	let monthGraphDay = monthDay + "(" + dayName +")"
+    		
+	    	monthGraphStr += `
+	    		<div class="monthDayDiv monthDayDiv\${i}"> <div class="monthDayGraph monthDayGraph\${i}"></div><span class="monthSpan\${i}">\${monthGraphDay}</span><br><span class="monthSpanTime monthSpan2_\${i}" ></span> </div>
+	    	`
+	    	
+    	}
+		
+		drawMonthChart();
+		getAvgTime(); // 근태분석 주간 데이터를 가져오기 위한 ajax
+    })
+    
+    
+ 	// 1초마다 updateTime 함수를 호출하여 시간을 업데이트합니다.
+    showTime();
+    setInterval(showTime, 1000);
+    getAvgTime(); // 근태분석 주간 데이터를 가져오기 위한 ajax
+	getWeekWorkData() // 누적 근무시간, 잔여 근무시간, 초과 근무시간을 페이지에 띄우기 위한 ajax
+    drawChart();
+    
+    
+    
+})
+
+</script>
+<c:set var="now" value="<%=new java.util.Date()%>" />
+<c:set var="sysDate">
+	<fmt:formatDate value="${now}" pattern="yyyy.MM.dd(E)" />
+</c:set>
+<c:set var="sysTime">
+	<fmt:formatDate value="${now}" pattern="HH:mm:ss" />
+</c:set>
+
+
+<div class="wf-main-container">
+	<div class="wf-tit-wrap">
+		<h1 class="page-tit">근태관리</h1>
+	</div>
+
+	<div class="wf-content-wrap">
+		<section class="wf-flex-box center">
+			<div class="wf-content-area attendance-box1">
+				<p id="sysDate" class="heading2 align-center"></p>
+				<p id="sysTime" class="heading1 align-center"></p>
+				<p class="heading2">
+					출근: <span class="attendTime"></span>
+				</p>
+				<p class="heading2">
+					퇴근: <span class="lvffcTime"></span>
+				</p>
+				<div class="attendanceBtn-container">
+					<button type="button" id="attendBtn" class="btn2 qrBtn"
+						modal-id="modal-qr">출근</button>
+					<button type="button" id="lvffcBtn" class="btn1 qrBtn"
+						modal-id="modal-qr">퇴근</button>
+				</div>
+			</div>
+
+			<div class="wf-content-area chartArea">
+				<div id="chart_div"></div>
+			</div>
+
+			<div class="wf-content-area attendance-box2" style="margin-top: 0px;">
+				<p class="weekDay1 heading2 align-center"></p>
+				<div class="wf-flex-box">
+					<p style="width: 82%; text-align: right;">40h</p>
+					<p style="width: 18%; text-align: right;">50h</p>
+				</div>
+				<div class="wf-content-area todayWeekBar"></div>
+				<br>
+				<p class="heading2 needTime">필요 근무시간 : 40h 0m</p>
+				<p class="heading2 plusTime">누적 근무시간 :</p>
+				<p class="heading2 minusTime">잔여 근무시간 :</p>
+				<p class="heading2 overTime">초과 근무시간 :</p>
+			</div>
+		</section>
+		<div class="wf-content-area attendance-box3 wf-flex-box">
+			<div class="tab-type tab-type1">
+				<section class="wf-flex-box">
+					<div class="tab-menu">
+						<button data-tab="tab1" type="button" class="tab-btn weekTab active">주</button>
+						<button data-tab="tab2" type="button" class="tab-btn monthTab">월</button>
+						<div class="tab-indicator"
+							style="width: 140px; transform: translateX(0px);"></div>
+					</div>
+					<div>
+						<p class="heading1" style="text-align: center; width: 910px;">근태
+							분석</p>
+					</div>
+					<div>
+						<p class="heading2 mainWeek"
+							style="text-align: right; width: 200px;">이번주 보기</p>
+					</div>
+				</section>
+				<p class="weekDay2 heading2" style="text-align: center"></p>
+
+				<div class="wf-content-box">
+					<div>
+						<p class="box-heading1">근무시간</p>
+					</div>
+					<div class="wf-flex-box workGraphDiv">
+						<div class="weekDayDiv weekDayDiv1">
+							<div class="weekDayGraph weekDayGraph1"></div>
+							<span class="graphSpan1"></span>(월)<br>
+							<span class="graphSpan2_1"></span>
+						</div>
+						<div class="weekDayDiv weekDayDiv2">
+							<div class="weekDayGraph weekDayGraph2"></div>
+							<span class="graphSpan2"></span>(화)<br>
+							<span class="graphSpan2_2"></span>
+						</div>
+						<div class="weekDayDiv weekDayDiv3">
+							<div class="weekDayGraph weekDayGraph3"></div>
+							<span class="graphSpan3"></span>(수)<br>
+							<span class="graphSpan2_3"></span>
+						</div>
+						<div class="weekDayDiv weekDayDiv4">
+							<div class="weekDayGraph weekDayGraph4"></div>
+							<span class="graphSpan4"></span>(목)<br>
+							<span class="graphSpan2_4"></span>
+						</div>
+						<div class="weekDayDiv weekDayDiv5">
+							<div class="weekDayGraph weekDayGraph5"></div>
+							<span class="graphSpan5"></span>(금)<br>
+							<span class="graphSpan2_5"></span>
+						</div>
+						<div class="weekDayDiv weekDayDiv6">
+							<div class="weekDayGraph weekDayGraph6"></div>
+							<span class="graphSpan6"></span>(토)<br>
+							<span class="graphSpan2_6"></span>
+						</div>
+						<div class="weekDayDiv weekDayDiv7">
+							<div class="weekDayGraph weekDayGraph7"></div>
+							<span class="graphSpan7"></span>(일)<br>
+							<span class="graphSpan2_7"></span>
+						</div>
+						<div class="avgDiv">
+
+							<p class="box-heading1">
+								평균 출근 시간: <span class="avgAttend"></span>
+							</p>
+							<p class="box-heading1">
+								평균 퇴근 시간: <span class="avgLeave"></span>
+							</p>
+							<p class="box-heading1">
+								평균 근무 시간: <span class="avgWork"></span>
+							</p>
+							<p class="box-heading1 ">
+								지각 <span class="late">0</span>
+							</p>
+							<p class="box-heading1 ">
+								연차 <span class="rest">0</span>
+							</p>
+							<p class="box-heading1 ">
+								외출 <span class="out1">0</span> 조퇴 <span class="out2">0</span> 결근<span
+									class="out3">0</span>
+							</p>
+						</div>
+						<div class="avgBadgeDiv">
+
+							<p class="box-heading1 badge-avgAttend">&nbsp;</p>
+							<p class="box-heading1 badge-avgLeave">&nbsp;</p>
+							<p class="box-heading1 badge-avgWork">&nbsp;</p>
+							<p class="box-heading1 badge-late">&nbsp;</p>
+							<p class="box-heading1 badge-rest">&nbsp;</p>
+							<p class="box-heading1 badge-out">&nbsp;</p>
+						</div>
+					</div>
+					<!-- 월 데이터 -->
+					<div class="wf-flex-box workGraphDiv2" style="display: none;">
+					
+				       
+
+					</div>
+					 <div class="avgMonthDiv" style="width:100%; text-align: center; display:none;">
+						<br><br>
+			        	<p class="box-heading2">평균 출근 시간: <span class="avgAttend"></span> &nbsp;&nbsp;&nbsp;&nbsp;
+			        	평균 퇴근 시간: <span class="avgLeave"></span>&nbsp;&nbsp;&nbsp;&nbsp;
+			        	평균 근무 시간: <span class="avgWork"></span>&nbsp;&nbsp;&nbsp;&nbsp;
+			        	지각 <span class="late">0</span>&nbsp;&nbsp;&nbsp;&nbsp;
+			        	연차 <span class="rest">0</span>&nbsp;&nbsp;&nbsp;&nbsp;
+			        	외출 <span class="out1">0</span> 조퇴 <span class="out2">0</span>  결근<span class="out3">0</span></p>
+			        </div>
+				</div>
+
+			</div>
+
+		</div>
+
+	</div>
+</div>
+<div class="modal" id="modal-qr">
+	<div class="qr-modal-cont"></div>
+</div>
+
+

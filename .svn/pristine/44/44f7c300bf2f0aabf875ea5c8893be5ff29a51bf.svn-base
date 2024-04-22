@@ -1,0 +1,515 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"%> <%@ page session="false"%> <%@ taglib uri="http://java.sun.com/jsp/jstl/core"
+prefix="c"%>
+<style>
+    .wf-table-container {
+        max-height: 200px; /* 테이블의 최대 높이 */
+        overflow-y: auto; /* 세로 스크롤이 필요할 때만 표시 */
+    }
+    .wf-table {
+        width: 100%; /* 테이블 너비 100%로 설정 */
+    }
+</style>
+
+<div class="wf-box-wrap">
+    <div class="wf-box custom">
+        <div class="tit-wrap">
+            <h1 class="wf-box-tit">출/퇴근</h1>
+            <!-- <button type="button" class="go-btn"></button> -->
+        </div>
+        <div class="box-cont attend-cont">
+            <div class="attend-box">
+                <p id="sysDate" class="current">2024.03.30(토)</p>
+                <p id="sysTime" class="current-date">16:38:51</p>
+                <p class="sub-tit">
+                    출근: <span>16:38:51</span>
+                </p>
+                <p class="sub-tit">
+                    퇴근: <span>16:38:51</span>
+                </p>
+                <div class="button-wrap">
+                    <button type="button" id="attendBtn" class="btn2 qrBtn" modal-id="modal-qr"><i
+                            class="xi-man"></i>출근</button>
+                    <button type="button" id="lvffcBtn" class="btn7 qrBtn" modal-id="modal-qr"><i
+                            class="xi-run"></i>퇴근</button>
+                </div>
+            </div>
+            <div class="chartArea">
+                <div id="chart_div" style="height: 100%;">
+                    <p class="attend-tit">오늘의 근무 <i class="xi-time"></i></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================== -->
+    <!-- 프로젝트 -->
+    <div class="wf-box custom">
+        <div class="tit-wrap">
+            <div class="tit-wrap-inner">
+                <h1 class="wf-box-tit">프로젝트</h1>
+                <span class="txt">/ 진행중인 프로젝트 <span class="cnt">10</span></span>
+            </div>
+            <button type="button" class="go-btn"></button>
+        </div>
+        <div class="box-cont"></div>
+    </div>
+
+    <!-- ================================================== -->
+    <!-- 업무 -->
+    <div class="wf-box custom">
+        <div class="tit-wrap">
+            <div class="tit-wrap-inner">
+                <h1 class="wf-box-tit">업무</h1>
+                <span class="txt">/ 진행중인 업무 <span class="cnt">10</span></span>
+            </div>
+            <button type="button" class="go-btn"></button>
+        </div>
+        <ul class="box-list3">
+            <li>
+                <a href="#">
+                    <span class="badge badge2">
+                        대기
+                    </span>
+                    <span class="tit">제목이 들어갑니다.제목이 들어갑니다.제목이 들어갑니다.제목이 들어갑니다.</span>
+                    <div class="top">
+                        <span class="emp">신성우 과장</span>
+                        <span class="emp">연구개발본부</span>
+                        <span class="date">2023-03-30</span>
+                    </div>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span class="badge badge4">
+                        진행중
+                    </span>
+                    <span class="tit">제목이 들어갑니다.제목이 들어갑니다.제목이 들어갑니다.제목이 들어갑니다.</span>
+                    <div class="top">
+                        <span class="emp">신성우 과장</span>
+                        <span class="emp">연구개발본부</span>
+                        <span class="date">2023-03-30</span>
+                    </div>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span class="badge badge3">
+                        완료
+                    </span>
+                    <span class="tit">제목이 들어갑니다.제목이 들어갑니다.제목이 들어갑니다.제목이 들어갑니다.</span>
+                    <div class="top">
+                        <span class="emp">신성우 과장</span>
+                        <span class="emp">연구개발본부</span>
+                        <span class="date">2023-03-30</span>
+                    </div>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- ================================================== -->
+    <!-- 메일 -->
+    <div class="wf-box custom">
+        <div class="tit-wrap">
+            <div class="tit-wrap-inner">
+                <h1 class="wf-box-tit">메일</h1>
+                <span class="txt">/ 안읽은메일<span class="cnt">10</span></span>
+            </div>
+            <button type="button" class="go-btn"></button>
+        </div>
+
+        <ul class="box-list1">
+            <li>
+                <a href="#">
+                    <div class="img-wrap">
+                        <img src="/resources/img/icon/avatar.png">
+                    </div>
+                    <div class="emp-wrap">
+                        <span class="tit">메일 제목이 들어갑니다. 메일 제목이 들어갑니다.메일 제목이 들어갑니다.메일 제목이 들어갑니다.메일
+                            제목이
+                            들어갑니다.메일 제목이 들어갑니다.</span>
+                        <span class="emp">이근규 과장_연구개발본부</span>
+                    </div>
+                    <span class="date">2023-03-30</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <div class="img-wrap">
+                        <img src="/resources/img/icon/avatar.png">
+                    </div>
+                    <div class="emp-wrap">
+                        <span class="tit">메일 제목이 들어갑니다. 메일 제목이 들어갑니다.메일 제목이 들어갑니다.메일 제목이 들어갑니다.메일
+                            제목이
+                            들어갑니다.메일 제목이 들어갑니다.</span>
+                        <span class="emp">이근규 과장_연구개발본부</span>
+                    </div>
+                    <span class="date">2023-03-30</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <div class="img-wrap">
+                        <img src="/resources/img/icon/avatar.png">
+                    </div>
+                    <div class="emp-wrap">
+                        <span class="tit">메일 제목이 들어갑니다. 메일 제목이 들어갑니다.메일 제목이 들어갑니다.메일 제목이 들어갑니다.메일
+                            제목이
+                            들어갑니다.메일 제목이 들어갑니다.</span>
+                        <span class="emp">이근규 과장_연구개발본부</span>
+                    </div>
+                    <span class="date">2023-03-30</span>
+                </a>
+            </li>
+        </ul>
+
+    </div>
+
+    <!-- ================================================== -->
+    <!-- 공지사항 -->
+    <div class="wf-box custom">
+        <div class="tit-wrap">
+            <div class="tit-wrap-inner">
+                <h1 class="wf-box-tit">공지사항</h1>
+                <span class="txt"><span class="cnt">10</span></span>
+            </div>
+            <button type="button" class="go-btn"></button>
+        </div>
+        <ul class="box-list1">
+            <li>
+                <a href="#">
+                    <span class="badge badge1">
+                        <i class="xi-bell"></i>
+                    </span>
+                    <span class="tit">공지사항 제목이 들어갑니다. 공지사항 제목이 들어갑니다.공지사항 제목이 들어갑니다.공지사항 제목이
+                        들어갑니다.공지사항 제목이 들어갑니다.공지사항 제목이 들어갑니다. </span>
+                    <span class="date">2023-03-30</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span class="badge badge1">
+                        <i class="xi-bell"></i>
+                    </span>
+                    <span class="tit">공지사항 제목이 들어갑니다. 공지사항 제목이 들어갑니다.공지사항 제목이 들어갑니다.공지사항 제목이
+                        들어갑니다.공지사항 제목이 들어갑니다.공지사항 제목이 들어갑니다. </span>
+                    <span class="date">2023-03-30</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span class="badge badge1">
+                        <i class="xi-bell"></i>
+                    </span>
+                    <span class="tit">공지사항 제목이 들어갑니다. 공지사항 제목이 들어갑니다.공지사항 제목이 들어갑니다.공지사항 제목이
+                        들어갑니다.공지사항 제목이 들어갑니다.공지사항 제목이 들어갑니다. </span>
+                    <span class="date">2023-03-30</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span class="badge badge1">
+                        <i class="xi-bell"></i>
+                    </span>
+                    <span class="tit">공지사항 제목이 들어갑니다. 공지사항 제목이 들어갑니다.공지사항 제목이 들어갑니다.공지사항 제목이
+                        들어갑니다.공지사항 제목이 들어갑니다.공지사항 제목이 들어갑니다. </span>
+                    <span class="date">2023-03-30</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span class="badge badge1">
+                        <i class="xi-bell"></i>
+                    </span>
+                    <span class="tit">공지사항 제목이 들어갑니다. 공지사항 제목이 들어갑니다.공지사항 제목이 들어갑니다.공지사항 제목이
+                        들어갑니다.공지사항 제목이 들어갑니다.공지사항 제목이 들어갑니다. </span>
+                    <span class="date">2023-03-30</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- ================================================== -->
+    <!-- 진행중인 결재-->
+    <div class="wf-box custom">
+        <div class="tit-wrap">
+            <div class="tit-wrap-inner">
+                <h1 class="wf-box-tit">진행중인 결재</h1>
+                <span class="txt"><span class="cnt">10</span></span>
+            </div>
+            <button type="button" class="go-btn"></button>
+        </div>
+        <ul class="box-list1">
+            <li>
+                <a href="#">
+                    <div class="img-wrap">
+                        <img src="/resources/img/icon/icon2.png">
+                    </div>
+                    <span class="badge badge2">
+                        품의서
+                    </span>
+                    <span class="tit">결재 제목이 들어갑니다. 결재 제목이 들어갑니다.</span>
+                    <span class="date">2023-03-30</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <div class="img-wrap">
+                        <img src="/resources/img/icon/icon2.png">
+                    </div>
+                    <span class="badge badge3">
+                        출장신청서
+                    </span>
+                    <span class="tit">결재 제목이 들어갑니다. 결재 제목이 들어갑니다.</span>
+                    <span class="date">2023-03-30</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <div class="img-wrap">
+                        <img src="/resources/img/icon/icon2.png">
+                    </div>
+                    <span class="badge badge1">
+                        품의서
+                    </span>
+                    <span class="tit">결재 제목이 들어갑니다. 결재 제목이 들어갑니다.</span>
+                    <span class="date">2023-03-30</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <div class="img-wrap">
+                        <img src="/resources/img/icon/icon2.png">
+                    </div>
+                    <span class="badge badge1">
+                        품의서
+                    </span>
+                    <span class="tit">결재 제목이 들어갑니다. 결재 제목이 들어갑니다.</span>
+                    <span class="date">2023-03-30</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <div class="img-wrap">
+                        <img src="/resources/img/icon/icon2.png">
+                    </div>
+                    <span class="badge badge3">
+                        품의서
+                    </span>
+                    <span class="tit">결재 제목이 들어갑니다. 결재 제목이 들어갑니다.</span>
+                    <span class="date">2023-03-30</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- ================================================== -->
+    <!-- 오늘의 일정 -->
+    <div class="wf-box custom">
+        <div class="tit-wrap">
+            <div class="tit-wrap-inner">
+                <h1 class="wf-box-tit">오늘의 일정</h1>
+                <span class="txt"><span class="cnt">10</span></span>
+            </div>
+            <button type="button" class="go-btn"></button>
+        </div>
+        <ul class="box-list2">
+            <li>
+                <a href="#">
+                    <span class="badge badge1">내일정</span>
+                    <span class="tit">일정 제목이 들어갑니다. 일정 제목이 들어갑니다. 일정 제목이 들어갑니다. 일정 제목이 들어갑니다.
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span class="badge badge2">팀일정</span>
+                    <span class="tit">일정 제목이 들어갑니다. 일정 제목이 들어갑니다. 일정 제목이 들어갑니다. 일정 제목이 들어갑니다.
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span class="badge badge3">본부일정</span>
+                    <span class="tit">일정 제목이 들어갑니다. 일정 제목이 들어갑니다. 일정 제목이 들어갑니다. 일정 제목이 들어갑니다.
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span class="badge badge4">회사일정</span>
+                    <span class="tit">일정 제목이 들어갑니다. 일정 제목이 들어갑니다. 일정 제목이 들어갑니다. 일정 제목이 들어갑니다.
+                    </span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- ================================================== -->
+    <!-- IT 동향 -->
+    <div class="wf-box custom">
+        <div class="tit-wrap">
+            <div class="tit-wrap-inner">
+                <h1 class="wf-box-tit">IT 동향</h1>
+            </div>
+            <!-- <button type="button" class="go-btn"></button> -->
+        </div>
+        <ul class="box-list1">
+            <li>
+                <a href="#">
+                    <span class="badge badge3">
+                        <i class="xi-trending-up"></i>
+                    </span>
+                    <span class="tit">기사제목이들어갑니다.기사제목이들어갑니다.</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span class="badge badge3">
+                        <i class="xi-trending-up"></i>
+                    </span>
+                    <span class="tit">기사제목이들어갑니다.기사제목이들어갑니다.</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span class="badge badge3">
+                        <i class="xi-trending-up"></i>
+                    </span>
+                    <span class="tit">기사제목이들어갑니다.기사제목이들어갑니다.</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span class="badge badge3">
+                        <i class="xi-trending-up"></i>
+                    </span>
+                    <span class="tit">기사제목이들어갑니다.기사제목이들어갑니다.</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span class="badge badge3">
+                        <i class="xi-trending-up"></i>
+                    </span>
+                    <span class="tit">기사제목이들어갑니다.기사제목이들어갑니다.</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- ================================================== -->
+    <!-- 회의실 예약 현황 -->
+    <div class="wf-box custom">
+        <div class="tit-wrap">
+            <div class="tit-wrap-inner">
+                <h1 class="wf-box-tit">회의실 예약 현황</h1>
+                <span class="txt">/ 오늘의 예약수<span class="cnt">10</span></span>
+            </div>
+            <button type="button" class="go-btn"></button>
+        </div>
+        <ul class="box-list1">
+            <li>
+                <a href="#">
+                    <span class="badge badge1">대회의실</span>
+                    <span class="tit">개발팀 주간회의</span>
+                    <div class="right">
+                        <span class="emp">예약자 : 양연주 / </span>
+                        <span class="date">09:00 ~ 11:00</span>
+                    </div>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span class="badge badge2">소회의실1</span>
+                    <span class="tit">개발팀 주간회의</span>
+                    <div class="right">
+                        <span class="emp">예약자 : 양연주 / </span>
+                        <span class="date">11:00 ~ 12:00</span>
+                    </div>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span class="badge badge3">소회의실2</span>
+                    <span class="tit">개발팀 주간회의</span>
+                    <div class="right">
+                        <span class="emp">예약자 : 양연주 / </span>
+                        <span class="date">13:00 ~ 14:00</span>
+                    </div>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span class="badge badge4">중회의실2</span>
+                    <span class="tit">개발팀 주간회의</span>
+                    <div class="right">
+                        <span class="emp">예약자 : 양연주 / </span>
+                        <span class="date">16:00 ~ 18:00</span>
+                    </div>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span class="badge badge4">중회의실2</span>
+                    <span class="tit">개발팀 주간회의</span>
+                    <div class="right">
+                        <span class="emp">예약자 : 양연주 / </span>
+                        <span class="date">17:00 ~ 18:00</span>
+                    </div>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+<!-- <div class="wf-box-wrap"> -->
+<!--     <div class="wf-box custom"> -->
+<!--         <h1 class="wf-box-tit">출/퇴근</h1> -->
+<!--     </div> -->
+<!--     <div class="wf-box custom"> -->
+<!--         <h1 class="wf-box-tit">프로젝트</h1> -->
+<!--     </div> -->
+<!--     <div class="wf-box custom"> -->
+<!--         <h1 class="wf-box-tit">업무</h1> -->
+<!--     </div> -->
+<!--     <div class="wf-box custom"> -->
+<!--         <h1 class="wf-box-tit">메일</h1> -->
+<!--     </div> -->
+<!--     <div class="wf-box custom"> -->
+<!--         <h1 class="wf-box-tit">공지사항</h1> -->
+<!--     </div> -->
+<!--     <div class="wf-box custom"> -->
+<!--         <h1 class="wf-box-tit">결재함</h1> -->
+<!--     </div> -->
+<!--     <div class="wf-box custom"> -->
+<!--         <h1 class="wf-box-tit">일정</h1> -->
+<!--     </div> -->
+<!--     <div class="wf-box custom"> -->
+<!--         <h1 class="wf-box-tit">IT/컴퓨터 기사 <i class="xi-caret-down-square"></i></h1> -->
+<!--         <div class="wf-content-wrap"> -->
+<!--             <div class="wf-table-container"> -->
+<!--                 <table class="wf-table"> -->
+<%--                     <c:forEach var="news" items="${newsList}" varStatus="stat"> --%>
+<!--                         <tr> -->
+<!--                             <td> -->
+<!--                                 <p> -->
+<%--                                     <a href="${news.url}">${news.subject}</a> --%>
+<!--                                 </p> -->
+<!--                             </td> -->
+<!--                         </tr> -->
+<%--                     </c:forEach> --%>
+<!--                 </table> -->
+<!--             </div> -->
+<!--         </div> -->
+<!--     </div> -->
+<!--     <div class="wf-box custom"> -->
+<!--         <h1 class="wf-box-tit">메뉴 바로가기(head)</h1> -->
+<!--         <p>ex) 결재, 일정, 주소록, 회의실 예약</p> -->
+<!--     </div> -->
+<!-- </div> -->

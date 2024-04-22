@@ -1,0 +1,273 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!-- fullcalendar -->
+<link href="${pageContext.request.contextPath}/resources/css/fullcalendar.css" rel="stylesheet" />
+<script src="${pageContext.request.contextPath}/resources/js/fullcalendar.js"></script>
+<script src="${pageContext.request.contextPath}/resources/js/fullcalendar-ko.js"></script>
+<!-- CSS -->
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/schedule/style.css" />
+<!-- Javascript -->
+<script src="${pageContext.request.contextPath}/resources/script/schedule/main.js"></script>
+<script type="text/javascript">
+    $(function () {
+        //
+        $("#createBtn").on("click", function () {
+            let selectSch = $("#selectSch").val();
+            let schSeCd;
+            if (selectSch == "mySch") {
+                schSeCd = 1;
+            } else if (selectSch == "teamSch") {
+                schSeCd = 2;
+            } else if (selectSch == "deptSch") {
+                schSeCd = 3;
+            } else {
+                schSeCd = 4;
+            }
+            let schName = $("#schName").val();
+            let schSDate = $("#schSDate").val();
+            let schSTime = $("#schSTime").val();
+            let schStart = schSDate + " " + schSTime;
+            let schEDate = $("#schEDate").val();
+            let schETime = $("#schETime").val();
+            let schEnd = schEDate + " " + schETime;
+            let schLoc = $("#schLoc").val();
+            let schCont = $("#schCont").val();
+
+            let data = {
+                schdulSeCd: schSeCd,
+                schdulSj: schName,
+                schdulBeginDate: schStart,
+                schdulEndDate: schEnd,
+                schdulLoc: schLoc,
+                schdulCn: schCont,
+            };
+
+            console.log("data : ", data);
+
+            $.ajax({
+                url: "/api/schedules",
+                type: "post",
+                data: JSON.stringify(data),
+                contentType: "application/json;charset=utf-8",
+                dataType: "text",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("${_csrf.headerName}", "${_csrf.token}");
+                },
+                success: function (rslt) {
+                    console.log("create 성공 : ", rslt);
+                },
+                error: function (xhr) {
+                    console.log(xhr.status);
+                },
+            });
+        });
+    });
+</script>
+<div class="wf-tit-wrap">
+    <h1 class="page-tit">일정</h1>
+    <div class="side-util">
+        <button type="button" class="btn2" id="schCreateBtn">일정 등록</button>
+    </div>
+</div>
+<div class="wf-content-wrap">
+    <div class="wf-flex-box">
+        <div class="wf-content-area" id="calctgrbox">
+            <ul class="checkbox-radio-custom category-ul">
+                <li class="category-li">
+                    <div class="wf-flex-box">
+                        <input type="checkbox" id="mySch" checked />
+                        <label for="mySch">내 일정 </label>
+                        <span class="circle" id="mySchCircle"></span>
+                    </div>
+                </li>  
+                <li class="category-li">
+                    <div class="wf-flex-box">
+                        <input type="checkbox" id="teamSch" />
+                        <label for="teamSch">팀 일정</label>
+                        <span class="circle" id="teamSchCircle"></span>
+                    </div>
+                </li>
+                <li class="category-li">
+                    <div class="wf-flex-box">
+                        <input type="checkbox" id="deptSch" />
+                        <label for="deptSch">부서 일정</label>
+                        <span class="circle" id="deptSchCircle"></span>
+                    </div>
+                </li>
+                <li class="category-li">
+                    <div class="wf-flex-box">
+                        <input type="checkbox" id="compSch" />
+                        <label for="compSch">회사 일정</label>
+                        <span class="circle" id="compSchCircle"></span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="wf-content-area" id="calbox">
+            <div id="calendar"></div>
+        </div>
+    </div>
+</div>
+
+<!--------------------------------- 일정 등록 모달 시작 --------------------------------->
+<div class="modal" id="schModal">
+    <div class="modal-cont">
+        <h1 class="modal-tit" id="modalTit">일정등록</h1>
+        <div class="modal-content-area">
+            <ul class="wf-insert-form2 vertical">
+                <li>
+                    <label for="selectSch">일정 종류<i class="i">*</i></label>
+                    <div>
+                        <div class="wf-select-group">
+                            <select name="selectSch" id="selectSch">
+                                <option value="mySch">내 일정</option>
+                                <option value="teamSch">팀 일정</option>
+                                <option value="deptSch">본부 일정</option>
+                                <option value="compSch">회사 일정</option>
+                            </select>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <label for="schName">일정명<i class="i">*</i></label>
+                    <div>
+                        <input type="text" name="schName" id="schName" placeholder="일정명 필수입력" />
+                    </div>
+                </li>
+                <li>
+                    <label for="cc">일시<i class="i">*</i></label>
+                    <div class="wf-flex-box">
+                        <input type="date" name="schSDate" id="schSDate" />
+                        <div class="wf-select-group">
+                            <select name="schSTime" id="schSTime">
+                                <option value="08:00">08:00</option>
+                                <option value="09:00">09:00</option>
+                                <option value="10:00">10:00</option>
+                                <option value="11:00">11:00</option>
+                                <option value="12:00">12:00</option>
+                                <option value="13:00">13:00</option>
+                                <option value="14:00">14:00</option>
+                                <option value="15:00">15:00</option>
+                                <option value="16:00">16:00</option>
+                                <option value="17:00">17:00</option>
+                                <option value="18:00">18:00</option>
+                                <option value="19:00">19:00</option>
+                                <option value="20:00">20:00</option>
+                                <option value="21:00">21:00</option>
+                                <option value="22:00">22:00</option>
+                            </select>
+                        </div>
+                        <span class="hyphen">-</span>
+                        <input type="date" name="schEDate" id="schEDate" />
+                        <div class="wf-select-group">
+                            <select name="schETime" id="schETime">
+                                <option value="08:00">08:00</option>
+                                <option value="09:00">09:00</option>
+                                <option value="10:00">10:00</option>
+                                <option value="11:00">11:00</option>
+                                <option value="12:00">12:00</option>
+                                <option value="13:00">13:00</option>
+                                <option value="14:00">14:00</option>
+                                <option value="15:00">15:00</option>
+                                <option value="16:00">16:00</option>
+                                <option value="17:00">17:00</option>
+                                <option value="18:00">18:00</option>
+                                <option value="19:00">19:00</option>
+                                <option value="20:00">20:00</option>
+                                <option value="21:00">21:00</option>
+                                <option value="22:00">22:00</option>
+                            </select>
+                        </div>
+                        <span class="checkbox-radio-custom">
+                            <input type="checkbox" name="allDay" id="allDay" />
+                            <label for="allDay">종일</label>
+                        </span>
+                    </div>
+                </li>
+                <li>
+                    <label for="schLoc">장소</label>
+                    <div>
+                        <input type="text" name="schLoc" id="schLoc" placeholder="장소입력" />
+                    </div>
+                </li>
+                <li>
+                    <label for="schCont">상세내용</label>
+                    <div>
+                        <textarea name="schCont" id="schCont" placeholder="상세내용"></textarea>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="modal-btn-wrap" id="createBtnGroup">
+            <button class="btn6">취소</button>
+            <button class="btn2" id="createBtn">등록</button>
+        </div>
+
+        <div class="modal-btn-wrap" id="updateBtnGroup">
+            <button class="btn6" id="updateCancelBtn">취소</button>
+            <button class="btn2" id="updateConfbtn">수정</button>
+        </div>
+
+        <button class="close-btn"></button>
+    </div>
+</div>
+<!--------------------------------- 일정 등록 모달 끝 --------------------------------->
+
+<!--------------------------------- 일정 상세 모달 시작 --------------------------------->
+<div class="modal" id="schDetailModal">
+    <div class="modal-cont">
+        <h1 class="modal-tit">일정상세</h1>
+        <div class="modal-content-area">
+            <form action="" method="">
+                <ul class="wf-insert-form2 vertical">
+                    <li>
+                        <label for="selectSch">일정 종류</label>
+                        <div>
+                            <input type="text" name="schCtgr" id="schCtgr" />
+                        </div>
+                    </li>
+                    <li id="schEmpNameBox">
+                        <label for="schEmpName">팀원 이름</label>
+                        <div>
+                            <input type="text" name="schEmpName" id="schEmpName" />
+                        </div>
+                    </li>
+                    <li>
+                        <label for="schName">일정명</label>
+                        <div>
+                            <input type="text" name="schDName" id="schDName" />
+                        </div>
+                    </li>
+                    <li>
+                        <label for="cc">일시</label>
+                        <div class="wf-flex-box">
+                            <input type="text" id="schSDateandTime" />
+                            <span class="hyphen">-</span>
+                            <input type="text" id="schEDateandTime" />
+                        </div>
+                    </li>
+                    <li>
+                        <label for="schDLoc">장소</label>
+                        <div>
+                            <input type="text" name="schDLoc" id="schDLoc" />
+                        </div>
+                    </li>
+                    <li>
+                        <label for="schDCont">상세내용</label>
+                        <div>
+                            <textarea name="schDCont" id="schDCont"></textarea>
+                        </div>
+                    </li>
+                </ul>
+            </form>
+        </div>
+
+        <div class="modal-btn-wrap">
+            <button class="btn6" id="deleteBtn">삭제</button>
+            <button class="btn2" id="updateBtn">수정</button>
+        </div>
+
+        <button class="close-btn" id="dModalCloseBtn"></button>
+    </div>
+</div>
+<!--------------------------------- 일정 상세 모달 끝 --------------------------------->

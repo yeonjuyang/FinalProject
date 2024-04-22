@@ -1,0 +1,147 @@
+package com.team1.workforest.employee.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.team1.workforest.employee.service.EmployeeService;
+import com.team1.workforest.employee.vo.EmployeeVO;
+import com.team1.workforest.util.ArticlePage;
+import com.team1.workforest.vo.DepartmentVO;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/emp")
+public class EmpController {
+
+	@Autowired
+	EmployeeService empService;
+
+	//비밀번호 암호화 의존성 주입
+	@Autowired
+	BCryptPasswordEncoder passwordEncoder;
+
+	//주소록 - 사원리스트
+	
+	@GetMapping("/list")
+	public String getList (Model model, Map<String,Object> map,
+			@RequestParam(value="currentPage", required = false, defaultValue = "1") int currentPage) {
+
+		//Map<String, Object> map = new HashMap<String,Object>();
+
+		// 페이지 번호
+		map.put("currentPage", currentPage);   
+
+		//전체 행의 수 (total)
+		int total = this.empService.getTotal(map);
+		log.info("total -> ",total);
+
+		// 한 화면에 보여지는 행의 수 (기본 10행)
+		int size = 10;
+
+		List<EmployeeVO>empVOList = this.empService.list(map);
+		log.info("list -> EmployeeVO : "+empVOList);
+
+		model.addAttribute("data",new ArticlePage<EmployeeVO>(total, currentPage, size, empVOList, null));
+
+		return "emp/list";
+	}
+
+	@ResponseBody
+	@PostMapping("/list")
+	public ArticlePage<EmployeeVO>  listAjax(@RequestBody(required=false) Map<String,Object> map) {
+		log.info("map: " + map);
+		
+		List<EmployeeVO> empVOList= this.empService.list(map);
+		log.info("list->empVOList : " + empVOList);
+		
+		int total= this.empService.getTotal(map);
+		log.info("list->total : " + total);
+		int size = 10;
+		
+		String currentPage= map.get("currentPage").toString();
+		
+		String keyword= map.get("keyword").toString();
+		
+		ArticlePage<EmployeeVO> data= new ArticlePage<EmployeeVO>(total, Integer.parseInt(currentPage), size, empVOList, keyword);
+		
+		String url= "/emp/list";
+		
+		data.setUrl(url);
+		
+		return data;
+	}
+
+	//사원 정보(내 정보)
+	@GetMapping("/detail")
+	public String detail( @RequestParam("empNo") String empNo, Model model) {
+
+		EmployeeVO empVO= this.empService.detail(empNo);
+		model.addAttribute("empVO", empVO);
+		log.info("empVO: {}", empVO);
+
+		//forwarding
+		return "emp/empDetail";
+	}
+
+	//내 정보 수정
+	@ResponseBody
+	@PostMapping("/modDetail")
+	public int modDetail(@RequestBody EmployeeVO empVO) {
+
+		//log.info("modDetail->empVO : " + empVO);
+		
+		 // 새로운 비밀번호가 입력된 경우 db에 암호화해서 저장
+	    if (empVO.getEmpPw() != null && !empVO.getEmpPw().isEmpty()) {
+	        String newPw = empVO.getEmpPw();
+	        String encodedPw = passwordEncoder.encode(newPw);
+	        empVO.setEmpPw(encodedPw);
+	    }
+
+		int result= this.empService.modDetail(empVO);
+		log.info("modDetail : " + result);		
+		
+	
+		return result;
+	}
+
+	//조직도
+	@GetMapping("/tree")
+	public String treeList(){
+		return "emp/empTree";
+	}
+
+	//조직도(jstree)
+	@ResponseBody
+	@GetMapping("/treeAjax")
+	public List<DepartmentVO> treeAjax() {
+
+		log.info("treeAjax");
+		List<DepartmentVO> deptVOList= this.empService.treeAjax();
+		for( int i=0; i <deptVOList.size(); i++) {
+			if (deptVOList.get(i).getUpperDept() == null) {
+				deptVOList.get(i).setUpperDept("#");
+			}
+		}
+		return deptVOList;
+	}
+
+} 
+
+
+

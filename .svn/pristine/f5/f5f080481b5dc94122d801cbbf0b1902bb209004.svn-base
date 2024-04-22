@@ -1,0 +1,68 @@
+$(function () {
+
+    // 세션 저장
+    function saveSession() {
+        let tit = $('#tit').val();
+        let cont = $('#cont').val();
+
+        console.log(tit, cont);
+
+        sessionStorage.setItem('tit', tit);
+        sessionStorage.setItem('cont', cont);
+    }
+
+    // 세션 삭제
+    function removeSession() {
+        sessionStorage.removeItem('tit');
+        sessionStorage.removeItem('cont');
+    }
+
+    // 미리보기 이벤트
+    $('#preview_btn').on('click', function () {
+        saveSession();
+
+        $('#preview-modal').addClass('open');
+
+        // 기안날짜
+        let today = new Date();
+        $('#preview-modal #apv_date').text(today.toLocaleString());
+
+        // 제목, 내용
+        $('#preview-modal #apv_tit').text(sessionStorage.getItem('tit'));
+        $('#preview-modal #apv_cont').text(sessionStorage.getItem('cont'));
+
+        removeSession();
+    });
+
+    // // 결재 상신 이벤트
+    // $('#save_btn').on('click', function () {
+    //     let empNo = $('#empNo').val(); // 기안자
+    //     let tit = $('#tit').val();     // 제목
+    //     let cont = $('#cont').val();   // 내용
+
+    //     let data = {
+    //         "docFormNo": "1", // 문서종류 (#셀렉트 선택에 따라 값이 바껴야함)
+    //         "empNo": empNo,
+    //         "apvSj": tit,
+    //         "apvCn": cont
+    //     }
+
+    //     console.log("data", data);
+
+    //     $.ajax({
+    //         type: "post",
+    //         url: "/approval/create",
+    //         data: JSON.stringify(data),
+    //         contentType: "application/json;charset=utf-8",
+    //         dataType: "text",
+    //         beforeSend: function (xhr) {
+    //             xhr.setRequestHeader("${_csrf.headerName}", "${_csrf.token}");
+    //         },
+
+    //         success: function (result) {
+    //             console.log("result : ", result);
+    //         }
+    //     });
+    // });
+
+});

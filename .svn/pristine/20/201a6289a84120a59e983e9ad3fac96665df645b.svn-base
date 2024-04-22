@@ -1,0 +1,216 @@
+// 파라미터 조회
+const _queryString = window.location.search;
+const _params = new URLSearchParams(_queryString);
+const _apvNo = _params.get('apvNo');
+
+$(function () {
+
+    createDetailCont();
+
+    // 내용 줄바꿈 처리
+    $('#apvCn .convert-txt').append(convertText($('#apvCn_val').val()));
+
+    // 회수
+    $('#docReturn_btn').on('click', docReturn);
+
+    // 승인
+    $('#approval_btn').on('click', approval);
+
+    // 반려
+    $('#refuse_btn').on('click', refuse);
+
+    //================================================================
+    // jsPDF 다운로드
+    let jsPDF = jspdf.jsPDF;
+
+    // pdf download
+    $("#pdf_btn").on("click", function () {
+        html2canvas($('#pdfViewer')[0]).then(function (canvas) {
+            var imgData = canvas.toDataURL('image/png');
+            var imgWidth = 210;
+            var pageHeight = imgWidth * 1.414;
+            var imgHeight = parseInt(canvas.height * imgWidth / canvas.width);
+            var heightLeft = imgHeight;
+            var margin = 0;
+
+            var doc = new jsPDF('p', 'mm', 'a4');
+            var position = 0;
+
+            // 첫 페이지 출력
+            doc.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            // 페이지가 더 있을 경우 루프 돌면서 출력
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                doc.addPage();
+                doc.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+
+            let doc_name = $('.doc-name').text();
+
+            doc.save(`${doc_name}.pdf`);
+        });
+    });
+    //================================================================
+    // PDF 다운로드 후 Blob URL 생성 및 프리뷰에 바인딩
+    function createBlobUrl(doc) {
+        let blobPDF = new Blob(
+            [doc.output('blob')],
+            { type: 'application/pdf' }
+        );
+
+        // Blob URL 생성
+        let blobUrl = window.URL.createObjectURL(blobPDF); // 서버에 저장할 url
+
+        // iframe에 url 바인딩
+        $('#pdf_preview').attr('src', blobUrl);
+    }
+
+    //================================================================
+
+
+
+});
+
+// 문자열 컨버트 함수
+function convertText(text) {
+    return text.replace(/\r?\n/g, '<br>');
+}
+
+// 회수
+function docReturn() {
+
+    let data = {
+        apvNo: _apvNo,
+        apvEmpNo: $('#empNo').val()
+    }
+
+    console.log(data);
+
+    $.ajax({
+        url: `${_ctx}/approval/docReturn`,
+        type: "put",
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        dataType: "json",
+        success: function (result) {
+            if (result > 0) {
+                alert(_msg.approval.returnSuccessAlert);
+                location.href = "/approval/listView";
+            } else {
+                alert(_msg.approval.returnFailAlert);
+            }
+        }
+    });
+}
+
+
+// 승인
+function approval() {
+
+    $.ajax({
+        url: `${_ctx}/approval/approval`,
+        type: "post",
+        contentType: 'application/json',
+        data: JSON.stringify(_apvNo),
+        dataType: "json",
+        success: function (result) {
+            if (result > 0) {
+                alert(_msg.approval.approvalSuccessAlert);
+                location.href = "/approval/mainView";
+            } else {
+                alert(_msg.approval.approvalFailAlert);
+            }
+        }
+    });
+}
+
+// 반려
+function refuse() {
+
+    console.log("결재번호 -> " + _apvNo);
+
+    $.ajax({
+        url: `${_ctx}/approval/refuse`,
+        type: "put",
+        data: JSON.stringify(_apvNo),
+        contentType: 'application/json; charset=utf-8',
+        dataType: "json",
+        success: function (result) {
+            if (result > 0) {
+                alert(_msg.approval.refuseSuccessAlert);
+                location.href = "/approval/mainView";
+            } else {
+                alert(_msg.approval.refuseFailAlert);
+            }
+        }
+    });
+}
+
+// 기타 내용 출력
+function createDetailCont() {
+
+    let apvNo = location.search.slice(7);
+
+    $.ajax({
+        url: `${_ctx}/approval/approvalDetailView/${apvNo}`,
+        type: 'GET',
+        dataType: 'json',
+        success: (result) => {
+
+            let etcList = JSON.parse(result.apvEtc);
+
+            console.log("기타내용출력->", etcList);
+
+            let parse = JSON.parse(result.apvEtc);
+
+            let html = `
+                <table>
+                    <tbody>
+                        <tr>
+                            <th>출장자</th>
+                            <td>${parse[0].name}</td>
+                            <th>소속</th>
+                            <td>${parse[1].dept}</td>
+                            <th>직급</th>
+                            <td>${parse[2].position}</td>
+                        </tr>
+                        <tr>
+                            <th>사번</th>
+                            <td>${parse[3].empId}</td>
+                            <th>출장지</th>
+                            <td>${parse[4].destination}</td>
+                            <th>시작일자</th>
+                            <td>${parse[5].startDate}</td>
+                        </tr>
+                        <tr>
+                            <th>종료일자</th>
+                            <td>${parse[6].endDate}</td>
+                            <th>업무내용</th>
+                            <td colspan="3">${parse[7].task}</td>
+                        </tr>
+                        <tr>
+                            <th>숙박비</th>
+                            <td>${parse[8].accommodation}</td>
+                            <th>일당</th>
+                            <td>${parse[9].dailyAllowance}</td>
+                            <th>교통비</th>
+                            <td>${parse[10].transportation}</td>
+                        </tr>
+                        <tr>
+                            <th>기타</th>
+                            <td>${parse[11].other}</td>
+                            <th>합계</th>
+                            <td colspan="3">${parse[12].total}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+
+            $('#etc').append(html);
+
+        }
+    });
+}

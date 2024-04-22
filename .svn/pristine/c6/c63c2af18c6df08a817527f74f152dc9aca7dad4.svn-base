@@ -1,0 +1,314 @@
+let paramYear = "2024";
+let myMonthNewChart = "";
+let myMonthEndChart = "";
+let myPeriodChart = "";
+let projVOList = [];
+let listTarget = "";
+function drawMonthNewChart(chartDiv, chartLabels, chartData){
+	
+	const ctx = document.getElementById(chartDiv);
+	
+	myMonthNewChart = new Chart(ctx, {
+		type: 'bar',
+		data: {
+			labels: chartLabels,
+			datasets: [{
+				label: '프로젝트 수',
+				data: chartData,
+				borderWidth: 1
+			}]
+		},
+		options: {
+			scales: {
+				y: {
+					beginAtZero: true
+				}
+			}
+		}
+	});
+}
+
+function drawMonthEndChart(chartDiv, chartLabels, chartData){
+	
+	const ctx = document.getElementById(chartDiv);
+	
+	myMonthEndChart = new Chart(ctx, {
+		type: 'bar',
+		data: {
+			labels: chartLabels,
+			datasets: [{
+				label: '프로젝트 수',
+				data: chartData,
+				borderWidth: 1
+			}]
+		},
+		options: {
+			scales: {
+				y: {
+					beginAtZero: true
+				}
+			}
+		}
+	});
+}
+
+function drawPeriodChart(chartDiv, chartLabels, chartData){
+	
+	const ctx = document.getElementById(chartDiv);
+	
+	myPeriodChart = new Chart(ctx, {
+		type: 'bar',
+		data: {
+			labels: chartLabels,
+			datasets: [{
+				label: '프로젝트 수',
+				data: chartData,
+				borderWidth: 1
+			}]
+		},
+		options: {
+			scales: {
+				y: {
+					beginAtZero: true
+				}
+			}
+		}
+	});
+}
+
+function getMonthProjectData(){
+	
+
+	// 시작 프로젝트 수
+	$.ajax({
+		url:"/adminProject/getMonthNewProj",
+		data:{"year":paramYear},
+		type:"get",
+		success:function(res){
+			let chartLabels = []
+			let chartData = []
+			
+			$.each(res,function(i,v){
+				chartLabels.push(v.split("_")[0])
+				chartData.push(v.split("_")[1])
+			})
+			
+			
+			if (myMonthNewChart && myMonthNewChart.data.labels) { 
+					
+				newLabels = chartLabels
+				newData = chartData
+				
+				myMonthNewChart.data.labels = newLabels
+		        // 기존 차트의 데이터를 업데이트
+			    myMonthNewChart.data.datasets[0].data = newData; // 새로운 데이터로 업데이트
+		        // 차트 업데이트
+		        myMonthNewChart.update();
+		        
+		    }else{
+		    	drawMonthNewChart("monthNewProj", chartLabels, chartData)
+		    }
+			
+		}
+	})
+	
+	// 종료 프로젝트 수
+	$.ajax({
+		url:"/adminProject/getMonthEndProj",
+		data:{"year":paramYear},
+		type:"get",
+		success:function(res){
+			let chartLabels = []
+			let chartData = []
+			
+			$.each(res,function(i,v){
+				chartLabels.push(v.split("_")[0])
+				chartData.push(v.split("_")[1])
+			})
+			
+			
+			if (myMonthEndChart && myMonthEndChart.data.labels) { 
+					
+				newLabels = chartLabels
+				newData = chartData
+				
+				myMonthEndChart.data.labels = newLabels
+		        // 기존 차트의 데이터를 업데이트
+			    myMonthEndChart.data.datasets[0].data = newData; // 새로운 데이터로 업데이트
+		        // 차트 업데이트
+		        myMonthEndChart.update();
+		        
+		    }else{
+		    	drawMonthEndChart("monthEndProj", chartLabels, chartData)
+		    }
+		}
+	
+	})
+}	
+// 처음에 프로젝트 테이블 데이터 가져오기
+function getProjects(){
+	
+	$.ajax({
+		url:"/adminProject/getProjects",
+		data:"",
+		type:"get",
+		async:false,
+		success:function(res){
+			let str = ""
+			projVOList = res
+		}
+	
+	})
+	
+
+}
+
+// 밑에 리스트 출력 데이터
+// order by로 데이터순서 정해야 할듯
+function getList(sttusCd){
+	let strNo = "";
+	let strNm = "";
+	let strBegin = "";
+	let strEnd = "";
+	let strEmp = "";
+	let strOver = [];
+	let strContent = "";
+	$.each(projVOList,function(i,v){
+		
+		if(v.prjctSttusCd == sttusCd){
+			strNo += `<p class="heading2">${v.prjctNo}</p>`;
+			strNm += `<p class="heading2">${v.prjctNm}</p>`;
+			if(v.prjctEndDate != null){
+				strEnd = `${v.prjctEndDate.substr(0,4)}-${v.prjctEndDate.substr(4,2)}-${v.prjctEndDate.substr(6,2)}`;
+			}else{
+				strEnd = "---- -- --";
+			}
+			strBegin += `<p class="heading2">${v.prjctBeginDate.substr(0,4)}-${v.prjctBeginDate.substr(4,2)}-${v.prjctBeginDate.substr(6,2)}
+				~
+				${strEnd}
+			</p>`;
+			
+			strContent += `<p class="heading2">${v.prjctDetailCn}</p>`
+			
+			strEmp += `<p class="heading2">${v.total}</p>`;
+		}
+	})
+	
+	$(".pjNo").html(strNo)
+	$(".pjNm").html(strNm)
+	$(".pjDate").html(strBegin)
+	$(".pjContent").html(strContent)
+	$(".pjEmp").html(strEmp)
+	
+	
+}
+
+$(function(){
+	getProjects()
+	getList("1")
+	// 프로젝트 수(대기중,진행중,완료,중단) 
+	$.ajax({
+		url:"/adminProject/getProjectCount",
+		data:"",
+		type:"get",
+		success:function(res){
+			let status = "";
+			let count = 0;
+			$.each(res,function(i,v){
+				status = v.split("_")[0];
+				count = v.split("_")[1];
+				
+				$(".sttus"+status).html(count)
+				
+			})
+			
+		}
+	
+	})
+	
+	// 즉시 투입 가능 사원수 
+	$.ajax({
+		url:"/adminProject/getEnableEmp",
+		data:"",
+		type:"get",
+		success:function(res){
+			let count = res.length
+			$(".enableEmp").html(count)
+			
+			let strEmpNm = ""
+			let strDeptNm = ""
+			
+			$.each(res,function(i,v){
+				strEmpNm += `<p class="heading2">${v.empNm}</p>`;
+				strDeptNm += `<p class="heading2">${v.deptNm}</p>`;
+			})
+			
+			$(".empNm").html(strEmpNm)
+			$(".deptNm").html(strDeptNm)
+			
+			
+		}
+	
+	})
+
+	// 프로젝트 진행기간 그래프
+	$.ajax({
+		url:"/adminProject/getProceedPeriod",
+		data:"",
+		type:"get",
+		success:function(res){
+			console.log("res:",res)
+			let chartLabels = []
+			let chartData = []
+			
+			$.each(res,function(i,v){
+				if(i==4){
+					chartLabels.push("60++")
+				}else{
+					chartLabels.push(v.split("_")[0])
+					chartData.push(v.split("_")[1])
+				}
+			})
+			
+			
+			if (myPeriodChart && myPeriodChart.data.labels) { 
+					
+				newLabels = chartLabels
+				newData = chartData
+				
+				myPeriodChart.data.labels = newLabels
+		        // 기존 차트의 데이터를 업데이트
+			    myPeriodChart.data.datasets[0].data = newData; // 새로운 데이터로 업데이트
+		        // 차트 업데이트
+		        myPeriodChart.update();
+		        
+		    }else{
+		    	drawPeriodChart("periodChart", chartLabels, chartData)
+		    }
+		}
+	
+	})
+	
+	
+	
+	
+	getMonthProjectData();
+	
+	$(".yearClassify").on("click",function(){
+		paramYear = $(this).find("p").text();
+		getMonthProjectData()
+		$(".yearClassify").css("background","#F8FFF8")
+		$(this).css("background","#00a287")
+	})
+	
+	$(".moreInfo").on("click",function(){
+		let sttus = $(this).attr("idx");
+		$(".moreInfo").css("background","#F8FFF8")
+		$(this).css("background","#00a287")
+		getList(sttus)
+	})
+	
+	
+	
+	
+})

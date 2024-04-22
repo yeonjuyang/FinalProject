@@ -1,0 +1,42 @@
+package com.team1.workforest.employee.service.impl;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.team1.workforest.employee.mapper.EmployeeMapper;
+import com.team1.workforest.employee.service.EmployeeService;
+import com.team1.workforest.employee.vo.EmployeeVO;
+
+@Service
+public class EmpServiceImpl implements EmployeeService {
+	
+	@Autowired
+	EmployeeMapper empMapper;
+
+	//사원 정보(내 정보)
+	@Override
+	public EmployeeVO detail(String empNo) {
+		return this.empMapper.detail(empNo);
+	}
+
+	//내 정보 수정
+	@Override
+	public int modDetail(EmployeeVO empVO) {
+		return this.empMapper.modDetail(empVO);
+	}
+
+	//주소록
+	@Override
+	public List<EmployeeVO> list(Map<String, Object> map) {
+		return this.empMapper.list(map);
+	}
+
+	@Override
+	public int getTotal() {
+		return this.empMapper.getTotal();
+	}
+
+}

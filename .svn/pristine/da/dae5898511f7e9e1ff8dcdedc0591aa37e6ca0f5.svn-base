@@ -1,0 +1,40 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<%@ page session="false"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<div class="wf-box-wrap">
+	<div class="wf-box custom">
+		<h1 class="wf-box-tit">출/퇴근</h1>
+	</div>
+	<div class="wf-box custom">
+		<h1 class="wf-box-tit">프로젝트</h1>
+	</div>
+	<div class="wf-box custom">
+		<h1 class="wf-box-tit">업무</h1>
+	</div>
+	<div class="wf-box custom">
+		<h1 class="wf-box-tit">일정</h1>
+	</div>
+	<div class="wf-box custom">
+		<h1 class="wf-box-tit">공지사항</h1>
+	</div>
+	<div class="wf-box custom">
+		<h1 class="wf-box-tit">결재함</h1>
+	</div>
+	<div class="wf-box custom">
+		<h1 class="wf-box-tit">예약 바로가기</h1>
+	</div>
+	<div class="wf-box custom">
+		<h1 class="wf-box-tit">IT/컴퓨터 기사  <i class="xi-caret-down-square"></i></h1>
+		<div class="wf-content-wrap">
+			<table class="wf-table">
+				<c:forEach var="news" items="${newsList}" varStatus="stat">
+					<tr>
+						<td><p>
+								<a href="${news.url}">${news.subject}</a>
+							</p></td>
+					</tr>
+			</c:forEach>
+		</table>
+</div>
+    </div>
+</div>

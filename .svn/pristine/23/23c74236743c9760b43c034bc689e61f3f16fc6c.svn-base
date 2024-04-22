@@ -1,0 +1,210 @@
+$(function () {
+
+	// 처음 로드됬을 때 tab1이 먼저 보이게 처리
+	getTabData5('tab5');
+
+	$('.tab-btn').on('click', function () {
+		let tab = $(this).data('tab');
+		console.log("tab은? -> ", tab);
+
+		switch (tab) {
+			case "1":
+				getTabData1(tab);
+				break;
+			case "2":
+				getTabData2(tab);
+				break;
+			case "3":
+				getTabData3(tab);
+				break;
+			case "4":
+				getTabData4(tab);
+				break;
+			case "5":
+				getTabData5(tab);
+				break;
+			case "6":
+				getTabData6(tab);
+				break;
+			default:
+				break;
+		}
+
+	});
+});
+
+function docFormNo(data) {
+	switch (data) {
+		case '1':
+			return "품의서";
+		case '2':
+			return "출장신청서";
+		case '3':
+			return "도서구입신청서";
+		default:
+			break;
+	}
+}
+
+// function getTabData1(tab) {
+
+// 	$.ajax({
+// 		url: "/approval/listView/myList?tab=" + tab,
+// 		type: "GET",
+// 		dataType: "json",
+// 		success: function (result) {
+// 			console.log(result);
+// 			result.map((e) => {
+
+// 				let HTML = `
+// 					<tr>
+// 						<td>${e.apvNo}</td>
+// 						<td>${e.apvNo}</td>
+// 						<td>${e.apvNo}</td>
+// 						<td>${e.apvNo}</td>
+// 						<td>${e.apvNo}</td>
+// 					</tr>		
+// 				`;
+
+// 				$('.tab-content5 .wf-table').find('tbody').append(HTML);
+// 			});
+// 		}
+// 	});
+// }
+
+// function getTabData2(tab) {
+
+// 	$.ajax({
+// 		url: "/approval/listView/myList?tab=" + tab,
+// 		type: "GET",
+// 		dataType: "json",
+// 		success: function (result) {
+// 			console.log(result);
+// 			result.map((e) => {
+
+// 				let HTML = `
+// 					<tr>
+// 						<td>${e.apvNo}</td>
+// 						<td>${e.apvNo}</td>
+// 						<td>${e.apvNo}</td>
+// 						<td>${e.apvNo}</td>
+// 						<td>${e.apvNo}</td>
+// 					</tr>		
+// 				`;
+
+// 				$('.tab-content5 .wf-table').find('tbody').append(HTML);
+// 			});
+// 		}
+// 	});
+// }
+
+// function getTabData3(tab) {
+// 	$.ajax({
+// 		url: "/approval/listView/myList?tab=" + tab,
+// 		type: "GET",
+// 		dataType: "json",
+// 		success: function (result) {
+// 			console.log(result);
+// 			result.map((e) => {
+
+// 				let HTML = `
+// 					<tr>
+// 						<td>${e.apvNo}</td>
+// 						<td>${e.apvNo}</td>
+// 						<td>${e.apvNo}</td>
+// 						<td>${e.apvNo}</td>
+// 						<td>${e.apvNo}</td>
+// 					</tr>		
+// 				`;
+
+// 				$('.tab-content5 .wf-table').find('tbody').append(HTML);
+// 			});
+// 		}
+// 	});
+
+// }
+
+// function getTabData4(tab) {
+
+// 	$.ajax({
+// 		url: "/approval/listView/myList?tab=" + tab,
+// 		type: "GET",
+// 		dataType: "json",
+// 		success: function (result) {
+// 			console.log(result);
+// 			result.map((e) => {
+
+// 				let HTML = `
+// 					<tr>
+// 						<td>${e.apvNo}</td>
+// 						<td>${e.apvNo}</td>
+// 						<td>${e.apvNo}</td>
+// 						<td>${e.apvNo}</td>
+// 						<td>${e.apvNo}</td>
+// 					</tr>		
+// 				`;
+
+// 				$('.tab-content5 .wf-table').find('tbody').append(HTML);
+// 			});
+// 		}
+// 	});
+// }
+
+
+function getTabData5(tab) {
+
+	$.ajax({
+		url: "/approval/listView/myList?tab=" + tab,
+		type: "GET",
+		dataType: "json",
+		success: function (result) {
+			console.log(result);
+
+
+			result.map((e, i) => {
+				let docType = docFormNo(e.docFormNo);
+
+				let HTML = `
+					<tr>
+						<td>${i + 1}</td>
+						<td>${docType}</td>
+						<td>${e.apvSj}</td>
+						<td>${e.drftDate}</td>
+						<td>
+							<a href="javascript:void(0)" style="padding: 5px 20px;" class="btn7">재기안</a>
+							<a href="javascript:void(0)" style="padding: 5px 20px;" class="btn5">삭제</a>
+						</td>
+					</tr>		
+				`;
+
+				$('.tab-content5').find('tbody').append(HTML);
+			});
+		}
+	});
+}
+
+// function getTabData6(tab) {
+
+// 	$.ajax({
+// 		url: "/approval/listView/myList?tab=" + tab,
+// 		type: "GET",
+// 		dataType: "json",
+// 		success: function (result) {
+// 			console.log(result);
+// 			result.map((e) => {
+
+// 				let HTML = `
+// 					<tr>
+// 						<td>${e.apvNo}</td>
+// 						<td>${e.apvNo}</td>
+// 						<td>${e.apvNo}</td>
+// 						<td>${e.apvNo}</td>
+// 						<td>${e.apvNo}</td>
+// 					</tr>
+// 				`;
+
+// 				$('.tab-content5 .wf-table').find('tbody').append(HTML);
+// 			});
+// 		}
+// 	});
+// }

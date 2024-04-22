@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.team1.workforest.mail.mapper.EmailMapper">
+    <sql id="currentPageList">
+	    WITH T AS (
+	    SELECT
+	        ROWNUM RNUM,
+	        E.SENDER_EMPL_NO,
+	        EM.EMP_NM,
+	        E.EMAIL_SJ,
+	        E.SEND_DATE,
+	        ER.CNFIRM_DATE,
+	        E.ATCHMNFL_NO,
+	        EM.EMAIL AS SENDER_EMAIL
+	    FROM
+	        EMAIL E
+	    JOIN
+	        EMAIL_RECIPIENT ER ON E.EMAIL_NO = ER.EMAIL_NO
+	    JOIN
+	        EMPLOYEE EM ON E.SENDER_EMPL_NO = EM.EMP_NO
+	    WHERE
+	        ER.EMP_NO = #{empNo}
+		)
+		SELECT * FROM T
+		WHERE T.RNUM BETWEEN (#{currentPage} * 10) - (10 - 1) AND (#{currentPage} * 10)
+		ORDER BY RNUM
+    </sql>
+    
+    <sql id="list">
+        SELECT 
+            E.SENDER_EMPL_NO,
+            E.EMAIL_SJ,
+            E.SEND_DATE,
+            ER.CNFIRM_DATE,
+            E.ATCHMNFL_NO,
+            EM.EMP_NM,
+            EM.EMAIL AS SENDER_EMAIL
+        FROM 
+            EMAIL E
+        JOIN 
+            EMAIL_RECIPIENT ER ON E.EMAIL_NO = ER.EMAIL_NO
+        JOIN 
+            EMPLOYEE EM ON E.SENDER_EMPL_NO = EM.EMP_NO
+        WHERE 
+            ER.EMP_NO = #{empNo}
+    </sql>
+
+	<select id="getMailDetail" parameterType="String" resultType="emailVO">
+		SELECT
+		    E.EMAIL_NO,
+		    E.SENDER_EMPL_NO,
+		    EM1.EMP_NM AS SENDER_NAME,
+		    EM1.EMAIL AS SENDER_EMAIL,
+		    E.EMAIL_SJ AS SUBJECT,
+		    E.EMAIL_CN AS CONTENT,
+		    E.SEND_DATE,
+		    E.TMPR_STRE,
+		    E.ATCHMNFL_NO,
+		    ER.CNFIRM_DATE,
+		    ER.DEL_DATE AS RECIPIENT_DEL_DATE,
+		    EM2.EMP_NM AS RECIPIENT_NAME,
+		    EM2.EMAIL AS RECIPIENT_EMAIL,
+		    EM2.DEPT_NO AS RECIPIENT_DEPT_NO 
+		FROM
+		    EMAIL E
+		JOIN
+		    EMAIL_RECIPIENT ER ON E.EMAIL_NO = ER.EMAIL_NO
+		JOIN
+		    EMPLOYEE EM1 ON E.SENDER_EMPL_NO = EM1.EMP_NO
+		JOIN
+		    EMPLOYEE EM2 ON ER.EMP_NO = EM2.EMP_NO
+		WHERE
+		    E.EMAIL_NO = #{emailNo}
+	</select>
+
+	<select id="getMailList" parameterType="hashMap" resultType="emailVO">
+		<include refid="currentPageList" />
+	</select>
+	
+	<select id="getTotal" parameterType="hashMap" resultType="int">
+		SELECT COUNT(*)
+		FROM(
+		<include refid="list" />
+		)
+	</select>
+</mapper>

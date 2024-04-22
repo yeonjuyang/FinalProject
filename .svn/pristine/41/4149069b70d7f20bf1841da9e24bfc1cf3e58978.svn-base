@@ -1,0 +1,21 @@
+package com.team1.workforest.board.suggestion.vo;
+
+import lombok.Data;
+
+@Data
+public class SuggestionReplyVO {
+	private String sugestBrdReNo;
+	private String reSj;
+	private String empNo;
+	private String writngDate;
+	private String updtDate;
+	private String sugestBrdNo;
+	private String upperRe;
+	
+	private String empNm;
+	private String deptNo;
+	private String positionCd;
+	private String deptNm;
+	private String cmmnCdNm;
+	
+}

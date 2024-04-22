@@ -1,0 +1,28 @@
+package com.team1.workforest.schedulerUtil.service.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.team1.workforest.attendance.vo.AttendanceManageVO;
+import com.team1.workforest.schedulerUtil.mapper.SchedularMapper;
+import com.team1.workforest.schedulerUtil.service.SchedularService;
+
+@Service
+public class SchedularServiceImpl implements SchedularService{
+	
+	@Autowired
+	SchedularMapper schedularMapper;
+	
+	@Override
+	public List<AttendanceManageVO> getAttendanceList() {
+		return this.schedularMapper.getAttendanceList();
+	}
+
+	@Override
+	public List<String> getEmpList() {
+		return this.schedularMapper.getEmpList();
+	}
+
+}

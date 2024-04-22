@@ -1,0 +1,226 @@
+const _HTML = {
+	myList: {
+		tab1: {
+			colgroup: function() {
+				return `
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+				`;
+			},
+			th_tr: function(param) {
+				return `
+					<tr>
+                        <th>번호</th>
+                        <th>문서종류</th>
+                        <th>제목</th>
+                        <th>기안자</th>
+                        <th>직급/직책</th>
+                        <th>소속부서</th>
+                        <th>기안일시</th>
+                    </tr>
+				`;
+			},
+			tr: function(param) {
+				return `
+					<tr data-apv-no='${param.apvNo}'>
+						<td>${param.i}</td>
+						<td>${param.docName}</td>
+						<td>${param.apvSj}</td>
+						<td>${param.empNm}</td>
+						<td>${param.apvPosition}/${param.apvRspnsbl}</td>
+						<td>${param.deptNm}</td>
+						<td>${param.drftDate}</td>
+					</tr>
+				`;
+			},
+		},
+		tab2: {
+			colgroup: function() {
+				return `
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+				`;
+			},
+			th_tr: function(param) {
+				return `
+					<tr>
+                        <th>번호</th>
+                        <th>문서종류</th>
+                        <th>제목</th>
+                        <th>기안일시</th>
+                    </tr>
+				`;
+			},
+			tr: function(param) {
+				return `
+					<tr data-apv-no='${param.apvNo}'>
+						<td>${param.i}</td>
+						<td>${param.docName}</td>
+						<td>${param.apvSj}</td>
+						<td>${param.empNm}</td>
+						<td>${param.apvPosition}/${param.apvRspnsbl}</td>
+						<td>${param.deptNm}</td>
+						<td>${param.drftDate}</td>
+					</tr>
+				`;
+			},
+		},
+		tab3: {
+			colgroup: function() {
+				return `
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+				`;
+			},
+			th_tr: function(param) {
+				return `
+					<tr>
+                        <th>번호</th>
+                        <th>문서종류</th>
+                        <th>제목</th>
+                        <th>기안자</th>
+                        <th>직급/직책</th>
+                        <th>소속부서</th>
+                        <th>기안일시</th>
+                        <th>최종결재일시</th>
+                    </tr>
+				`;
+			},
+			tr: function(param){
+				return `
+					<tr data-apv-no='${param.apvNo}'>
+						<td>${param.i}</td>
+						<td>${param.docName}</td>
+						<td>${param.apvSj}</td>
+						<td>${param.empNm}</td>
+						<td>${param.apvPosition}/${param.apvRspnsbl}</td>
+						<td>${param.deptNm}</td>
+						<td>${param.drftDate}</td>
+						<td>${param.apvDate}</td>
+					</tr>	
+				`;
+			},
+		},
+		tab4: {
+			colgroup: function() {
+				return `
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+				`;
+			},
+			th_tr: function(param) {
+				return `
+					<tr>
+                        <th>번호</th>
+                        <th>문서종류</th>
+                        <th>제목</th>
+                        <th>기안일시</th>
+                        <th>반려일시</th>
+                    </tr>
+				`;
+			},
+			tr: function(param){
+				return `
+					<tr data-apv-no='${param.apvNo}'>
+						<td>${param.i}</td>
+						<td>${param.docName}</td>
+						<td>${param.apvSj}</td>
+						<td>${param.drftDate}</td>
+						<td>${param.refuseDate}</td>
+					</tr>		
+				`;
+			},
+		},
+		tab5: {
+			colgroup: function() {
+				return `
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+				`;
+			},
+			th_tr: function(param) {
+				return `
+					<tr>
+                        <th>번호</th>
+                        <th>문서종류</th>
+                        <th>제목</th>
+                        <th>기안일시</th>
+                        <th></th>
+                    </tr>
+				`;
+			},
+			tr: function(param){
+				return `
+					<tr data-apv-no='${param.apvNo}'>
+						<td>${param.i}</td>
+						<td>${param.docName}</td>
+						<td>${param.apvSj}</td>
+						<td>${param.drftDate}</td>
+						<td>
+							<a href="javascript:void(0)" style="padding: 5px 20px;" class="btn7">재기안</a>
+							<a href="javascript:void(0)" style="padding: 5px 20px;" class="btn5">삭제</a>
+						</td>
+					</tr>	
+				`;
+			},
+		},
+		tab6: {
+			colgroup: function() {
+				return `
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+				`;
+			},
+			th_tr: function(param) {
+				return `
+					<tr>
+                        <th>번호</th>
+                        <th>문서종류</th>
+                        <th>제목</th>
+                        <th>생성일시</th>
+                        <th></th>
+                    </tr>
+				`;
+			},
+			tr: function(param){
+				return `
+					<tr data-apv-no='${param.apvNo}'>
+						<td>${param.i}</td>
+						<td>${param.docName}</td>
+						<td>${param.apvSj}</td>
+						<td>${param.drftDate}</td>
+						<td>
+							<a href="javascript:void(0)" style="padding: 5px 20px;" class="btn7">재기안</a>
+							<a href="javascript:void(0)" style="padding: 5px 20px;" class="btn5">삭제</a>
+						</td>
+					</tr>	
+				`;
+			},
+		},
+		noData: function() {
+			return '<tr><td colspan="7" style="text-align: center;">문서가 없습니다.</td></tr>';
+		},
+	}
+};

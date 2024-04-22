@@ -1,0 +1,34 @@
+package com.team1.workforest.employee.mapper;
+
+import java.util.List;
+import java.util.Map;
+
+import com.team1.workforest.employee.vo.EmployeeVO;
+import com.team1.workforest.vo.DepartmentVO;
+
+public interface EmployeeMapper {
+
+	//사원 정보(내 정보)
+	public EmployeeVO detail(String empNo);
+	
+	//내 정보 수정
+	public int modDetail(EmployeeVO empVO);
+
+	//주소록
+	public List<EmployeeVO> list(Map<String, Object> map);
+
+	//페이징에 필요 - 행 수
+	public int getTotal(Map<String, Object> map);
+
+	//조직도(jstree)
+	public List<DepartmentVO> treeAjax();
+
+	//비밀번호 찾기
+	public int getMemberPass(EmployeeVO empVO);
+
+	//임시비밀번호 설정
+	public int updatePass(EmployeeVO empVO);
+
+	
+
+}

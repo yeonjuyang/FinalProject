@@ -1,0 +1,94 @@
+package com.team1.workforest.duty.service.impl;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.team1.workforest.duty.mapper.DutyMapper;
+import com.team1.workforest.duty.service.DutyService;
+import com.team1.workforest.duty.vo.DutyRecipientVO;
+import com.team1.workforest.duty.vo.DutyVO;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+public class DutyServiceImpl implements DutyService {
+	@Autowired
+	DutyMapper dutyMapper;
+	
+	@Override
+	public List<DutyVO> getDutyList(Map<String, Object> map) {
+		List<DutyVO> list= this.dutyMapper.getDutyList(map);
+		getYYMMDDDutyVO(list);
+		return list;
+	}
+	
+	
+	
+	
+	
+	//yymmdd날짜를 변환해주는 함수
+	public  List<DutyVO> getYYMMDDDutyVO(List<DutyVO> list){
+		for (int i = 0; i < list.size(); i++) {
+			String sendDate=list.get(i).getSendDate();			
+			String closDate=list.get(i).getClosDate();
+			String cnfirmDate=list.get(i).getCnfirmDate();
+				if(sendDate!=null) {
+				LocalDate localDate = LocalDate.parse(sendDate, DateTimeFormatter.ofPattern("yyyyMMdd"));
+				DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+				String formattedDate = localDate.format(outputFormatter);
+				list.get(i).setSendDate(formattedDate);
+				}
+				if(closDate!=null) {				
+				LocalDate localDate2 = LocalDate.parse(closDate, DateTimeFormatter.ofPattern("yyyyMMdd"));
+				DateTimeFormatter outputFormatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+				String formattedDate2 = localDate2.format(outputFormatter2);
+				list.get(i).setClosDate(formattedDate2);
+				}
+				if(cnfirmDate!=null) {
+				LocalDate localDate3 = LocalDate.parse(cnfirmDate, DateTimeFormatter.ofPattern("yyyyMMdd"));
+				DateTimeFormatter outputFormatter3 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+				String formattedDate3 = localDate3.format(outputFormatter3);			
+				list.get(i).setCnfirmDate(formattedDate3);
+				}
+		}
+
+		return list;
+	}
+
+
+
+
+
+	@Override
+	public List<DutyRecipientVO> getPieChart(DutyVO vo) {
+		return this.dutyMapper.getPieChart(vo);
+	}
+
+
+
+
+
+	@Override
+	public List<DutyVO> todayDoList(DutyVO vo) {
+		List<DutyVO> list =this.dutyMapper.todayDoList(vo);
+		getYYMMDDDutyVO(list);	
+		return list;
+	}
+
+
+
+
+
+	@Override
+	public int clickAndDone(DutyVO vo) {
+		return this.dutyMapper.clickAndDone(vo);
+	}
+	
+
+}

@@ -1,0 +1,315 @@
+// 공통으로 들어가는 항목
+let _docFormNo; // 선택된 양식
+let _tit;       // 제목
+let _cont;      // 내용
+    
+$(function () {
+	const _empNo = $('#empNo').val(); // 기안자 (세션)
+	
+    // 미리보기 이벤트
+    $('#preview_btn').on('click', preview);
+
+    // 양식 선택 이벤트
+    $('select#docFormNo').change(function (e) {
+        _docFormNo = $(this).val();
+        console.log("선택 -> ", _docFormNo);
+
+        switch (_docFormNo) {
+            case "1":
+                createDoc1();
+                break;
+            case "2":
+                createDoc2();
+                break;
+            case "3":
+                createDoc3();
+                break;
+            default:
+                break;
+        }
+    });
+
+    // 작성한 기안 저장 이벤트
+    $('#save_btn').on('click', function () {
+        const selectedDocData = getSelectedDocData();
+        createApv(selectedDocData);
+    });
+
+    // 미리보기 함수
+    function preview() {
+        // 모달창 활성화
+        $('#preview_modal').addClass('open');
+        $('html').removeClass('scroll-hidden');
+
+		_tit = $('#doc_cont').find('#tit').val();
+		_cont = $('#doc_cont').find('#cont').val(); 
+		
+		console.log("preview : ", _tit + ", " + _cont);
+		
+        // 데이터 추가
+        const today = new Date();
+        $('#preview_modal #apv_date').text(today.toLocaleString());
+        $('#preview_modal #apv_tit').text(_tit);
+        $('#preview_modal #apv_cont').text(_cont);
+    }
+
+    // 기안 저장 함수 (기안 상신 처리)
+    function createApv(docData) {
+        console.log("docData : ", docData);
+
+        $.ajax({
+            type: "post",
+            url: "/approval/create",
+            data: JSON.stringify(docData),
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                console.log("결재번호 -> ", result);
+                
+                let apvNo = result;
+	
+                if (result > 0) {
+                    alert(_msg.approval.insertSuccessAlert);
+                    location.href = 
+                    "/approval/approvalDetailView?empNo=" + _empNo + "&apvNo=" + apvNo;
+                } else {
+                    alert(_msg.approval.insertFailAlert);
+                }
+            }
+        });
+    }
+
+    // 문서 양식 생성 함수
+    function createDoc(HTML) {
+        let docCont = $('#doc_cont');
+        let docContLi = docCont.find('li');
+        let titArea = docContLi[0];
+        docContLi.not(titArea).remove();
+
+        $('#doc_cont').append(HTML);
+    }
+
+    // 품의서 양식 생성
+    function createDoc1() {
+        const HTML = `
+            <li style="height: 100%;">
+            	<textarea id="cont" style="height: 100%;" placeholder="내용을 입력해주세요"></textarea>
+            </li>
+        `;
+        createDoc(HTML);
+    }
+
+    // 출장신청서 양식 생성
+    function createDoc2() {
+        const HTML = `
+	    	<li>
+	    		<textarea id="cont" style="min-height: 100px;" placeholder="내용을 입력해주세요"></textarea>
+	    	</li>
+           <li class="create-doc" style="height:100%;">
+                <button type="button" class="btn5 emp-add-btn">
+                    <i class="xi-user-plus-o"></i> 출장자 추가
+                </button>
+                <div class="doc-sub-wrap">
+                    <div class="doc-sub">
+                        <div class="doc-tit-wrap">
+                            <span class="doc-sub-tit">출장자</span>
+                        </div>
+                        <div class="doc-sub-inner">
+                            <input type="text" id="name" placeholder="성명">
+                            <input type="text" id="dept" placeholder="소속">
+                            <input type="text" id="position" placeholder="직급">
+                            <input type="text" id="empId" placeholder="사번">
+                        </div>
+                    </div>
+                    <div class="doc-sub">
+                        <span class="doc-sub-tit">출장지</span>
+                        <div class="doc-sub-inner">
+                            <input type="text" id="destination" placeholder="출장지">
+                        </div>
+                    </div>
+                    <div class="doc-sub">
+                        <div class="doc-tit-wrap">
+                            <span class="doc-sub-tit">출장일정별</span>
+                        </div>
+                        <div class="doc-sub-inner">
+                            <input type="date" id="startDate" data-placeholder="시작일자 선택" required>
+                            <span> ~ </span>
+                            <input type="date" id="endDate" data-placeholder="종료일자 선택" required>
+                            <input type="text" id="place" placeholder="방문처">
+                            <input type="text" id="task" placeholder="업무내용">
+                        </div>
+                    </div>
+                    <div class="doc-sub">
+                        <span class="doc-sub-tit">출장비</span>
+                        <div class="doc-sub-inner">
+                            <input type="text" id="accommodation" placeholder="숙박비">
+                            <input type="text" id="dailyAllowance" placeholder="일당">
+                            <input type="text" id="transportation" placeholder="교통비">
+                            <input type="text" id="other" placeholder="기타">
+                            <input type="text" id="total" placeholder="계">
+                        </div>
+                    </div>
+                </div>
+                 <!-- "doc-sub-wrap"이 추가되게,  
+                 <div class="doc-sub-wrap">
+                    <button type="button" class="btn5 emp-remove-btn">
+                        <i class="xi-user-plus-o"></i> 출장자 삭제
+                    </button>
+                    <div class="doc-sub">
+                        <div class="doc-tit-wrap">
+                            <span class="doc-sub-tit">출장자</span>
+                        </div>
+                        <div class="doc-sub-inner">
+                            <input type="text" id="name" placeholder="성명">
+                            <input type="text" id="dept" placeholder="소속">
+                            <input type="text" id="position" placeholder="직급">
+                            <input type="text" id="empId" placeholder="사번">
+                        </div>
+                    </div>
+                    <div class="doc-sub">
+                        <span class="doc-sub-tit">출장지</span>
+                        <div class="doc-sub-inner">
+                            <input type="text" id="destination" placeholder="출장지">
+                        </div>
+                    </div>
+                    <div class="doc-sub">
+                        <div class="doc-tit-wrap">
+                            <span class="doc-sub-tit">출장일정별</span>
+                        </div>
+                        <div class="doc-sub-inner">
+                            <input type="date" id="startDate" data-placeholder="시작일자 선택">
+                            <span> ~ </span>
+                            <input type="date" id="endDate" data-placeholder="종료일자 선택">
+                            <input type="text" id="place" placeholder="방문처">
+                            <input type="text" id="task" placeholder="업무내용">
+                        </div>
+                    </div>
+                    <div class="doc-sub">
+                        <span class="doc-sub-tit">출장비</span>
+                        <div class="doc-sub-inner">
+                            <input type="text" id="accommodation" placeholder="숙박비">
+                            <input type="text" id="dailyAllowance" placeholder="일당">
+                            <input type="text" id="transportation" placeholder="교통비">
+                            <input type="text" id="other" placeholder="기타">
+                            <input type="text" id="total" placeholder="계">
+                        </div>
+                    </div>
+                </div> -->
+            </li>
+        `;
+        createDoc(HTML);
+    }
+
+    // 도서구입신청서 양식 생성
+    function createDoc3() {
+        const HTML = `
+	    	<li>
+		        <textarea id="cont" style="min-height: 100px;"
+		        placeholder="내용을 입력해주세요"></textarea>
+		    </li>
+		    
+		    <li class="create-doc" style="height: 100%;">
+		        <div class="doc-sub">
+		            <span class="doc-sub-tit">구입사유</span>
+		            <div class="doc-sub-inner">
+		                <input type="text" placeholder="구입사유">
+		            </div>
+		        </div>
+		        <div class="doc-sub">
+		            <div class="doc-tit-wrap">
+		                <span class="doc-sub-tit">도서목록 신청</span>
+		                <button type="button" class="add-btn">
+		                    <i class="xi-plus-circle"></i>
+		                </button>
+		            </div>
+		            <div class="doc-sub-inner">
+		                <ul class="bul-lst01">
+		                    <li>
+                                <input type="text" id="title" placeholder="도서명">
+                                <input type="text" id="author" placeholder="저자">
+                                <input type="text" id="publisher" placeholder="출판사">
+                                <input type="text" id="qty" placeholder="수량">
+                                <input type="text" id="unitPrice" placeholder="예상단가">
+                                <input type="text" id="totalAmount" placeholder="금액">
+		                    </li>
+		                    <!-- <li>
+                                <input type="text" id="title" placeholder="도서명">
+                                <input type="text" id="author" placeholder="저자">
+                                <input type="text" id="publisher" placeholder="출판사">
+                                <input type="text" id="qty" placeholder="수량">
+                                <input type="text" id="unitPrice" placeholder="예상단가">
+                                <input type="text" id="totalAmount" placeholder="금액">
+		                        <button type="button" class="remove-btn">
+		                            <i class="xi-minus-circle"></i>
+		                        </button>
+		                    </li> -->
+		                </ul>
+		            </div>
+		        </div>
+		        <div class="doc-sub">
+		            <div class="doc-sub-inner">
+		                <span class="tit">합계</span>
+		                <input type="text" placeholder="">
+		                <span class="tit">금액</span>
+		                <input type="text" placeholder="">
+		            </div>
+		        </div>
+		    </li>
+        `;
+        createDoc(HTML);
+    }
+
+    // 선택된 문서 데이터 가져오는 함수
+    function getSelectedDocData() {
+        _tit = $('#tit').val();   // 제목
+        _cont = $('#cont').val(); // 내용(또는 비고)
+        console.log("getSelectedDocData : ", _tit + " , " + _cont);
+		console.log("_empNo : ", _empNo);
+        switch (_docFormNo) {
+            case "1":
+            
+                // 품의서
+                let data = {
+                	"apv" : {
+	                    "docFormNo": _docFormNo, // 문서 양식 번호
+	                    "empNo": _empNo,         // 기안자 사번
+	                    "apvSj": _tit,           // 제목
+	                    "apvCn": _cont,          // 내용
+	                    "sttusCd": "Y"           // 상태코드
+                	},
+                	// ### 샘플데이터 ###
+                	"apvLine" : [
+        		        { apvEmpNo: '2020001', apvSeCd: '0', apvLineSeq: 0}, // 기안
+        				{ apvEmpNo: '2020002', apvSeCd: '1', apvLineSeq: 1}, // 검토
+        				{ apvEmpNo: '2020003', apvSeCd: '2', apvLineSeq: 2}  // 결재
+                	],
+                	"refer" : [
+        		        { empNo: '2023008'}, // 참조인1
+        				{ empNo: '2023008'}, // 참조인2
+        				{ empNo: '2023009'}  // 참조인3
+                	]
+                }
+                
+                return data;
+            case "2":
+                // 출장신청서
+                return {
+                    "docFormNo": _docFormNo,
+                    "empNo": _empNo,
+                    "apvSubject": _tit,
+                    "apvContent": _cont
+                    // 출장신청서 양식에 따른 추가 필드
+                };
+            case "3":
+                // 도서구입신청서
+                return {
+                    "docFormNo": _docFormNo,
+                    "employeeId": _empNo,
+                    "bookList": _cont
+                    // 도서구입신청서 양식에 따른 추가 필드
+                };
+            default:
+                return null;
+        }
+    }
+});

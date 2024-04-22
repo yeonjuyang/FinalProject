@@ -1,0 +1,183 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<p>테스트금지... 제 번호로 발송되기 때문에 그리고 한건당 20원 </p>
+
+
+
+<div class="wf-main-container">
+	<!-- =============== 상단타이틀영역 시작 =============== -->
+	<div class="wf-tit-wrap">
+		<h1 class="page-tit">문자 보내기</h1>
+	</div>
+	<!-- =============== 상단타이틀영역 끝 =============== -->
+	<br>
+
+	<!-- =============== 컨텐츠 영역 시작 =============== -->
+	<div class="wf-content-wrap">
+		<div class="wf-content-area">
+			<form id="smsForm" method="post"
+				action="/sendSMSAfter?${_csrf.parameterName}=${_csrf.token}">
+				<ul class="wf-insert-form3">
+					<li>
+					<div class="wf-insert-tit" id="senderPlus">
+					<label for="inputField">수신번호: </label> 
+					<input type="text" id="inputField" class="autocomplete cntcnos"
+					placeholder="수신자 이름을 입력해 주세요." /> 
+					<div id="recipientList"></div>
+					<i class="xi-plus xi-2x" id="addButton"></i>
+					<div id="hdnField" style='display:none;'></div>
+					<input type="hidden" class="autocomplete cntcnos" name="to" id="empVOList" 
+					value="" />
+					</div>
+					</li>
+					<br>
+					<li><label>내용: </label> <textarea name="text">${baseMessage}</textarea>
+					</li>
+					<br>
+					<li><button type="button" class="btn2" onclick="messageSubmit()">전송</button></li>
+				</ul>
+				<sec:csrfInput />
+			</form>
+		</div>
+	</div>
+	<!-- =============== 컨텐츠 영역 끝 =============== -->
+</div>
+<script>
+    function messageSubmit() {
+    	
+   	 var empnoList = $("#recipientList").find("[data-empno]").map(function() {
+	    	return $(this).data("empno");
+	   		}).get();
+
+			console.log("empVOList",empnoList);
+			$("#empVOList").val(empnoList);
+        document.getElementById("smsForm").submit();
+        
+        
+    }
+
+
+				  
+				    //부서명 자동완성
+				    $(() => {
+						$(document).on("focus", ".cntcnos", function (e) {
+							if (!$(this).hasClass("ui-autocomplete")) {
+								$(this).autocomplete({
+
+									source: function (request, response) {
+										console.log("auto1", this.element[0].value);
+										autoNm = this.element[0].value;
+										//console.log("auto2" ,autoNm);
+										data = {
+											"empNm": autoNm
+										}
+										console.log("empNm: ", autoNm);
+										$.ajax({
+											type: 'post',
+											data: JSON.stringify(data),
+											url: '/findCntcNo',
+											contentType: "application/json",
+											dataType: 'json',
+											success: function (data) {
+												console.log("자동완성 : ", data);
+												response(
+													$.map(data, function (item) {
+														return {
+															label: item.empNm,
+															value: item.empNm,
+															cntcNo: item.cntcNo
+														}
+													})
+												);
+											}
+										});
+									},
+									select: function (event, ui) {
+
+										console.log("cntcnos시 :", this);
+
+										$(this).val(ui.item.cntcNo);
+										$(this).data("cntcNo", ui.item.cntcNo);
+										
+
+										console.log("select시 :", $(this).val());
+										
+										const cntcNo= $("#inputField").val();
+										console.log("select시 진짜야 cntcNo :", cntcNo);
+										$("#inputField").val(cntcNo);
+										
+									},
+									focus: function (event, ui) {
+
+										return false;
+									},
+									open: function (event, ui) {
+										console.log("open this", this);
+										console.log("open ui", ui);
+										console.log("open event", event);
+
+									},
+									minLength: 1,
+									autoFocus: true,
+									classes: {
+										'ui-autocomplete': 'highlight'
+									},
+									delay: 500,
+									position: { my: 'right top', at: 'right bottom' },
+									close: function (event) {
+										//$("#ui-id-1").remove();
+										console.log(event);
+
+									}
+								});
+							}
+						});
+					});//끝
+					
+				
+					
+				
+					
+					 // 버튼 클릭 처리
+				    $("#addButton").click(function(){
+				        addRecipient();
+				    });
+					
+					
+			
+
+					
+				    function addRecipient() {
+				        var inputText = $("#inputField").val();
+				        var inputEmpNo = $("#inputField").data("cntcNo");
+				        console.log("inputEmpNo"+inputEmpNo);
+				        var recipientList = $("#recipientList");
+				        var newRecipient = `<div class='dynamic-div' data-empno='\${inputEmpNo}'>\${inputText}</div>`;
+				  
+				        
+				        // 새로운 수신자를 목록에 추가
+				        let count= recipientList.find(".dynamic-div").length+1;       
+// 				        if (count > 2 ) {
+// 				        	newRecipient= `<div class='dynamic-div' data-empno='\${inputEmpNo}' style='display:none;'>\${inputText}</div>`;
+// 				        }
+				       	recipientList.append(newRecipient);
+
+				        recipientList.find(".total-recipients").remove();
+				        recipientList.append(`<div class='total-recipients'>총 \${count}명</div>`);
+				        
+				        // 입력 필드의 값을 비움
+				        $("#inputField").val("");
+				        
+				        // 추가된 수신자를 hidden 입력란에 추가
+				        var empVOList = $("#empVOList");
+				        var currentValue = empVOList.val(); // 현재 hidden 입력란의 값 가져오기
+				        if (currentValue.length > 0) {
+				            currentValue += ","; // 값 사이에 쉼표 추가
+				        }
+				        empVOList.val(currentValue + inputText); 
+	
+				    }
+					
+				
+			</script>

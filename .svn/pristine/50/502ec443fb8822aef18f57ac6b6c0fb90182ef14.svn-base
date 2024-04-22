@@ -1,0 +1,186 @@
+$(function () {
+
+	getBkmkList();
+	
+    // 미리보기 이벤트
+    $('#preview_btn').on('click', preview);
+    
+    // 결재 라인 모달 이벤트
+    $('#approval_modal_btn').on('click', openApprovalModal);
+    
+    // 즐겨찾기 저장 이벤트
+    $('#create_bkmk_btn').on('click', createBkmk);
+    
+	// 즐겨찾기 상세 조회 이벤트
+	$(document).on('click', 'p[class="bkmkNo"]', function() {
+	
+		let bkmkNo = $(this).data('bkmkNo'); // 삭제할 번호
+		
+		$(this).parent('li').addClass('active').siblings('li').removeClass('active');
+	
+		getBkmkDetail(bkmkNo);
+	});
+	
+	// 즐겨찾기 삭제
+	$(document).on('click', '#approval-modal ul.bookmark-list .delete-btn' ,function(){
+		
+        let bkmkNo = $(this).parent('li').find('p').data('bkmkNo'); // 삭제할 번호
+        
+		deleteBkmk(bkmkNo);
+    });
+});
+
+// 미리보기
+function preview() {
+	let tit = $('#tit').val();
+	let cont = $('#cont').val();
+
+    $('#preview-modal').addClass('open');
+
+    // 기안날짜
+    let today = new Date();
+    $('#preview-modal #apv_date').text(today.toLocaleString());
+
+    // 제목, 내용
+    $('#preview-modal #apv_tit').text(tit);
+    $('#preview-modal #apv_cont').text(cont);
+}
+
+// 결재라인 모달 활성화
+function openApprovalModal() {
+	// open modal
+	$('#approval-modal').addClass('open');
+	$('html').addClass('scroll-hidden');
+	
+	$('#jstree').jstree({
+		core: {
+			data: []
+		}
+	});
+}
+
+// 즐겨찾기 저장
+function createBkmk() {
+
+	var sample = [
+		{empNo: '2020001', apvSeCd: '0'}, // 기안
+		{empNo: '2020002', apvSeCd: '1'}, // 검토
+	  	{empNo: '2020003', apvSeCd: '2'}  // 결재
+	]
+	
+	$.ajax({
+		url: '/approval/createBkmk',
+		method: 'post',
+		data: JSON.stringify({
+			bkmkNm: '즐겨찾기',
+			bkmkDetail: sample
+		}),
+		success: (result) => {
+			console.log('result : ', result);
+			alert(_msg.common.saveSuccessAlert);
+			
+			// 즐겨찾기 목록
+			getBkmkList();
+		}
+	});
+}
+
+// 즐겨찾기 목록 조회
+function getBkmkList(){
+	$.ajax({
+		url: '/approval/getBkmkList',
+		method: 'get',
+		success: (result) => {
+			console.log('result : ', result);
+			
+			result.forEach((e)=>{
+				
+				let HTML = `
+					<li>
+	                    <p data-bkmk-no=${e.bkmkNo} class="bkmkNo">${e.bkmkNm}</p>
+	                    <div class="button-wrap">
+	                    	<button type="button" class="modify-btn"></button>
+	                    	<button type="button" class="delete-btn"></button>
+	                    </div>
+	                </li>
+				`;
+				$('ul.bookmark-list').append(HTML);
+			});
+		}
+	});
+}
+
+// 즐겨찾기 상세 조회
+function getBkmkDetail(bkmkNo){
+
+	//let bkmkNo = $(this).data('bkmkNo');
+	console.log('this : ',bkmkNo);
+	
+	$('#approval-modal ul.approval-add-user').empty();
+	
+	$.ajax({
+		url: '/approval/getBkmkDetail?bkmkNo=' + bkmkNo,
+		method: 'get',
+		success: (result) => {
+			console.log('result : ', result);
+			
+			result.forEach(function(e){
+				let apvSeCdText;
+				switch(e.apvSeCd){
+					case "0":
+						apvSeCdText = "기안";
+						break;
+					case "1":
+						apvSeCdText = "검토";
+						break;
+					case "2":
+						apvSeCdText = "결재";
+						break;
+					default:
+						apvSeCdText = "";
+				}
+				
+				let HTML = `
+					<li>
+					    <div class="user">
+					        <span class="dept">${e.deptNm}</span>
+					        <span>${e.empNm}</span>
+					        <span>${e.cmmnCdNm}</span>
+					    </div>
+					    <div class="wf-select-group">
+					        <select name="" id="">
+					        	<option value="${e.apvSeCd}" selected>${apvSeCdText}</option>
+					        </select>
+					    </div>
+					</li>
+				`;
+				// Q.구분코드에 맞게 selected가 되게만 하고싶음 
+				$('#approval-modal ul.approval-add-user').append(HTML);
+			});
+		}
+	});
+}
+
+// 즐겨찾기 삭제
+function deleteBkmk(bkmkNo){
+	console.log("넘어옴? : ", bkmkNo);
+	$.ajax({
+		url:'/approval/deleteBkmk',
+		method: 'delete',
+		data: JSON.stringify(bkmkNo),
+		dataType: 'text',
+		success: (result) => {
+			console.log("result : ",result);
+			
+			if(result>0){
+				alert(_msg.common.deleteSuccessAlert);
+				
+				$(`p[data-bkmk-no="${bkmkNo}"]`).parent('li').remove();
+				
+			} else {
+				alert(_msg.common.deleteFailAlert);
+			}
+			
+		}
+	});
+}

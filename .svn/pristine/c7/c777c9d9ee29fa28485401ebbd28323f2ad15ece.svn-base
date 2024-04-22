@@ -1,0 +1,181 @@
+
+let _finalRefer; // 최종
+
+$(function () {
+
+	// 참조인선택 클릭시 참조인 선택 모달 활성화
+	$('#refer_modal_btn').on('click', openReferModal);
+
+	// 확인버튼 클릭시 문서화면에 띄우기
+	$('#apvline2_save_btn').on('click', () => {
+
+		// 모달 닫기
+		$('#refer_modal').removeClass('open');
+		$('html').removeClass('scroll-hidden');
+
+		// 참조인 문서화면에 띄우기 
+		showRefer();
+	});
+
+	// 참조인 모달 활성화
+	function openReferModal() {
+		// 모달 활성화
+		$('#refer_modal').addClass('open');
+		$('html').addClass('scroll-hidden');
+
+		// 부서 조직도
+		getEmpList();
+	}
+
+	// 직원 목록 조회
+	function getEmpList() {
+		$.ajax({
+			url: `${_ctx}/approval/getEmpList`,
+			type: 'get',
+			success: (result) => {
+				if (Array.isArray(result)) {
+
+					_emp = result.reduce((acc, e) => {
+
+						let state = {
+							opened: true,
+							disabled: false,
+							selected: false
+						}
+
+						// 부서
+						if (!acc.tmpDeptNoList.includes(e.DEPT_NO)) {
+							acc.arr.push({
+								id: e.DEPT_NO,
+								text: e.DEPT_NM,
+								parent: e.UPPER_DEPT || '#',
+								state: state,
+								type: 'dept',
+							});
+							acc.tmpDeptNoList.push(e.DEPT_NO)
+						}
+
+
+						// 직원 
+						acc.arr.push(
+							Object.assign({
+								id: e.EMP_NO,
+								text: `${e.EMP_NM} ${e.POSITION_NM}`,
+								parent: e.DEPT_NO,
+								state: state,
+								type: 'emp',
+							}, e)
+						);
+
+						return acc;
+					}, {
+						arr: [],
+						tmpDeptNoList: [],
+					}).arr;
+
+					$('#refer_modal .container').jstree({
+						core: {
+							data: _emp,
+							multiple: true,
+							animation: 100
+						},
+						checkbox: {
+							keep_selected_style: false
+						},
+						//types: {
+						//	emp: {
+						//		icon: 'ki-outline ki-older text-warning'
+						//	},
+						//	dept: {
+						//		icon: 'ki-outline ki-file  text-warning'
+						//	},
+						//},
+						plugins: [
+							'types',
+							'wholerow',
+							'checkbox'
+						],
+					})
+						.on('changed.jstree', selectEmp);
+					//.on('select_node.jstree', selectEmp);
+
+				}
+			}
+		});
+
+	}
+
+	// 직원 선택
+	function selectEmp(event, e) {
+		let selectedEmp = _emp.filter((emp) => e.selected.includes(emp.EMP_NO));
+
+		console.log("selectedEmp -> ", selectedEmp);
+
+		// 마지막 배열만 담기위해 이전 배열 초기화
+		_selectedEmp;
+
+		// 선택한 직원 배열에 추가
+		_selectedEmp = selectedEmp.map((emp) => {
+			console.log("map 체크 : ", emp);
+			return {
+				empNo: emp.EMP_NO,
+				empNm: emp.EMP_NM,
+				deptNm: emp.DEPT_NM,
+				empInfo: emp.text,
+				cmmnCdNm: emp.POSITION_NM,
+				rspnsblCtgryNm: emp.RSPNSBL_CTGRY_NM
+			};
+		});
+
+		_finalRefer = _selectedEmp;
+
+		let apvLine = $('#refer_modal .approval-add-user.refer');
+		apvLine.empty(); // 이전 내용 비우기
+
+		_selectedEmp.forEach((e, index) => {
+			let HTML = `
+	            <li>
+	                <div class="user">
+	                    <span class="dept">${e.deptNm}</span>
+	                    <span>${e.empInfo}</span>
+	                </div>
+	            </li>
+	        `;
+			apvLine.append(HTML);
+		});
+	}
+
+
+	// 최종적으로 선택한 직원들 문서화면에 띄우기
+	function showRefer() {
+
+		// no-data 화면 지우기
+		$('#apv_line2').removeClass('no-data');
+
+		let referList = _selectedEmp.map((e) => {
+			return {
+				deptNm: e.deptNm,
+				empNm: e.empNm,
+				cmmnCdNm: e.cmmnCdNm
+			}
+		});
+
+		// 기존 내용 지우기
+		$('#apv_line2').empty();
+
+		referList.forEach((e) => {
+			let HTML = `
+				<li>
+		            <div class="user">
+		            	<span class="dept">${e.deptNm}</span>
+		                <span>${e.empNm}</span>
+		                <span>${e.cmmnCdNm}</span>
+		            </div>
+		        </li>
+			`;
+
+			$('#apv_line2').append(HTML);
+		});
+	}
+});
+

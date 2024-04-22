@@ -1,0 +1,462 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!-- chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- CSS -->
+<link href="${pageContext.request.contextPath}/resources/css/vacation/style.css" rel="stylesheet" />
+<script>
+    let empNo = '<%=(String)session.getAttribute("empNo")%>';
+
+    // 당해년도
+    let today = new Date();
+    let year = today.getFullYear();
+    let currentYear = year.toString();
+
+    let detailYear = currentYear;
+    let pastYear = currentYear;
+
+    let myChart;
+
+    let recordCnt; // 사용한 휴가 개수
+    let remainCnt; // 잔여 휴가 개수
+    let totalCnt; // 총 휴가 개수
+    let dissipateCnt; // 소멸 휴가 개수
+</script>
+
+<script>
+    $(function () {
+        // 연도 칸 채우기
+        $("#recordYearBox").text(currentYear);
+
+        // 내 연차들 불러오기
+        getVacationList(empNo, currentYear);
+
+        // 휴가 상세 현황 불러오기
+        getVacationDetail(empNo, currentYear);
+
+        getMyVacationRecordList(empNo, currentYear);
+    });
+
+    // 내 연차들 불러오기
+    function getVacationList(empNo, giveYear) {
+        data = {
+            empNo: empNo,
+            giveYear: giveYear,
+        };
+        $.ajax({
+            url: "/api/vacations",
+            type: "GET",
+            data: data,
+            dataType: "json",
+            success: function (vacations) {
+                console.log("vacations : ", vacations);
+                let vcatnStr = "";
+                vacations.forEach(function (vacation, index) {
+                    let vcatnCtgr = vacation.vcatnCtgryNo;
+                    if (vcatnCtgr == "1") {
+                        vcatnStr += `<div class="wf-content-box createBtn" data-id="\${vacation.vcatnCtgryNo}">
+                                        <p class="box-heading1">\${vacation.vcatnCtgrySj}</p>
+                                        <p>\${vacation.remainCnt}일</p>
+                                    </div>`;
+                    } else if (vcatnCtgr == "2" || vcatnCtgr == "3") {
+                        if (!vacation.remainCnt) {
+                            vcatnStr += `<div class="wf-content-box disable createBtn" data-id="\${vacation.vcatnCtgryNo}">
+                                            <p class="box-heading1">\${vacation.vcatnCtgrySj}</p>
+                                            <p>0일</p>
+                                        </div>`;
+                        } else {
+                            vcatnStr += `<div class="wf-content-box createBtn" data-id="\${vacation.vcatnCtgryNo}">
+                                            <p class="box-heading1">\${vacation.vcatnCtgrySj}</p>
+                                            <p>\${vacation.vcatnCtgryCn}</p>
+                                        </div>`;
+                        }
+                    } else {
+                        vcatnStr += `   <div class="wf-content-box createBtn" data-id="\${vacation.vcatnCtgryNo}">
+                                            <p class="box-heading1">\${vacation.vcatnCtgrySj}</p>
+                                            <p>\${vacation.vcatnCtgryCn}</p>
+                                        </div>`;
+                    }
+                });
+                $("#vacationBox").append(vcatnStr);
+
+                $(".createBtn").on("click", function (e) {
+                    console.log(e);
+                    let vcatnCtgryNo = e.currentTarget.dataset.id;
+                    console.log(vcatnCtgryNo);
+                    getVacationInfo(empNo, vcatnCtgryNo);
+                    getApvLine(empNo, vcatnCtgryNo);
+
+                    $("#vacationModal").addClass("open");
+                });
+            },
+        });
+    }
+
+    // 연차 정보 가져오기
+    function getVacationInfo(empNo, vcatnCtgryNo) {
+        let data = {
+            empNo: empNo,
+            vcatnCtgryNo: vcatnCtgryNo,
+            giveYear: currentYear,
+        };
+        $.ajax({
+            url: "/api/vacation",
+            type: "GET",
+            data: data,
+            dataType: "json",
+            success: function (vcatnInfo) {
+                console.log("vcatnInfo : ", vcatnInfo);
+                let vcatnCtgryNo = vcatnInfo.vcatnCtgryNo;
+                let apvStr = "";
+
+                if (vcatnCtgryNo == "1" || vcatnCtgryNo == "2" || vcatnCtgryNo == "3" || vcatnCtgryNo == "8") {
+                    apvStr = "1단계 승인";
+                } else {
+                    apvStr = "2단계 승인";
+                }
+                console.log("apvStr : ", apvStr);
+
+                // 초기화
+                $("#modalTit").text("");
+                $("#remainDispBox").text("");
+                $("#apvLevelBox").text("");
+
+                // 값채우기
+                $("#modalTit").text(vcatnInfo.vcatnCtgrySj);
+                $("#remainDispBox").text(vcatnInfo.remainCnt + "일 사용 가능");
+                $("#apvLevelBox").text(apvStr);
+            },
+        });
+    }
+
+    // 결재 라인 불러오기
+    function getApvLine(empNo, vcatnCtgryNo) {
+        let apvLevel = "";
+        let apvLineStr = "";
+        if (vcatnCtgryNo == 1 || vcatnCtgryNo == 2 || vcatnCtgryNo == 3 || vcatnCtgryNo == 8) {
+            apvLevel = 1;
+        } else {
+            apvLevel = 2;
+        }
+
+        $.ajax({
+            url: `/api/vacation/apvLine/\${empNo}/\${apvLevel}`,
+            type: "GET",
+            dataType: "json",
+            success: function (apvLines) {
+                console.log("apvLine : ", apvLines);
+                apvLines.forEach(function (apvLine, index) {
+                    apvLineStr += index + 1 + " " + apvLine.empNm + " " + apvLine.rspnsblCtgryNm + " ";
+                });
+                console.log(apvLineStr);
+                $("#apvLine").val(apvLineStr);
+            },
+        });
+    }
+
+    // 휴가 상세 현황 불러오기
+    function getVacationDetail(empNo, yearVal) {
+        $("#detailYearBox").text(yearVal);
+
+        // 사용 휴가 개수
+        getVacationRecordsCount(empNo, yearVal, function (count) {
+            console.log("recordCnt: ", count);
+            console.log(typeof count);
+            recordCnt = count;
+        });
+
+        // 남은 휴가 개수
+        getRemainVacationCount(empNo, yearVal, function (count) {
+            console.log("remainCnt: ", count);
+            console.log(typeof count);
+            remainCnt = count;
+        });
+
+        // 연도가 당해면 소멸 휴가 0
+        if (yearVal == currentYear) {
+            dissipateCnt = 0;
+        } else {
+            dissipateCnt = remainCnt;
+        }
+
+        totalCnt = recordCnt + remainCnt;
+
+        $("#totalVcatn").text(totalCnt);
+        $("#useVcatn").text(recordCnt);
+        $("#remainVcatn").text(remainCnt);
+        $("#dissipateVcatn").text(dissipateCnt);
+
+        detailYear = yearVal;
+
+        if (myChart) {
+            updateChart(recordCnt, totalCnt);
+        } else {
+            drawChart(totalCnt, recordCnt);
+        }
+    }
+
+    // 사용 휴가 개수
+    function getVacationRecordsCount(empNo, yearVal, callback) {
+        let data = {
+            empNo: empNo,
+            giveYear: yearVal,
+        };
+
+        $.ajax({
+            url: "/api/vacations/count",
+            type: "GET",
+            data: data,
+            async: false,
+
+            success: function (count) {
+                console.log("VacationRecordsCount : ", count);
+
+                callback(count);
+            },
+        });
+    }
+    // 남은 휴가 개수
+    function getRemainVacationCount(empNo, yearVal, callback) {
+        let data = {
+            empNo: empNo,
+            vcatnCtgryNo: "1",
+            giveYear: yearVal,
+        };
+
+        $.ajax({
+            url: "/api/vacation",
+            type: "GET",
+            data: data,
+            async: false,
+
+            success: function (vcatnInfo) {
+                let count = vcatnInfo.remainCnt;
+                console.log("remainCnt : ", count);
+
+                callback(count);
+            },
+        });
+    }
+
+    // 차트 그리기
+    function drawChart() {
+        const ctx = document.querySelector("#vacationChart").getContext("2d");
+
+        const DATA_COUNT = 7;
+        const NUMBER_CFG = { count: DATA_COUNT, min: 0, max: 100 };
+
+        const data = {
+            labels: "v",
+            datasets: [
+                {
+                    label: "",
+                    data: [recordCnt],
+                },
+                {
+                    label: "",
+                    data: [totalCnt],
+                },
+            ],
+        };
+
+        myChart = new Chart(ctx, {
+            type: "bar",
+            data: data,
+            options: {
+                indexAxis: "y",
+                elements: {
+                    bar: {
+                        borderWidth: 2,
+                        borderRadius: 10,
+                    },
+                },
+                responsive: false,
+                plugins: {
+                    legend: {
+                        display: false,
+                    },
+                },
+                responsive: true,
+                scales: {
+                    y: {
+                        stacked: true,
+                    },
+                },
+            },
+        });
+    }
+
+    // 차트 업데이트
+    function updateChart(recordCnt, totalCnt) {
+        myChart.data.datasets[0].data = [recordCnt];
+        myChart.data.datasets[1].data = [totalCnt];
+
+        myChart.update();
+    }
+
+    // 지난 휴가 목록 불러오기
+    function getMyVacationRecordList(empNo, yearVal) {
+        $("#recordYearBox").text(yearVal);
+
+        let data = {
+            empNo: empNo,
+            giveYear: yearVal,
+        };
+        $.ajax({
+            url: "/api/vacations/record",
+            type: "GET",
+            data: data,
+            dataType: "json",
+            success: function (records) {
+                console.log("records : ", records);
+            },
+        });
+    }
+</script>
+
+<!--------------------------------- body 시작 --------------------------------->
+<div class="wf-tit-wrap">
+    <h1 class="page-tit">휴가</h1>
+</div>
+<div class="wf-content-wrap">
+    <div class="wf-content-area">
+        <p class="heading1">휴가 등록</p>
+        <div class="wf-flex-box" id="vacationBox"></div>
+    </div>
+    <div class="wf-content-area">
+        <p class="heading1">휴가 상세 현황</p>
+        <nav class="wf-pagination-wrap">
+            <ul class="pagination">
+                <li class="page-item">
+                    <a class="page-link prev" href="javascript:getVacationDetail(empNo, detailYear-1)">
+                        <i class="xi-angle-left"></i>
+                    </a>
+                </li>
+                <li id="detailYearBox"></li>
+
+                <li class="page-item">
+                    <a class="page-link next" href="javascript:getVacationDetail(empNo, detailYear+1)">
+                        <i class="xi-angle-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <div>
+            <canvas id="vacationChart" style="height: 100px; width: 100%"></canvas>
+        </div>
+        <div class="wf-flex-box">
+            <ul class="wf-list-style">
+                <li class="style1">자동 지급<br /><span id="totalVcatn"></span></li>
+            </ul>
+
+            <ul class="wf-list-style">
+                <li class="style4">사용<br /><span id="useVcatn"></span></li>
+            </ul>
+            <ul class="wf-list-style">
+                <li class="style5">조정<br /><span id="remainVcatn"></span></li>
+            </ul>
+            <ul class="wf-list-style">
+                <li class="style2">소멸<br /><span id="dissipateVcatn"></span></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="wf-content-area">
+        <p class="heading1">지난 휴가</p>
+        <nav class="wf-pagination-wrap">
+            <ul class="pagination">
+                <li class="page-item">
+                    <a class="page-link prev" href="javascript:getVacationDetail(empNo, pastYear-1)">
+                        <i class="xi-angle-left"></i>
+                    </a>
+                </li>
+                <li id="recordYearBox"></li>
+
+                <li class="page-item">
+                    <a class="page-link next" href="javascript:getVacationDetail(empNo, pastYear+1)">
+                        <i class="xi-angle-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <table class="wf-table">
+            <colgroup>
+                <col style="width: 15%" />
+                <col style="width: 10%" />
+                <col style="width: 2%" />
+                <col style="width: 60%" />
+                <col style="width: 13%" />
+            </colgroup>
+
+            <tbody>
+                <tr>
+                    <td>
+                        <span class="wf-badge1" id="apvSttsBox">승인완료</span>
+                    </td>
+                    <td>
+                        <p>연차</p>
+                    </td>
+                    <td>
+                        <p>|</p>
+                    </td>
+                    <td>
+                        <p>2024-03-11</p>
+                    </td>
+                    <td>
+                        <span class="wf-badge3" id="vcatnPeriodBox">1일</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<!--------------------------------- body 끝 --------------------------------->
+
+<!--------------------------------- 예약 등록/수정 모달 시작 --------------------------------->
+<div class="modal" id="vacationModal">
+    <div class="modal-cont">
+        <h1 class="modal-tit" id="modalTit"></h1>
+        <div class="modal-content-area">
+            <form id="vacationForm">
+                <ul class="wf-insert-form2 vertical">
+                    <li>
+                        <span class="wf-badge1" id="remainDispBox"></span>
+                    </li>
+                    <li>
+                        <div class="wf-flex-box between">
+                            <label for="rsvEmpName">승인</label>
+                            <span class="wf-badge2" id="apvLevelBox"></span>
+                        </div>
+                        <div>
+                            <input type="text" name="apvLine" id="apvLine" />
+                        </div>
+                    </li>
+                    <li>
+                        <label for="cc">일시<i class="i">*</i></label>
+                        <div class="wf-flex-box">
+                            <input type="date" name="rsvSDate" id="rsvSDate" min="" max="" required />
+                            <span class="hyphen">-</span>
+                            <input type="date" name="rsvEDate" id="rsvEDate" min="" max="" required />
+                        </div>
+                    </li>
+                    <li>
+                        <label for="rsvCont">휴가 신청 메시지<i class="i">*</i></label>
+                        <div>
+                            <textarea name="resveCn" id="rsvCont" placeholder="휴가 신청 메시지 입력" required></textarea>
+                        </div>
+                    </li>
+                    <li id="rturnSttsBox">
+                        <label for="rturnStts">휴가 상세 편집<i class="i">*</i></label>
+                        <div name="rturnCd" id="rturnStts"></div>
+                    </li>
+                </ul>
+            </form>
+        </div>
+
+        <div class="modal-btn-wrap" id="createBtnGroup">
+            <button class="btn6">취소</button>
+            <button type="submit" form="carRsvForm" class="btn2" id="createConfBtn">승인요청</button>
+        </div>
+        <button class="close-btn" id="rsvModalCloseBtn"></button>
+    </div>
+</div>
+<!--------------------------------- 예약 등록/수정 모달 끝 --------------------------------->

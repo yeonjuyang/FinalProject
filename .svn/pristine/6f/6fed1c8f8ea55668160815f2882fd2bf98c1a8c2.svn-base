@@ -1,0 +1,26 @@
+package com.team1.workforest.chat.service.impl;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.team1.workforest.chat.mapper.ChattingMapper;
+import com.team1.workforest.chat.service.ChattingService;
+import com.team1.workforest.chat.vo.ChatRoomEmployeeVO;
+
+@Service
+public class ChattingServiceImpl implements ChattingService{
+
+	@Autowired
+	ChattingMapper chattingMapper;
+
+	@Override
+	public List<ChatRoomEmployeeVO> getChatRoom(Map<String, String> map) {
+		return this.chattingMapper.getChatRoom(map);
+	}
+	
+	
+	
+}

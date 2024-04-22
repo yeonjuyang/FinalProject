@@ -1,0 +1,29 @@
+package com.team1.workforest.admin.reservation.service.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.team1.workforest.admin.reservation.mapper.AdminResourcesMapper;
+import com.team1.workforest.admin.reservation.service.AdminResourcesService;
+import com.team1.workforest.reservation.car.vo.CarVO;
+import com.team1.workforest.reservation.meetingroom.vo.MtrVO;
+
+@Service
+public class AdminResourcesServiceImpl implements AdminResourcesService{
+	
+	@Autowired
+	AdminResourcesMapper adminResourcesMapper;
+	
+	@Override
+	public List<MtrVO> getMtrList() {
+		return adminResourcesMapper.getMtrList();
+	}
+
+	@Override
+	public List<CarVO> getCarList() {
+		return adminResourcesMapper.getCarList();
+	}
+
+}

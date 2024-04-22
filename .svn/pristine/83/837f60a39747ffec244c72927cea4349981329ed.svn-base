@@ -1,0 +1,94 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<div class="wf-tit-wrap">
+	<h1 class="page-tit">근태 통계</h1>
+</div>
+<div class="wf-flex-box">
+	<div class="wf-search-area" style="height: 40px;">
+		<div style="height: 40px; overflow: visible;">
+	    	<input type="text" id="empSearch" placeholder="사원 검색"><span id="searchEmpNo" style="display: none"></span>
+	    	<div class="wf-content-box" id="empSearchRes" style="display: none;"></div>
+	    </div>
+	    <button type="button" class="btn4 searchBtn">
+	        <i class="xi-search"></i>
+	    </button>
+	    <div class="select-box" style="height: 30px; width: 100px;">
+	        <select name="searchYear" id="searchYear" style="height: 30px; width: 100px;">
+	            <option class="searchYear" value="2024">2024</option>
+	            <option class="searchYear" value="2023">2023</option>
+	            <option class="searchYear" value="2022">2022</option>
+	        </select>
+	    </div>
+	    <div style="height: 20px;">
+			<p class="heading2">년</p>
+	    </div>
+	    <div class="select-box" style="height: 30px; width: 100px;">
+	        <select name="searchMonth" id="searchMonth" style="height: 30px; width: 100px;">
+	            <option class="searchMonth" value="00">--</option>
+	            <option class="searchMonth" value="01">01</option>
+	            <option class="searchMonth" value="02">02</option>
+	            <option class="searchMonth" value="03">03</option>
+	        </select>
+	    </div>
+		<div style="height: 20px;">
+			<p class="heading2">월</p>
+	    </div>
+	</div>
+</div>
+<div class="wf-content-area wf-flex-box" style="margin-top: 20px; height: 55px;">
+	<div class="wf-flex-box" style="width: 15%;">
+		<p class="heading1">평균출근시간:</p>
+		<p class="heading1 avgAttend"></p>
+	</div>
+	<div class="wf-flex-box" style="width: 15%;">
+		<p class="heading1">평균 퇴근시간:</p>
+		<p class="heading1 avgLeave"></p>
+	</div>
+	<div class="wf-flex-box" style="width: 15%;">
+		<p class="heading1">평균 근무시간:</p>
+		<p class="heading1 avgWork"></p>
+	</div>
+	<div class="wf-flex-box" style="width: 10%;">
+		<p class="heading1">연차:</p>
+		<p class="heading1 rest"></p>
+	</div>
+	<div class="wf-flex-box" style="width: 10%;">
+		<p class="heading1">정상근무:</p>
+		<p class="heading1 work"></p>
+	</div>
+	<div class="wf-flex-box" style="width: 10%;">
+		<p class="heading1">지각:</p>
+		<p class="heading1 late"></p>
+	</div>
+	<div class="wf-flex-box" style="width: 10%;">
+		<p class="heading1">외출:</p>
+		<p class="heading1 out1"></p>
+	</div>
+	<div class="wf-flex-box" style="width: 10%;">
+		<p class="heading1">조퇴:</p>
+		<p class="heading1 out2"></p>
+	</div>
+	<div class="wf-flex-box" style="width: 10%;">
+		<p class="heading1">결근:</p>
+		<p class="heading1 out3"></p>
+	</div>
+</div>
+<div class="wf-flex-box" style="width: 100%; height: 60%; margin-top: 20px;">
+	<div class="wf-content-area" style="width:60%; ">
+		<div class="wf-flex-box">
+			<p class="heading1" style="width:22%;">일자</p>
+			<p class="heading1" style="width:22%;">출근 일시</p>
+			<p class="heading1" style="width:22%;">퇴근 일시</p>
+			<p class="heading1" style="width:22%;">총 근무시간</p>
+			<p class="heading1" style="width:12%;">연차 사용</p>
+		</div>
+		<div id="attendList" style="overflow: auto; height: 95%;">
+		</div>
+	</div>
+	<div class="wf-content-area" style="width:40%; ">
+		<div style="width: 100%; height: 100%;">
+			<canvas id="statisticsChart"></canvas>
+		</div>
+	</div>
+</div>
+    

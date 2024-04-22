@@ -1,0 +1,70 @@
+package com.team1.workforest.util;
+
+import java.io.IOException;
+import java.sql.*;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+public class ExcelController {
+    
+    @GetMapping("/excel/empdownload")
+    public void excelDownload(HttpServletResponse response) throws IOException, SQLException {
+        String jdbcURL = "jdbc:oracle:thin:@112.220.114.130:1521:xe";
+        String username = "team1_202309F";
+        String password = "java";
+
+        //출력 원하는 데이터의 쿼리문
+        String query = "SELECT A.EMP_NO AS 사원번호, A.EMP_NM AS 사원명,  A.LXTN AS 내선번호, B.DEPT_NM AS 부서명, A.EMAIL AS 이메일주소," + 
+                " C1.CMMN_CD_NM AS 직급, D.RSPNSBL_CTGRY_NM AS 직책, C2.CMMN_CD_NM AS 근무지" + 
+                " FROM EMPLOYEE A" + 
+                " JOIN DEPARTMENT B ON A.DEPT_NO = B.DEPT_NO" + 
+                " JOIN COMMON_CODE C1 ON A.POSITION_CD = C1.CMMN_CD AND C1.CMMN_CD_GROUP = 'EMP002' " + 
+                " JOIN COMMON_CODE C2 ON A.WORK_LOC_CD = C2.CMMN_CD AND C2.CMMN_CD_GROUP = 'EMP005' " + 
+                " JOIN RESPONSIBILITY_CATEGORY D ON A.RSPNSBL_CD = D.RSPNSBL_CD " + 
+                " WHERE C1.CMMN_CD_GROUP = 'EMP002' " + 
+                " AND C2.CMMN_CD_GROUP = 'EMP005' ";
+
+        Workbook wb = new XSSFWorkbook();
+        Sheet sheet = wb.createSheet("직원 목록");
+        Row row = null;
+        Cell cell = null;
+        int rowNum = 0;
+
+        // 데이터베이스 연결
+        try (Connection connection = DriverManager.getConnection(jdbcURL, username, password);
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+
+            // Header
+            row = sheet.createRow(rowNum++);
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            int columnCount = metaData.getColumnCount();
+            for (int i = 1; i <= columnCount; i++) {
+                cell = row.createCell(i - 1);
+                cell.setCellValue(metaData.getColumnName(i));
+            }
+
+            // Body
+            while (resultSet.next()) {
+                row = sheet.createRow(rowNum++);
+                for (int i = 1; i <= columnCount; i++) {
+                    cell = row.createCell(i - 1);
+                    cell.setCellValue(resultSet.getString(i));
+                }
+            }
+        }
+
+        // 컨텐츠 타입과 파일명 지정
+        response.setContentType("ms-vnd/excel");
+        response.setHeader("Content-Disposition", "attachment;filename=emp_addressBook.xlsx");
+
+        // Excel 파일 출력
+        wb.write(response.getOutputStream());
+        wb.close();
+        
+    }
+}

@@ -1,0 +1,493 @@
+package com.team1.workforest.approval.service.impl;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team1.workforest.approval.mapper.ApprovalMapper;
+import com.team1.workforest.approval.service.ApprovalService;
+import com.team1.workforest.approval.vo.ApvBkmkVO;
+import com.team1.workforest.approval.vo.ApvLineBkmkVO;
+import com.team1.workforest.approval.vo.ApvLineVO;
+import com.team1.workforest.approval.vo.ApvReferVO;
+import com.team1.workforest.approval.vo.ApvVO;
+import com.team1.workforest.vo.AttachedFileVO;
+import com.team1.workforest.vo.CommonCodeVO;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+public class ApprovalServiceImpl implements ApprovalService {
+	
+	@Autowired
+	String uploadPath;
+	
+	@Autowired
+	private ApprovalMapper approvalMapper;
+	
+	@Autowired
+	private HttpSession session;
+	
+	// 날짜 포맷
+    Date today = new Date();
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+	
+    // 접속자 ID
+    private String getSessionEmpNo() {
+        return (String) session.getAttribute("empNo");
+    }
+    
+	// 직원 목록 조회
+	@Override
+	public List<Map<String, Object>> getEmpList() {
+		return approvalMapper.getEmpList();
+	}
+	
+	// 결재(승인)
+	@Override
+	public int approval(int apvNo) {
+	    String empNo = getSessionEmpNo();
+	    
+	    if (empNo != null) {
+	    	
+	    	// 해당 결재에 대한 결재라인 조회 
+	        List<ApvLineVO> apvLineVOList = approvalMapper.getApvLine(apvNo);
+
+	        // 넘길 파라미터
+	        Map<String, Object> apvMap = new HashMap<String, Object>();
+	        apvMap.put("apvNo", apvNo);
+
+	        for (ApvLineVO apvLine : apvLineVOList) {
+	        	
+	            if (apvLine != null && apvLine.getApvEmpNo() != null) {
+	            	
+	            	// 세션 사번과 결재자 사번 같은지 체크 
+	                if (empNo.equals(apvLine.getApvEmpNo())) {
+
+	                	// 현재 결재자가 승인 전 일 때
+	                    if (("2".equals(apvLine.getApvSeCd()) || "3".equals(apvLine.getApvSeCd()))
+	                            && "0".equals(apvLine.getApvSttusCd())) {
+	                    	
+	                        apvMap.put("apvLineSeq", apvLine.getApvLineSeq());
+
+	                        return approvalMapper.approval(apvMap);
+	                    } else {
+	                        return 0; // 승인 실패
+	                    }
+	                }
+	            }
+	        }
+	    }
+	    
+    	// 결재자가 아닌 경우 또는 해당 결재의 결재라인이 없는 경우
+	    return 0; 
+	}
+
+	// 기안 상신
+	@Override
+	public int create(MultipartFile[] files, 
+			Map<String, Object> apvMap, 
+			List<Map<String, Object>> apvEtc) {
+		
+		ObjectMapper mapper = new ObjectMapper();
+		
+		// JSON을 VO로 변환
+		ApvVO apvVO = mapper.convertValue(apvMap.get("apv"), ApvVO.class);
+		List<ApvLineVO> apvLineList = mapper.convertValue(apvMap.get("apvLine"), new TypeReference<List<ApvLineVO>>() {});
+		List<ApvReferVO> apvReferList = mapper.convertValue(apvMap.get("refer"), new TypeReference<List<ApvReferVO>>() {});
+		
+		apvEtc = mapper.convertValue(apvEtc, new TypeReference<List<Map<String, Object>>>() {});
+		
+		log.info("apvEtc체크 : {} ",apvEtc);
+		
+		apvVO.setApvEtc(String.valueOf(apvEtc));
+		
+		log.info("apvVo (apvEtc체크) -> {} ", apvVO);
+		log.info("apvLineList -> {} ", apvLineList);
+		log.info("apvReferList -> {} ", apvReferList);
+		
+		// =====================================================
+		
+		// 파일 처리
+		File uploadPath2 = new File(uploadPath, getFolder());
+		
+		if(!uploadPath2.exists()) {
+			uploadPath2.mkdirs();
+		}
+		
+		int result = 0;
+		long size = 0;
+		int seq = 1;
+		String mime = "";
+		String uploadFileName = "";
+
+		apvVO.setMultipartFile(files);
+		
+		MultipartFile[] uploadFile = apvVO.getMultipartFile();
+		
+		// 파일 첨부가 없는 경우
+		if(uploadFile != null && uploadFile.length > 0) {
+			String FileCheck = uploadFile[0].getOriginalFilename();
+			
+			if(!FileCheck.equals("") && !FileCheck.equals(null)) {
+				
+				for(MultipartFile multipartFile : uploadFile) {
+					String orginalFileName = multipartFile.getOriginalFilename();
+					log.info("원본 파일명 : " + multipartFile.getOriginalFilename());
+					log.info("파일 크기    : " + multipartFile.getSize());
+					log.info("MIME타입  : " + multipartFile.getContentType());
+					
+					uploadFileName = multipartFile.getOriginalFilename();
+					size = multipartFile.getSize();
+					mime = multipartFile.getContentType();
+					
+					uploadFileName = UUID.randomUUID().toString() + "_" + uploadFileName;
+					
+					File saveFile = new File(uploadPath2 + "\\", uploadFileName);
+					
+					try {
+						multipartFile.transferTo(saveFile);
+						
+						AttachedFileVO attachedFileVO = new AttachedFileVO();
+						attachedFileVO.setAtchmnflOriginNm(orginalFileName);
+						attachedFileVO.setAtchmnflNm(uploadFileName);
+						attachedFileVO.setAtchmnflSize(size);
+						attachedFileVO.setAtchmnflSeq(String.valueOf(seq++));
+						attachedFileVO.setAtchmnflUrl("/" + getFolder().replace("\\", "/") + "/" 
+								+ uploadFileName);
+						
+						log.info("attachedFileVO : " + attachedFileVO);
+						
+						// 파일 첨부 insert
+//			        String atchmnflNo = approvalMapper.getNextAtchmnflNo();
+//			        attachedFileVO.setAtchmnflNo(atchmnflNo);
+						
+						result = approvalMapper.createAttachedFile(attachedFileVO);
+						
+						apvVO.setAtchmnflNo(attachedFileVO.getAtchmnflNo());
+						
+					} catch(IllegalStateException | IOException e) {
+						log.error(e.getMessage());
+					}
+				}
+			}
+		} else {
+			log.info("첨부 파일이 없습니다.");
+		}
+		
+        // apvLineSeq 순서 후처리
+        for (ApvLineVO apvLine : apvLineList) {
+            switch (apvLine.getApvSeCd()) {
+                case "1":
+                    apvLine.setApvLineSeq(1);
+                    break;
+                case "2":
+                    apvLine.setApvLineSeq(2);
+                    break;
+                case "3":
+                    apvLine.setApvLineSeq(3);
+                    break;
+                default:
+                    break;
+            }
+        }
+        
+        // 세션 id
+        String empNo = getSessionEmpNo();
+        
+        if(empNo != null) {
+        	for (ApvLineVO apvLine : apvLineList) {
+        		
+        		// 기안날짜
+        		apvLine.setApvDate(dateFormat.format(today));
+        		
+        		if ("1".equals(apvLine.getApvSeCd())) {
+        			
+        			// 세션 id
+        			apvLine.setApvEmpNo(empNo);
+        			// 기안자 상태 변경
+        			apvLine.setApvSttusCd("Y");
+        		}
+        		// 대기자 상태 변경
+        		else {
+        			apvLine.setApvSttusCd("0");
+        		}
+        	}
+        	
+        	// 기안 상신 등록
+        	int cnt = approvalMapper.create(apvVO);
+        	log.debug("create -> apvVo(후) : {}", apvVO);
+        	
+        	// 결재라인 등록
+        	cnt += approvalMapper.createApvLine(apvLineList);
+        	
+        	// 참조자 등록
+        	cnt += approvalMapper.createRefer(apvReferList);
+        	
+        	log.info("cnt : {} " , cnt);
+        	
+        	// 기안 상신 성공
+        	if(cnt > 0) {
+        		// 생성된 결재번호
+        		int apvNo = apvVO.getApvNo(); 
+        		return apvNo;
+        	}
+        	
+        	// 기안 상신 실패
+            else {
+            	return cnt;
+            }
+        }
+        
+        // 결재자가 아닌 경우
+		return 0;
+	}
+	
+	// 결재 상세1
+	@Override
+	public ApvVO approvalDetailView1(int apvNo) {
+		return approvalMapper.approvalDetailView1(apvNo);
+	}
+	
+	// 결재 상세2 (결재라인)
+	@Override
+	public List<ApvLineVO> approvalDetailView2(int apvNo) {
+		return approvalMapper.approvalDetailView2(apvNo);
+	}
+
+	// 결재 상세3 (참조인)
+	@Override
+	public List<ApvReferVO> approvalDetailView3(int apvNo) {
+		return approvalMapper.approvalDetailView3(apvNo);
+	}
+
+	// 결재라인 구분코드 조회
+	@Override
+	public List<CommonCodeVO> getCommonCode() {
+		return approvalMapper.getCommonCode();
+	}             
+	
+	// 즐겨찾기 저장
+	@Override
+	public int createBkmk(Map<String, Object> bkmkMap) {
+		String empNo = (String) session.getAttribute("empNo");
+		
+		// 사원번호가 없을 경우
+		if (empNo == null || empNo.isEmpty()) {
+		   throw new IllegalArgumentException("사원 번호 (empNo)는 null이거나 비어 있을 수 없습니다.");
+		}
+		
+		bkmkMap.put("empNo", empNo);
+		
+		// 즐겨찾기 생성
+		int cnt = approvalMapper.createBkmk(bkmkMap);
+		
+		// 즐겨찾기 상세 생성
+		int detailCnt = approvalMapper.createBkmkDetail(bkmkMap);
+		
+		return detailCnt;
+	}
+
+	// 즐겨찾기 목록 조회
+	@Override
+	public List<ApvBkmkVO> getBkmkList() {
+		return approvalMapper.getBkmkList();
+	}
+	
+	// 즐겨찾기 상세 조회
+	@Override
+	public List<ApvBkmkVO> getBkmkDetail(int bkmkNo) {
+		return approvalMapper.getBkmkDetail(bkmkNo);
+	}
+
+	// 즐겨찾기 삭제
+	@Override
+	public int deleteBkmk(int bkmkNo) {
+		return approvalMapper.deleteBkmk(bkmkNo);
+	}
+
+	// 즐겨찾기 수정
+	@Override
+	public int updateBkmk(ApvLineBkmkVO bkmkVO) {
+		return approvalMapper.updateBkmk(bkmkVO);
+	}
+
+	// 회수 처리
+	@Override
+	public int docReturn(ApvLineVO apvLineVO) {
+		int apvNo = apvLineVO.getApvNo(); // 결재번호
+		
+		List<ApvLineVO> apvLineVOList = approvalMapper.getApvLine(apvNo);
+		
+		for(ApvLineVO apvLine : apvLineVOList) {
+			
+			// 다음 결재자 상태로 비교
+			if("2".equals(apvLine.getApvSeCd())) {
+				// 현재 ApvLineSeq=2의 apvSttusCd=0일때 만  회수
+				if ("0".equals(apvLine.getApvSttusCd())) {
+					return approvalMapper.docReturn(apvLineVO);
+				} else {
+					// 회수 실패
+					return 0;
+				}
+			}
+		}
+		return 0;
+	}
+
+	// 반려
+	@Override
+	public int refuse(int apvNo) {
+	    String empNo = getSessionEmpNo();
+	    
+	    if(empNo != null) {
+	    	// 해당 결재에 대한 결재라인 조회 
+	    	List<ApvLineVO> apvLineVOList = approvalMapper.getApvLine(apvNo);
+	    	
+	    	// 넘길 파라미터
+	    	Map<String, Object> apvMap = new HashMap<String, Object>();
+	    	apvMap.put("apvNo", apvNo);
+	    	
+	        for (ApvLineVO apvLine : apvLineVOList) {
+	        	
+	            if (apvLine != null && apvLine.getApvEmpNo() != null) {
+	            	
+	            	// 세션 사번과 결재자 사번 같은지 체크 
+	                if (empNo.equals(apvLine.getApvEmpNo())) {
+
+	                	// 현재 결재자가 승인 전 일 때
+	                    if (("2".equals(apvLine.getApvSeCd()) || "3".equals(apvLine.getApvSeCd()))
+	                            && "0".equals(apvLine.getApvSttusCd())) {
+	                    	
+	                    	// 넘길 파라미터
+	                        apvMap.put("apvLineSeq", apvLine.getApvLineSeq());
+	                        
+	                        int cnt = approvalMapper.refuse(apvMap);
+	                        
+	                        // 반려됬으면 결재 상태  'N'으로 변경
+	                        if(cnt > 0) {
+	                        	return approvalMapper.updateApvRefuse(apvNo);
+	                        }
+	                        
+	                    } else {
+	                        return 0; // 반려 실패
+	                    }
+	                }
+	            }
+	        }
+	    }
+		
+    	// 결재자가 아닌 경우 또는 해당 결재의 결재라인이 없는 경우
+		return 0;
+	}
+	
+	// 회수 목록 조회
+	@Override
+	public List<ApvVO> getDocReturn() {
+		String empNo = getSessionEmpNo();
+		return approvalMapper.getDocReturn(empNo);
+	}
+	
+	// 반려 목록 조회
+	@Override
+	public List<ApvVO> getRefuseList() {
+		String empNo = getSessionEmpNo();
+		return approvalMapper.getRefuseList(empNo);
+	}
+	
+	// 결재 대기 목록 조회
+	@Override
+	public List<ApvVO> getPending() {
+	    String apvEmpNo = getSessionEmpNo();
+	    return approvalMapper.getPending(apvEmpNo);
+	    
+//	    List<ApvLineVO> ApvLineVOList = approvalMapper.getApvLinePending(apvEmpNo);
+//	    List pendingList = new ArrayList<>(); // 빈 리스트
+//	    for(ApvLineVO apvLine : ApvLineVOList) {
+//	    	
+//	    	// 검토자가 승인 전 일 때
+//	        if ("2".equals(apvLine.getApvSeCd()) && "0".equals(apvLine.getApvSttusCd())) {
+//	            return approvalMapper.getPending(apvEmpNo);
+//	        }
+//	        
+//	        // Q. 검토자가 승인 했을때만 실행해야함!
+//	        // 검토자가 승인 전이 아니고, 결재자가 승인 전일 때
+//	        else if ("3".equals(apvLine.getApvSeCd()) && "0".equals(apvLine.getApvSttusCd())) {
+//	        	return approvalMapper.getPending(apvEmpNo);
+//	        }
+//	    }
+	    
+	}
+	
+	// 결재 완료 목록 조회
+	@Override
+	public List<ApvVO> getCompleted() {
+		String apvEmpNo = getSessionEmpNo();
+		return approvalMapper.getCompleted(apvEmpNo);
+	}
+	
+	// 결재 진행 조회
+	@Override
+	public List<ApvVO> getProgress() {
+		String apvEmpNo = getSessionEmpNo();
+		return approvalMapper.getProgress(apvEmpNo);
+	}
+
+	// 연/월/일 폴더 생성
+	public String getFolder() {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Date date = new Date();
+		String str = sdf.format(date);
+		// 2024-01-30 -> 2024\\01\\30
+		return str.replace("-", File.separator);
+	}
+
+	// 문서별 갯수 조회
+	@Override
+	public Map<String, Object> getTotalCnt() {
+		String apvEmpNo = getSessionEmpNo();
+		
+		Map<String, Object> totalCntResult = new HashMap<String, Object>();
+		
+		int pendingCnt = approvalMapper.getPendingCnt(apvEmpNo);     // 대기
+		int progressCnt = approvalMapper.getProgessCnt(apvEmpNo);    // 진행
+		int completedCnt = approvalMapper.getCompletedCnt(apvEmpNo); // 완료
+		int rejectedCnt = approvalMapper.getRejectedCnt(apvEmpNo);   // 반려
+
+		totalCntResult.put("pendingCnt", pendingCnt);
+		totalCntResult.put("progressCnt", progressCnt);
+		totalCntResult.put("completedCnt", completedCnt);
+		totalCntResult.put("rejectedCnt", rejectedCnt);
+		
+		return totalCntResult;
+	}
+
+//	@Override
+//	public List<ApvVO> getProgressOne() {
+//		String apvEmpNo = getSessionEmpNo();
+//		return approvalMapper.getProgressOne(apvEmpNo);
+//	}
+//
+//	@Override
+//	public List<ApvVO> getProgressAll() {
+//		String apvEmpNo = getSessionEmpNo();
+//		return approvalMapper.getProgressAll(apvEmpNo);
+//	}
+
+}
+

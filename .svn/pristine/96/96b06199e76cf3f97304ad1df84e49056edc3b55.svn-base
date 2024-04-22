@@ -1,0 +1,17 @@
+package com.team1.workforest.reservation.meetingroom.vo;
+
+
+import java.util.Date;
+
+import lombok.Data;
+
+@Data
+public class MtrReservationVO {
+	private String mtgRoomResveNo;	// 회의실 예약 번호
+	private String mtgRoomNo;		// 회의실 번호
+	private String empNo;			// 예약자 사번
+	private String resveCn;			// 예약 내용
+	private Date resveBeginTime;	// 예약 시작 일시
+	private Date resveEndTime;		// 예약 종료 일시
+
+}

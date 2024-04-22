@@ -1,0 +1,261 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!-- Javascript -->
+<script src="${pageContext.request.contextPath}/resources/script/common/commonForSchAndRsv.js" defer></script>
+<script>
+    $(function () {
+        AdminGetMtrResve();
+
+        $("#mtrListBtn").on("click", function () {
+            AdminGetMtrResve();
+        });
+
+        $("#carListBtn").on("click", function () {
+            AdminGetCarResve();
+        });
+    });
+
+    function AdminGetMtrResve() {
+        $.ajax({
+            url: "/admin/reservations/mtr",
+            type: "GET",
+            dataType: "json",
+            success: function (rsvs) {
+                console.log("rsvs : ", rsvs);
+                $("#mtrRsvBody").empty();
+                if (!rsvs.length) {
+                    let rowStr = `<tr>
+                                    <td colspan="7">
+                                        <p>저장된 회의실 예약이 없습니다.</p>
+                                    </td>
+                                </tr>`;
+                    $("#mtrRsvBody").append(rowStr);
+                } else {
+                    $.each(rsvs, function (index, rsv) {
+                        let rowStr = "";
+                        // 팀원 정보 불러와서 채우기, 요상태로는 동기만 가능!
+                        getEmpInfo(rsv.empNo, function (empInfo) {
+                            let deptNm = empInfo.deptNm;
+                            let empNm = empInfo.empNm;
+                            let position = empInfo.position;
+                            let rspnsblCtgryNm = empInfo.rspnsblCtgryNm;
+                            if (rspnsblCtgryNm != "팀원") {
+                                position = rspnsblCtgryNm;
+                            }
+                            rowStr += ` <tr>
+                                            <td>
+                                                <p>\${index+1}</p>
+                                            </td>
+                                            <td>
+                                                <p>\${rsv.mtrNm}</p>
+                                            </td>
+                                            <td>
+                                                <p>\${rsv.mtrLoc}</p>
+                                            </td>
+                                            <td>
+                                                <p>\${deptNm} \${empNm} \${position}</p>
+                                            </td>     
+                                            <td>
+                                                <p>\${rsv.resveBeginDate.substr(0,16)}-\${rsv.resveEndDate.substr(11,5)}</p>
+                                            </td>
+                                            <td>
+                                                <p>\${rsv.resveCn}</p>
+                                            </td>
+                                            <td>
+                                                <p>
+                                                    <button type="button" class="btn3 listDelBtn" data-id="\${rsv.mtrResveNo}">예약 취소</button>
+                                                </p>
+                                            </td>
+                                        </tr>`;
+                            $("#mtrRsvBody").append(rowStr);
+                        });
+                    });
+                }
+            },
+        });
+    }
+
+    function AdminGetCarResve() {
+        $.ajax({
+            url: "/admin/reservations/car",
+            type: "GET",
+            dataType: "json",
+            success: function (rsvs) {
+                console.log("rsvs : ", rsvs);
+                $("#carRsvBody").empty();
+                if (!rsvs.length) {
+                    let rowStr = `<tr>
+                                    <td colspan="8">
+                                        <p>저장된 차량 예약이 없습니다.</p>
+                                    </td>
+                                </tr>`;
+                    $("#carRsvBody").append(rowStr);
+                } else {
+                    $.each(rsvs, function (index, rsv) {
+                        let rowStr = "";
+                        // 팀원 정보 불러와서 채우기
+                        getEmpInfo(rsv.empNo, function (empInfo) {
+                            let deptNm = empInfo.deptNm;
+                            let empNm = empInfo.empNm;
+                            let position = empInfo.position;
+                            let rspnsblCtgryNm = empInfo.rspnsblCtgryNm;
+                            if (rspnsblCtgryNm != "팀원") {
+                                position = rspnsblCtgryNm;
+                            }
+
+                            let rturnCd = rsv.rturnCd;
+                            console.log("rturnCd", rturnCd);
+                            let rturnStr = "";
+                            if (rturnCd == "1") {
+                                rturnStr = "<span class='wf-badge5'>반납 전</span>";
+                            } else if (rturnCd == "2") {
+                                rturnStr = "<span class='wf-badge4'>반납 처리 중</span>";
+                            } else {
+                                rturnStr = "<span class='wf-badge3'>반납 완료</span>";
+                            }
+
+                            rowStr += ` <tr>
+                                            <td>
+                                                <p>\${index+1}</p>
+                                            </td>
+                                            <td>
+                                                <p>\${rsv.carNm}</p>
+                                            </td>
+                                            <td>
+                                                <p>\${rsv.carNo}</p>
+                                            </td>
+                                            <td>
+                                                <p>\${deptNm} \${empNm} \${position}</p>
+                                            </td>
+                                            <td>
+                                                <p>\${rsv.resveBeginDate.substr(0,16)}-\${rsv.resveEndDate.substr(0,16)}</p>
+                                            </td>
+                                            <td>
+                                                <p>\${rsv.resveCn}</p>
+                                            </td>
+                                            <td>
+                                            <p>\${rturnStr}</p>
+                                            </td>
+                                            <td>
+                                                <p>
+                                                    <button type="button" class="btn4 listDelBtn" data-id="\${rsv.carResveNo}">예약 취소</button>
+                                                    <button type="button" class="btn3 listDelBtn" data-id="\${rsv.carResveNo}">예약 취소</button>
+                                                </p>
+                                            </td>
+                                        </tr>`;
+                            $("#carRsvBody").append(rowStr);
+                        });
+                    });
+                }
+            },
+        });
+    }
+</script>
+<!--------------------------------- body 시작 --------------------------------->
+<div class="wf-tit-wrap">
+    <h1 class="page-tit">예약 관리</h1>
+</div>
+<div class="wf-content-wrap">
+    <div class="tab-type tab-type2">
+        <div class="tab-menu">
+            <!-- "active"가 추가되면 메뉴가 활성화됩니다. -->
+            <button data-tab="tab1" type="button" class="tab-btn active" id="mtrResveListBtn">회의실 예약</button>
+            <button data-tab="tab2" type="button" class="tab-btn" id="carResveListBtn">차량 예약</button>
+            <div class="tab-indicator"></div>
+        </div>
+
+        <!-- tab1  -->
+        <div data-tab="tab1" class="tab-content active">
+            <div class="tab-board-lst">
+                <div class="wf-content-area" id="calbox">
+                    <table class="wf-table">
+                        <colgroup>
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 20%" />
+                            <col style="width: 20%" />
+                            <col style="width: 20%" />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>번호</th>
+                                <th>종류</th>
+                                <th>위치</th>
+                                <th>예약자</th>
+                                <th>예약일시</th>
+                                <th>사용목적</th>
+                                <th>상태변경</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mtrRsvBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- tab2  -->
+        <div data-tab="tab2" class="tab-content">
+            <div class="tab-board-lst">
+                <div class="wf-content-area">
+                    <p class="heading1">예약 현황</p>
+                    <table class="wf-table">
+                        <colgroup>
+                            <col style="width: 5%" />
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 15%" />
+                            <col style="width: 20%" />
+                            <col style="width: 20%" />
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>번호</th>
+                                <th>차량명</th>
+                                <th>차량번호</th>
+                                <th>예약자</th>
+                                <th>예약일시</th>
+                                <th>사용목적</th>
+                                <th>반납상태</th>
+                                <th>상태변경</th>
+                            </tr>
+                        </thead>
+                        <tbody id=""></tbody>
+                    </table>
+                </div>
+                <div class="wf-content-area">
+                    <p class="heading1">반납 대기</p>
+                    <table class="wf-table">
+                        <colgroup>
+                            <col style="width: 5%" />
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 15%" />
+                            <col style="width: 20%" />
+                            <col style="width: 20%" />
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>번호</th>
+                                <th>차량명</th>
+                                <th>차량번호</th>
+                                <th>예약자</th>
+                                <th>예약일시</th>
+                                <th>사용목적</th>
+                                <th>반납상태</th>
+                                <th>상태변경</th>
+                            </tr>
+                        </thead>
+                        <tbody id="carRsvBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--------------------------------- body 끝 --------------------------------->
+</div>

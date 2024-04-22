@@ -1,0 +1,84 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<style>
+.yearClassify{
+	height:50px;
+	
+}
+.yearClassify1{
+	display: flex;
+	flex-direction: column;
+}
+.box1{
+	width: 150px;
+	height: 120px;
+	text-align: center;
+	background-image: linear-gradient(to top, rgba(255, 99, 132, 0.7) 0%, rgba(255, 99, 132, 0.7) 30%, var(--glass-bg) 20%, var(--glass-bg) 100%)
+}
+.box2{
+	width: 200px;
+	height: 120px;
+	text-align: center;
+}
+.box2 .heading1{
+	position: relative;
+	top: 10px;
+}
+.moreInfo{
+	width: 100%;
+	position: relative;
+	top: 5px;
+}
+.line2{
+	margin-top: 10px;
+}
+</style>
+<script>
+$(".box1").css("margin-top","1px")
+
+</script>
+<div class="wf-main-container">
+	<div class="wf-tit-wrap">
+		<h1 class="page-tit">프로젝트 통계</h1>
+	</div>
+	<div class="wf-content-wrap wf-flex-box line1">
+		<div class="wf-content-area box2">
+			<p class="heading1 align-center">프로젝트</p>
+			<p class="heading1 align-center">관리/통계</p>
+		</div>
+		<div class="wf-content-area box1" style="margin-top: 0px;">
+			<p class="heading2 align-center">진행중</p>
+			<p class="heading1 align-center">25</p>
+			<p class="heading2 align-center moreInfo">More Info >></p>
+		</div>
+		<div class="wf-content-area box1" style="margin-top: 0px;">
+			<p class="heading2 align-center">대기중</p>
+			<p class="heading1 align-center">5</p>
+			<p class="heading2 align-center moreInfo">More Info >></p>
+		</div>
+		<div class="wf-content-area box1" style="margin-top: 0px;">
+			<p class="heading2 align-center">완료</p>
+			<p class="heading1 align-center">43</p>
+			<p class="heading2 align-center moreInfo">More Info >></p>
+		</div>
+	</div>
+	<div class="wf-flex-box line2">
+		<div class="yearClassify1">
+			<div class="wf-content-area yearClassify" style="margin-top: 10px; width:70px;">
+				<p class="heading2 align-center">2024</p>
+			</div>
+			<div class="wf-content-area yearClassify" style="margin-top: 10px; width:70px;">
+				<p class="heading2 align-center">2023</p>
+			</div>
+			<div class="wf-content-area yearClassify" style="margin-top: 10px; width:70px;">
+				<p class="heading2 align-center">2022</p>
+			</div>
+		</div>
+		<div class="wf-content-area line2">
+			<p class="heading2 align-center">진행한 프로젝트 수</p>
+			차트 넣기<br>
+			기타 등등 정보...
+		</div>
+		
+	</div>
+</div>

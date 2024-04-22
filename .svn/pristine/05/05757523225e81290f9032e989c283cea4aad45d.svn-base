@@ -1,0 +1,17 @@
+@charset "UTF-8";
+
+
+.box3{
+	height:350px;
+	
+}
+
+.wf-content-box{
+	height:320px;
+	
+}
+
+#monthDay{
+	width:370px;
+		
+}

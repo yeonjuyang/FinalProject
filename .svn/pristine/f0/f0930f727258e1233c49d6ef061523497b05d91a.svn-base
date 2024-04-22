@@ -1,0 +1,136 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+
+<!-- =============== 상단타이틀영역 시작 =============== -->
+<div class="wf-tit-wrap">
+    <h1 class="page-tit">결재 작성</h1>
+    <div class="wf-util">
+        <button type="button" class="btn1">취소</button>
+        <button type="button" class="btn4">미리보기</button>
+        <button type="button" class="btn3">임시저장</button>
+        <button type="button" class="btn2">결재상신</button>
+    </div>
+</div>
+<!-- =============== 상단타이틀영역 끝 =============== -->
+<!-- =============== 컨텐츠 영역 시작 =============== -->
+<div class="wf-content-wrap">
+
+    <div class="approval-create-wrap wf-flex-box">
+
+        <div class="wf-content-area left">
+
+            <ul class="wf-insert-form3">
+                <li>
+                    <div class="wf-insert-tit">
+                        <div class="wf-select-group">
+                            <select name="" id="">
+                                <option disabled selected>양식선택</option>
+                                <option value="">품의서</option>
+                                <option value="">출장복명서</option>
+                                <option value="">휴가신청서</option>
+                            </select>
+                        </div>
+                        <input type="text" placeholder="제목을 입력해주세요">
+
+                    </div>
+                </li>
+                <li>
+                    <textarea name="editor" class="editor"
+                        placeholder="Editing with Markdown output"></textarea>
+                </li>
+            </ul>
+        </div>
+        <div class="wf-content-area right">
+            <div class="approval-write-box">
+                <div class="tit-wrap">
+                    <p class="heading2">결재라인</p>
+                    <button type="button" class="add-btn" modal-id="approval-modal">
+                        <i class="xi-users-plus"></i>
+                    </button>
+                </div>
+                <ul class="approval-add-user bul-lst01">
+                    <li>
+                        <div class="user">
+                            <span class="dept">개발팀</span>
+                            <span>이소망</span>
+                            <span>사원</span>
+                        </div>
+                        <span class="approval-status1">기안</span>
+                    </li>
+                    <li>
+                        <div class="user">
+                            <span class="dept">개발팀</span>
+                            <span>이소망</span>
+                            <span>사원</span>
+                        </div>
+                        <span class="approval-status2">검토</span>
+                    </li>
+                    <li>
+                        <div class="user">
+                            <span class="dept">개발팀</span>
+                            <span>이소망</span>
+                            <span>사원</span>
+                        </div>
+                        <span class="approval-status3">결재</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="approval-write-box">
+                <div class="tit-wrap">
+                    <p class="heading2">참조인</p>
+                    <button type="button" class="add-btn">
+                        <i class="xi-users-plus"></i>
+                    </button>
+                </div>
+                <ul class="approval-add-user bul-lst01">
+                    <li>
+                        <div class="user">
+                            <span class="dept">개발팀</span>
+                            <span>이소망</span>
+                            <span>사원</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="approval-write-box">
+                <div class="tit-wrap">
+                    <p class="heading2">첨부파일</p>
+                    <label for="file-custom" class="file-btn">
+                        <input type="file" id="file-custom">
+                    </label>
+                </div>
+                <ul class="file-lst">
+                    <li class="all-remove">
+                        <span class="checkbox-radio-custom">
+                            <input type="checkbox" name="chck" id="all-check">
+                            <label for="all-check"></label>
+                        </span>
+                        <span class="file-name">전체 삭제</span>
+                        <button type="button" class="file-all-remove">
+                        </button>
+                    </li>
+                    <li>
+                        <span class="checkbox-radio-custom">
+                            <input type="checkbox" name="chck" id="chck">
+                            <label for="chck"></label>
+                        </span>
+                        <span class="file-name">파일 이름</span>
+                        <span class="file-size">512KB</span>
+                        <button type="button" class="file-remove">
+                        </button>
+                    </li>
+                    <li>
+                        <span class="checkbox-radio-custom">
+                            <input type="checkbox" name="chck" id="chck">
+                            <label for="chck"></label>
+                        </span>
+                        <span class="file-name">파일 이름</span>
+                        <span class="file-size">512KB</span>
+                        <button type="button" class="file-remove">
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- =============== 컨텐츠 영역 끝 =============== -->

@@ -1,0 +1,351 @@
+package com.team1.workforest.mail.controller;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.team1.workforest.mail.service.MailService;
+import com.team1.workforest.mail.vo.EmailRecipientVO;
+import com.team1.workforest.mail.vo.EmailVO;
+import com.team1.workforest.util.ArticlePage;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/mail")
+public class MailController {
+	
+	@Autowired
+	MailService mailService;
+	
+	//메일 메인화면 (모든 메일 출력)
+	@GetMapping("/main")
+	public String getMainList(Model model, HttpServletRequest request, @RequestParam(value="currentPage", required = false, defaultValue = "1") int currentPage) {
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+        // 세션을 통해 사용자 이름 가져오기
+        HttpSession session = request.getSession();
+        String empNo = (String) session.getAttribute("empNo");
+	    
+		//페이지 번호
+		map.put("currentPage", currentPage);
+		map.put("empNo", empNo);
+		
+		log.info("map : " + map);
+		//한 화면에 보여지는 행의 수 (기본 10행)
+		int size = 10;
+		
+		//받은메일 수
+		int total = this.mailService.getMailCount(map);
+		int noreadCount = this.mailService.getNoreadCount(map);
+		
+		List<EmailVO> emailVOList = this.mailService.getMailList(map);
+		log.info("list -> emailVOList : " + emailVOList);
+		
+		model.addAttribute("emaildata", new ArticlePage<EmailVO>(total, currentPage, size, emailVOList, null));
+		model.addAttribute("allCount", total);
+		model.addAttribute("noreadCount", noreadCount);
+		model.addAttribute("size", size);
+		return "mail/main";
+	}
+
+	
+	//메일 상세보기
+	@GetMapping("/detail/{mailbox}/{emailNo}")
+	public String getMailDetail(Model model, @PathVariable("mailbox") String mailbox, 
+            @PathVariable("emailNo") String emailNo, HttpSession session, EmailVO emailVO) {
+		log.info("emailVO : " + emailVO);
+		Map<String, Object> map = new HashMap<String, Object>();
+		String empNo = (String) session.getAttribute("empNo");
+		map.put("empNo", empNo);
+		emailVO.setEmpNo(empNo);
+		emailVO.setEmailNo(emailNo);
+		int updateCnfirmDate = 0;
+		switch (mailbox) {
+        case "main":
+        	log.info("mainEmail check");
+        	updateCnfirmDate = this.mailService.putCnfirmDate(emailVO);
+        	emailVO = this.mailService.getMailDetail(emailNo);
+            break;
+        case "sendbox":
+        	log.info("sendEmail check");
+            emailVO = mailService.getSendMailDetail(emailNo);
+            break;
+        case "attachbox":
+    		updateCnfirmDate = this.mailService.putCnfirmDate(emailVO);
+        	emailVO = this.mailService.getMailDetail(emailNo);
+            break;
+        case "unreadbox":
+    		updateCnfirmDate = this.mailService.putCnfirmDate(emailVO);
+        	emailVO = this.mailService.getMailDetail(emailNo);
+            break;
+        default:
+            // 기본적으로 받은 메일함을 처리
+        	emailVO = this.mailService.getMailDetail(emailNo);
+            break;
+    }
+		
+//		int updateCnfirmDate = this.mailService.putCnfirmDate(emailVO);
+//		emailVO = this.mailService.getMailDetail(emailNo);
+		int noreadCount = this.mailService.getNoreadCount(map);
+		
+		model.addAttribute("emailVO", emailVO);
+		model.addAttribute("noreadCount", noreadCount);
+		model.addAttribute("mailbox", mailbox);
+		
+//		String nextEmailNo = Integer.toString(Integer.parseInt(emailNo)+1);
+//		String previousEmailNo = Integer.toString(Integer.parseInt(emailNo)-1);
+//		EmailVO pEmailVO = this.mailService.getMailDetail(previousEmailNo);
+//		EmailVO nEmailVO = this.mailService.getMailDetail(nextEmailNo);
+//		model.addAttribute("pEmailVO", pEmailVO);
+//		model.addAttribute("nEmailVO", nEmailVO);
+		log.info("updateCnfirmDate : "+updateCnfirmDate);
+		return "mail/detail";
+	}
+	
+	//메일 쓰기
+	@GetMapping("/create")
+	public String createMail(Model model , HttpServletRequest request) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		
+		HttpSession session = request.getSession();
+		String empNo = (String) session.getAttribute("empNo");
+		
+		map.put("empNo", empNo);
+		int noreadCount = this.mailService.getNoreadCount(map);
+		model.addAttribute("noreadCount", noreadCount);
+		return "mail/create";
+	}
+	
+	//메일 쓰기 성공
+	@GetMapping("/success")
+	public String createSuccess(Model model, HttpServletRequest request) {//Model model
+		Map<String, Object> map = new HashMap<String, Object>();
+		HttpSession session = request.getSession();
+        String empNo = (String) session.getAttribute("empNo");
+        map.put("empNo", empNo);
+        int noreadCount = this.mailService.getNoreadCount(map);
+        model.addAttribute("noreadCount", noreadCount);
+		return "mail/success";
+	}
+	
+	//메일보내기
+	@PostMapping("/createMail")
+	public String insertMail(Model model, HttpServletRequest request, EmailVO emailVO, EmailRecipientVO emailRVO, BindingResult brResult) {
+		log.info("emailVO : " + emailVO);
+        HttpSession session = request.getSession();
+        String empNo = (String) session.getAttribute("empNo");
+        
+        emailVO.setEmpNo(empNo);
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("empNo", empNo);
+		int noreadCount = this.mailService.getNoreadCount(map);
+		model.addAttribute("noreadCount", noreadCount);
+        int sendResult = this.mailService.insertMail(emailVO);
+        log.info("sendResult : " + sendResult);
+        
+        return "redirect:success";
+	}
+	
+	//보낸메일함
+	@GetMapping("/sendbox")
+	public String getSendList(Model model, HttpServletRequest request, @RequestParam(value = "currentPage", required = false, defaultValue = "1") int currentPage) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		
+		HttpSession session = request.getSession();
+		String empNo = (String) session.getAttribute("empNo");
+		
+		map.put("empNo", empNo);
+		map.put("currentPage", currentPage);
+		
+		log.info("map : "+ map);
+		
+		int size = 10;
+		
+		int count = this.mailService.getSendMailCount(map);
+		int noreadCount = this.mailService.getNoreadCount(map);
+		List<EmailVO> emailVOList = this.mailService.getSendList(map);
+		log.info("list -> emailVOList : " + emailVOList);
+		
+		model.addAttribute("emaildata", new ArticlePage<EmailVO>(count, currentPage, size, emailVOList, null));
+		model.addAttribute("count", count);
+		model.addAttribute("noreadCount", noreadCount);
+		
+		return "mail/sendbox";
+	}
+	
+	//첨부파일메일함
+	@GetMapping("/attachbox")
+	public String getAttachList(Model model, HttpServletRequest request, @RequestParam(value = "currentPage", required = false, defaultValue = "1") int currentPage) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		
+		HttpSession session = request.getSession();
+		String empNo = (String) session.getAttribute("empNo");
+		
+		map.put("currentPage", currentPage);
+		map.put("empNo", empNo);
+		
+		log.info("map : "+ map);
+		
+		int size = 10;
+		
+		int total = this.mailService.getAttachMailCount(map);
+		int noreadCount = this.mailService.getNoreadCount(map);
+		List<EmailVO> emailVOList = this.mailService.getAttachList(map);
+		log.info("list -> emailVOList : " + emailVOList);
+		
+		model.addAttribute("emaildata", new ArticlePage<EmailVO>(total, currentPage, size, emailVOList, null));
+		model.addAttribute("count", total);
+		model.addAttribute("noreadCount", noreadCount);
+		
+		return "mail/attachbox";
+	}
+	
+	//휴지통
+	@GetMapping("/deletebox")
+	public String deleteList(Model model, HttpServletRequest request, @RequestParam(value = "currentPage", required = false, defaultValue = "1") int currentPage) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		
+		HttpSession session = request.getSession();
+		String empNo = (String) session.getAttribute("empNo");
+		
+		map.put("empNo", empNo);
+		map.put("currentPage", currentPage);
+		
+		log.info("map : "+ map);
+		
+		int size = 10;
+		int total = this.mailService.getDeleteCount(map);
+		int noreadCount = this.mailService.getNoreadCount(map);
+		List<EmailVO> emailVOList = this.mailService.getDeleteList(map);
+		log.info("list -> emailVOList : " + emailVOList);
+		
+		model.addAttribute("emaildata", new ArticlePage<EmailVO>(total, currentPage, size, emailVOList, null));
+		model.addAttribute("count", total);
+		model.addAttribute("noreadCount", noreadCount);
+		
+		return "mail/deletebox";
+	}
+ 
+	@ResponseBody
+	@PostMapping("/delete/{mailbox}")
+	public int deleteMail(@PathVariable("mailbox") String mailbox, @RequestBody EmailVO emailVO ,HttpSession session) {
+		log.info("emailVO : " + emailVO);
+		String[] checkboxList = emailVO.getCheckboxList();
+		String empNo = (String) session.getAttribute("empNo");
+		
+		int result = 0;
+		for(int i = 0; i<checkboxList.length; i++) {
+			EmailVO demailVO = new EmailVO();
+			demailVO.setEmailNo(checkboxList[i]);
+			demailVO.setEmpNo(empNo);
+			
+			result += this.mailService.deleteGetMail(demailVO);
+		
+		}
+		
+		log.info("result:"+result);
+		return result;
+	}
+	
+	
+	//안읽은메일함
+	@GetMapping("/unreadbox")
+	public String unreadList(Model model, HttpServletRequest request, @RequestParam(value = "currentPage", required = false, defaultValue = "1") int currentPage) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		
+		HttpSession session = request.getSession();
+		String empNo = (String) session.getAttribute("empNo");
+		
+		map.put("empNo", empNo);
+		map.put("currentPage", currentPage);
+		
+		log.info("map : "+ map);
+		
+		int size = 10;
+		
+		int total = this.mailService.getNoreadCount(map);
+		List<EmailVO> emailVOList = this.mailService.getUnreadList(map);
+		log.info("list -> emailVOList : " + emailVOList);
+		
+		model.addAttribute("emaildata", new ArticlePage<EmailVO>(total, currentPage, size, emailVOList, null));
+		model.addAttribute("noreadCount", total);
+		return "mail/unreadbox";
+	}
+	
+	//임시보관함
+	@GetMapping("/temporarybox")
+	public String temporaryList(Model model, HttpServletRequest request, @RequestParam(value = "currentPage", required = false, defaultValue = "1") int currentPage) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		
+		HttpSession session = request.getSession();
+		String empNo = (String) session.getAttribute("empNo");
+		
+		map.put("empNo", empNo);
+		map.put("currentPage", currentPage);
+		
+		log.info("map : "+ map);
+		
+		int size = 10;
+		
+		int total = this.mailService.getTemporaryMailCount(map);
+		int noreadCount = this.mailService.getNoreadCount(map);
+		List<EmailVO> emailVOList = this.mailService.getTemporaryList(map);
+		log.info("list -> emailVOList : " + emailVOList);
+		
+		model.addAttribute("emaildata", new ArticlePage<EmailVO>(total, currentPage, size, emailVOList, null));
+		model.addAttribute("count", total);
+		model.addAttribute("noreadCount", noreadCount);
+		return "mail/temporarybox";
+	}
+	
+	//임시저장메일 보내기
+		@GetMapping("/tempcreate")
+		public String tempCreateMail(Model model , @RequestParam("emailNo") String emailNo, HttpServletRequest request) {
+			Map<String, Object> map = new HashMap<String, Object>();
+			
+			HttpSession session = request.getSession();
+			String empNo = (String) session.getAttribute("empNo");
+			
+			map.put("empNo", empNo);
+			int noreadCount = this.mailService.getNoreadCount(map);
+			model.addAttribute("noreadCount", noreadCount);
+			return "mail/tempcreate";
+		}
+	
+	//임시저장하기
+	@PostMapping("/temporaryMail")
+	public String temporaryMail(Model model, HttpServletRequest request, EmailVO emailVO, BindingResult brResult) {
+		log.info("emailVO : " + emailVO);
+		Map<String, Object> map = new HashMap<String, Object>();
+        HttpSession session = request.getSession();
+        String empNo = (String) session.getAttribute("empNo");
+        map.put("empNo", empNo);
+        
+        emailVO.setEmpNo(empNo);
+		int noreadCount = this.mailService.getNoreadCount(map);
+		model.addAttribute("noreadCount", noreadCount);
+		int temporaryResult = this.mailService.insertTemporaryMail(emailVO);
+        log.info("temporaryResult : " + temporaryResult);
+        
+        return "redirect:success";
+	}
+	
+	
+}

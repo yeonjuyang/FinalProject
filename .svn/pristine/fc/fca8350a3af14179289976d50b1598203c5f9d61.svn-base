@@ -1,0 +1,69 @@
+let headerWebSocket;
+
+$(function(){
+	$(".xi-wechat").on("click",function(){
+		let url = "/chat/main"
+		let name = "채팅방"
+		let option = "width = 800, height = 800, left=2000, location=no, toolbars=no, status=no"
+		open(url,name,option)
+	})
+	
+	headerWebSocketConnect()
+	//연결
+	function headerWebSocketConnect() {
+		
+	    
+		headerWebSocket = new WebSocket("ws://192.168.146.64:80/ws-chat"); // End Point
+		
+		
+		headerWebSocket.empNo = headerEmpNo;
+				
+		headerWebSocket.onopen = function(){
+			console.log("접속")
+		}
+		headerWebSocket.onmessage = receiveMessage;
+		
+	}
+	
+	function receiveMessage(){
+		// 받은 메세지
+		let data = event.data;
+		// 보낸 사람 사번
+		let data1 = data.split(":%")[0]
+		// 받는 사람 사번
+		let data2 = data.split(":%")[1]
+		// 메세지
+		let data3 = data.split(":%")[2]
+		// 무슨 종류의 메세지인지 구분
+		let data4 = data.split(":%")[3]
+		
+		if(data2 == headerWebSocket.empNo){
+		
+			if(data4 == "mReserve"){
+				Swal.fire(data3)
+				
+				// 알람 테이블에 내용 인서트
+				$.ajax({
+					url:"/admin/addAlram",
+					data:{
+						"empNo":data2,
+						"msg":data3
+					},
+					type:"get",
+					async:false,
+					success:function(res){
+						// 알람 테이블에서 empNo가 자신이고 읽은상태가 N인 행의 수 반환 후 알람 옆에 표시
+						getAlram();
+						
+					}
+				})
+				
+				
+			}
+			
+		}
+		
+	}
+	
+	
+})

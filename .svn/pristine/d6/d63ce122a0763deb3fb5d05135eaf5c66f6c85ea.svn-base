@@ -1,0 +1,145 @@
+$(function () {
+
+    // gradient (stripe-gradient)
+    new Gradient({
+        canvas: '#gradient',
+        colors: ['#80FFDB', '#64DFDF', '#48BFE3', '#5E60CE']
+    });
+
+    $('#gradient').gradient({
+        colors: ['#80FFDB', '#64DFDF', '#48BFE3', '#5E60CE']
+    });
+
+    // leftside-navigation
+    $("#leftside-navigation .sub-menu > a").click(function (e) {
+        //e.preventDefault();
+
+        let $depth2 = $(this).next(".depth2");
+        let $subMenu = $(this).parent('.sub-menu');
+
+        $(".depth2").not($depth2).slideUp(200);
+        $depth2.slideToggle(200);
+
+        $(".sub-menu").not($subMenu).removeClass('open');
+        $subMenu.toggleClass('open');
+    });
+
+    // 메뉴 active
+    const url = window.location.pathname;
+    $('#leftside-navigation a').each(function () {
+        const linkHref = $(this).attr('href');
+
+        if (linkHref === url) {
+            $(this).parent().addClass('active');
+            $(this).closest('.sub-menu').addClass('open').find('.depth2').show();
+            return false;
+        }
+    });
+
+    // wf-menu-dropdown
+    $(document).on('click', function (event) {
+        var $target = $(event.target);
+        if (!$target.closest('.wf-util').length) {
+            $('.wf-util > li').removeClass('wf-menu-open');
+        }
+    });
+
+    $('.wf-util > li > a').on('click', function (event) {
+        event.stopPropagation(); // 클릭 이벤트 전파 중지
+        $('.wf-util > li').not($(this).parent()).removeClass('wf-menu-open');
+        $(this).parent().toggleClass('wf-menu-open');
+    });
+
+
+    // Tab
+    const tabContainers = $('.tab-type');
+
+    tabContainers.each(function () {
+        const container = $(this);
+        const tabButtons = container.find('.tab-btn');
+        const tabContents = container.find('.tab-content');
+        const tabIndicator = container.find('.tab-indicator');
+        const numTabs = tabButtons.length;
+        let activeTabIndex = 0;
+
+        function showTab(tabIndex) {
+            if (tabIndex === activeTabIndex) {
+                return;
+            }
+            tabButtons.removeClass('active');
+            tabContents.removeClass('active');
+            tabButtons.eq(tabIndex).addClass('active');
+            tabContents.eq(tabIndex).addClass('active');
+            activeTabIndex = tabIndex;
+
+            const activeButton = tabButtons.eq(tabIndex);
+            const buttonRect = activeButton[0].getBoundingClientRect();
+            const tabIndicatorWidth = buttonRect.width;
+            const tabIndicatorOffset = buttonRect.left - activeButton.parent()[0].getBoundingClientRect().left;
+            tabIndicator.css({ width: `${tabIndicatorWidth}px`, transform: `translateX(${tabIndicatorOffset}px)` });
+        }
+
+        tabButtons.each(function (index) {
+            $(this).click(function () {
+                showTab(index);
+            });
+        });
+
+        showTab(0);
+    });
+
+    // modal
+    $('[modal-id]').click(modal);
+
+    // modal close
+    $('.modal .close-btn').click(function () {
+        $(this).parents('.modal').removeClass('open');
+        $('html').removeClass('scroll-hidden');
+    });
+
+    // ck-editors (Initial)
+    const editors = document.querySelectorAll('.editor');
+    editors.forEach((editor) => {
+        ClassicEditor
+            .create(editor)
+            .catch((error) => {
+                console.error(error);
+            });
+    });
+
+});
+
+// modal
+function modal() {
+    let id = $(this).attr('modal-id');
+    $('.modal').removeClass('open').filter('#' + id).addClass('open');
+    $('html').addClass('scroll-hidden');
+}
+
+// tree
+$(function () {
+
+    // tree menu (level 3)
+    $('.tree-menu .caret').click(function () {
+        // Toggle the nested items
+        $(this).toggleClass('caret-down');
+        let submenu = $(this).siblings('.sub-menu');
+        if (submenu.css('display') === 'block') {
+            submenu.css('display', 'none');
+        } else {
+            submenu.css('display', 'block');
+        }
+    });
+
+    // level-3에서 클릭한 a를 제외한 나머지 a태그 비활성화
+    $('.tree-menu .level-3 a').click(function (e) {
+        $('.tree-menu .level-3 a').removeClass('active');
+        $(this).addClass('active');
+    });
+
+    $('.tree-menu .level-3 a').click(function (e) {
+        $('.tree-menu .level-3 a').removeClass('active');
+        $(this).addClass('active');
+    });
+
+});

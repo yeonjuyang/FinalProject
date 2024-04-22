@@ -1,0 +1,94 @@
+package com.team1.workforest.vacation.service.impl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.team1.workforest.employee.vo.EmployeeVO;
+import com.team1.workforest.vacation.mapper.VacationMapper;
+import com.team1.workforest.vacation.service.VacationService;
+import com.team1.workforest.vacation.vo.EmpVacationManageVO;
+import com.team1.workforest.vacation.vo.VacationRecordVO;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+public class VacationServiceImpl implements VacationService{
+	
+	@Autowired
+	VacationMapper vacationMapper;
+
+	// 내 휴가 목록(잔여 휴가 개수) 가져오기
+	@Override
+	public List<EmpVacationManageVO> getMyVacationList(EmpVacationManageVO empVcatnManageVO) {
+		return vacationMapper.getMyVacationList(empVcatnManageVO);
+
+	}
+	
+	// 내 특정 휴가 정보 가져오기
+	@Override
+	public EmpVacationManageVO getMyVacation(EmpVacationManageVO empVcatnManageVO) {
+		return vacationMapper.getMyVacation(empVcatnManageVO);
+	}
+	
+	// 결재 라인 불러오기
+	@Override
+	public List<EmployeeVO> getApvLine(String empNo, int apvLevel) {
+		List<EmployeeVO> apvLines = new ArrayList<EmployeeVO>();
+		
+		EmployeeVO firstEmpVO = vacationMapper.getApvLine(empNo);
+		apvLines.add(0, firstEmpVO);
+		
+		if(apvLevel == 2) {
+			String SupEmpNo = firstEmpVO.getEmpNo();
+			log.info(SupEmpNo);
+			
+			EmployeeVO secondEmpVO = vacationMapper.getApvLine(empNo);
+			log.info("secondEmpVO : {}", secondEmpVO);
+			apvLines.add(1, secondEmpVO);
+		}
+		return apvLines;
+	}
+	
+	// 지난 휴가 가져오기
+	@Override
+	public Map<String, List<VacationRecordVO>> getMyVacationRecordList(VacationRecordVO vacationRecordVO) {
+		List<VacationRecordVO> records = vacationMapper.getMyVacationRecordList(vacationRecordVO);
+		log.info("records : {}", records);
+		
+		Map<String, List<VacationRecordVO>> recordGroups = new HashMap<String, List<VacationRecordVO>>();
+		for(VacationRecordVO record : records) {
+			if(!recordGroups.containsKey(record.getApvNo())) {
+				recordGroups.put(record.getApvNo(), new ArrayList<VacationRecordVO>());
+			}
+			recordGroups.get(record.getApvNo()).add(record);
+		}
+		return recordGroups;
+	}
+
+	// 사용 연차 카운트
+	@Override
+	public float getVacationRecordsCount(VacationRecordVO vacationRecordVO) {
+		// 종일 연차 카운트
+		int allDayCount = vacationMapper.getAllDayVacationRecordsCount(vacationRecordVO);
+		// 반차 카운트
+		float halfDayCount = vacationMapper.getHalfDayVacationRecordsCount(vacationRecordVO);
+		
+		float AllVacationRecordsCount = allDayCount + (halfDayCount / 2);
+		log.info("count : {}", AllVacationRecordsCount);		
+		
+		return AllVacationRecordsCount;
+	}
+
+	
+
+	
+
+	
+
+}

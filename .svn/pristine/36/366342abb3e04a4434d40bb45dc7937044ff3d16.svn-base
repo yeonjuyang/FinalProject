@@ -1,0 +1,691 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!-- fullcalendar -->
+<link href="${pageContext.request.contextPath}/resources/css/fullcalendar.css" rel="stylesheet" />
+<script src="${pageContext.request.contextPath}/resources/js/fullcalendar.js"></script>
+<script src="${pageContext.request.contextPath}/resources/js/fullcalendar-ko.js"></script>
+<!-- message -->
+<script src="${pageContext.request.contextPath}/resources/js/message.js"></script>
+<!-- CSS -->
+<link href="${pageContext.request.contextPath}/resources/css/schedule/style.css" rel="stylesheet" />
+<script>
+    let empNo = '<%=(String)session.getAttribute("empNo")%>';
+</script>
+<!-- Javascript -->
+<script src="${pageContext.request.contextPath}/resources/script/schedule/main.js" defer></script>
+<script>
+    $(document).ready(function () {
+        const myColor = "#32b677";
+        const teamColor = "#029be6";
+        const deptColor = "#7987ca";
+        const compColor = "#f5521c";
+
+        // sweetalert toast 알림
+        const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 3000,
+            didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+            },
+        });
+
+        // 일정 등록(확인) 버튼 누르면 일정 등록 실행
+        $("#createConfBtn").on("click", function () {
+            let selectSch = $("#selectSch").val();
+            let schSeCd;
+            let color;
+            if (selectSch == "mySch") {
+                schSeCd = 1;
+                color = myColor;
+            } else if (selectSch == "teamSch") {
+                schSeCd = 2;
+                color = teamColor;
+            } else if (selectSch == "deptSch") {
+                schSeCd = 3;
+                color = deptColor;
+            } else {
+                schSeCd = 4;
+                color = compColor;
+            }
+            let schName = $("#schName").val().trim();
+            let schSDate = $("#schSDate").val();
+            let schSTime = $("#schSTime").val();
+            let schStart = schSDate + " " + schSTime;
+            let schEDate = $("#schEDate").val();
+            let schETime = $("#schETime").val();
+            let schEnd = schEDate + " " + schETime;
+            let schLoc = $("#schLoc").val().trim();
+            let schCont = $("#schCont").val().trim();
+
+            // validation
+            if (schName == "") {
+                alert("일정명이 입력되지 않았습니다.");
+                return false;
+            }
+
+            if (schSDate == "") {
+                alert("시작일이 입력되지 않았습니다.");
+                return false;
+            }
+
+            if (schEDate == "") {
+                alert("종료일이 입력되지 않았습니다.");
+                return false;
+            }
+
+            let data = {
+                empNo: empNo,
+                schdulSeCd: schSeCd,
+                schdulSj: schName,
+                schdulBeginDate: schStart,
+                schdulEndDate: schEnd,
+                schdulLoc: schLoc,
+                schdulCn: schCont,
+            };
+
+            console.log("data : ", data);
+            createEvent(data, color);
+        });
+
+        // 일정 등록하기
+        function createEvent(data, color) {
+            $.ajax({
+                url: "/api/schedule",
+                type: "post",
+                data: JSON.stringify(data),
+                contentType: "application/json;charset=utf-8",
+                dataType: "text",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("${_csrf.headerName}", "${_csrf.token}");
+                },
+                success: function (rslt) {
+                    console.log("create : ", rslt);
+
+                    if (rslt == "success") {
+                        $("#schModal").removeClass("open");
+                        // 알림 출력
+                        Toast.fire({
+                            icon: "success",
+                            title: _msg.common.insertSuccessAlert,
+                        });
+                        // 캘린더에 반영
+                        calendar.addEvent({
+                            title: data.schdulSj,
+                            start: data.schdulBeginDate,
+                            end: data.schdulEndDate,
+                            backgroundColor: color,
+                        });
+                    } else {
+                        Toast.fire({
+                            icon: "success",
+                            title: _msg.common.insertFailAlert,
+                        });
+                    }
+                },
+            });
+        }
+
+        // 일정 수정하기
+        function updateEvent(info, data) {
+            $.ajax({
+                url: `/api/schedule`,
+                type: "PUT",
+                data: JSON.stringify(data),
+                contentType: "application/json;charset=utf-8",
+                dataType: "text",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("${_csrf.headerName}", "${_csrf.token}");
+                },
+                success: function (rslt) {
+                    console.log(rslt);
+
+                    if (rslt == "success") {
+                        // 알림 출력
+                        Toast.fire({
+                            icon: "success",
+                            title: _msg.common.updateSuccessAlert,
+                        });
+                        // 캘린더에 반영
+                        info.event.setProp("title", data.schdulSj);
+                        info.event.setStart(data.schdulBeginDate);
+                        info.event.setEnd(data.schdulEndDate);
+                    } else {
+                        Toast.fire({
+                            icon: "success",
+                            title: _msg.common.updateFailAlert,
+                        });
+                    }
+                },
+            });
+        }
+
+        // 일정 삭제하기
+        function deleteEvent(info, schdulNo) {
+            // 삭제 확인창 표시
+            Swal.fire({
+                title: _msg.common.deleteConfirm,
+                showDenyButton: true,
+                confirmButtonText: "삭제",
+                denyButtonText: `취소`,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/api/schedule/\${schdulNo}`,
+                        type: "DELETE",
+                        dataType: "text",
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader("${_csrf.headerName}", "${_csrf.token}");
+                        },
+                        success: function (rslt) {
+                            console.log(rslt);
+
+                            if (rslt == "success") {
+                                // 캘린더에 반영
+                                info.event.remove();
+                                // 알림 출력
+                                Toast.fire({
+                                    icon: "success",
+                                    title: _msg.common.deleteSuccessAlert,
+                                });
+                            } else {
+                                Toast.fire({
+                                    icon: "info",
+                                    title: _msg.common.deleteFailAlert,
+                                });
+                            }
+                        },
+                    });
+                } else if (result.isDenied) {
+                    Toast.fire({
+                        icon: "info",
+                        title: _msg.common.deleteFailAlert,
+                    });
+                }
+            });
+        }
+
+        // 모달 닫으면 모달 제목 바꾸고, 팀원 이름 박스, 수정삭제버튼 안보이게 하기
+        $("#schModalCloseBtn").on("click", function () {
+            $("#modalTit").text("일정 등록");
+            $("#schEmpNameBox").css("display", "none");
+            $("#updateConfbtn").prop("disabled", false);
+            $("#deleteBtn").prop("disabled", false);
+            $("#updateBtnGroup").css("display", "none");
+            $("#createBtnGroup").css("display", "block");
+        });
+
+        // 캘린더에서 일정 등록할 때 종료일 포맷
+        function formatEDate(dateString) {
+            let date = new Date(dateString);
+
+            date.setDate(date.getDate() - 1);
+
+            let year = date.getFullYear();
+            let month = ("0" + (date.getMonth() + 1)).slice(-2); // 월을 0부터 시작하기 때문에 1을 더하고, 앞에 0을 붙여 두 자리로
+            let day = ("0" + date.getDate()).slice(-2); // 날짜를 두 자리로
+            return year + "-" + month + "-" + day;
+        }
+
+        // 날짜 추출
+        function extractDate(dateString) {
+            return dateString.split(" ")[0];
+        }
+
+        // 시간 추출
+        function extractTime(dateString) {
+            return dateString.split(" ")[1].substring(0, 5);
+        }
+
+        // 모달에서 종일버튼 클릭에 따라 시간선택 활성화 변경
+        $("#allDay").on("change", function () {
+            if ($(this).is(":checked")) {
+                $("#schSTime").prop("disabled", true);
+                $("#schETime").prop("disabled", true);
+            } else {
+                $("#schSTime").prop("disabled", false);
+                $("#schETime").prop("disabled", false);
+            }
+        });
+
+        // 일정 등록(추가) 버튼 클릭하면 모달 표시
+        $("#createBtn").on("click", function () {
+            // 초기화
+            $("#selectSch").val("mySch");
+            $("#schName").val("");
+            $("#schSDate").val("");
+            $("#schEDate").val("");
+            $("#schSTime").val("08:00");
+            $("#schETime").val("08:00");
+            $("#schLoc").val("");
+            $("#schCont").val("");
+            // 모달 표시
+            $("#schModal").addClass("open");
+        });
+
+        // 캘린더에 표시할 일정 불러오기
+        function getSchedule() {
+            let chkSchs = [];
+            // 체크된 체크박스의 값을 배열에 추가
+            $(".chkSch:checked").each(function () {
+                chkSchs.push(this.id);
+                console.log("check :", chkSchs);
+            });
+
+            // 배열을 쿼리 문자열로 변환
+            let queryString = chkSchs.map(function (id) {
+                return "chkSchs=" + encodeURIComponent(id);
+            });
+
+            return $.ajax({
+                url: "/api/schedules?" + queryString.join("&"),
+                method: "GET",
+                contentType: "application/json",
+                dataType: "json",
+            }).done(function (data) {
+                data.forEach(function (item) {
+                    // 일정 종류에 따라 색상 설정
+                    if (item.schType == "mySch") {
+                        item.backgroundColor = myColor;
+                    } else if (item.schType == "teamSch") {
+                        item.backgroundColor = teamColor;
+                    } else if (item.schType == "deptSch") {
+                        item.backgroundColor = deptColor;
+                    } else {
+                        item.backgroundColor = compColor;
+                    }
+                });
+            });
+        }
+
+        // 일정 상세 모달 불러오기
+        function showSchDetail(info) {
+            console.log("Event clicked:", info);
+            let schdulNo = info.event._def.extendedProps.schNo;
+
+            // 데이터 불러오기
+            $.ajax({
+                url: `/api/schedule/\${schdulNo}`,
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    console.log(data);
+                    let schdulSeCd = data.schdulSeCd;
+                    let schTypeStr = "";
+                    if (schdulSeCd == "1") {
+                        schTypeStr = "mySch";
+                        // 일정이 팀원 일정인 경우
+                        if (empNo != data.empNo) {
+                            schTypeStr = "teamSch";
+                            $("#schEmpName").val(data.empNo);
+                            $("#schEmpNameBox").css("display", "block");
+                            $("#updateConfbtn").prop("disabled", true);
+                            $("#deleteBtn").prop("disabled", true);
+                        }
+                    } else if (schdulSeCd == "2") {
+                        schTypeStr = "teamSch";
+                    } else if (schTypeInfo == "3") {
+                        schTypeStr = "deptSch";
+                    } else {
+                        schTypeStr = "compSch";
+                    }
+
+                    $("#selectSch").val(schTypeStr);
+                    $("#schName").val(data.schdulSj);
+
+                    let schSDateNtime = data.schdulBeginDate;
+                    let schEDateNtime = data.schdulEndDate;
+
+                    $("#schSDate").val(extractDate(schSDateNtime));
+                    $("#schSTime").val(extractTime(schSDateNtime));
+                    $("#schEDate").val(extractDate(schEDateNtime));
+                    $("#schETime").val(extractTime(schEDateNtime));
+
+                    $("#schLoc").val(data.schdulLoc);
+                    $("#schCont").val(data.schdulCn);
+                },
+            });
+
+            // 일정 상세 모달로 바꾸기
+            $("#modalTit").text("일정 상세");
+            $("#createBtnGroup").css("display", "none");
+            $("#updateBtnGroup").css("display", "block");
+            // 모달 열기
+            $("#schModal").addClass("open");
+
+            // 일정 수정(확인) 버튼 누르면 모달 닫고 일정 수정 진행
+            $("#updateConfbtn").on("click", function () {
+                // 값 가져오기
+                let selectSch = $("#selectSch").val();
+                let schSeCd;
+                if (selectSch == "mySch") {
+                    schSeCd = 1;
+                } else if (selectSch == "teamSch") {
+                    schSeCd = 2;
+                } else if (selectSch == "deptSch") {
+                    schSeCd = 3;
+                } else {
+                    schSeCd = 4;
+                }
+                let schName = $("#schName").val().trim();
+                let schSDate = $("#schSDate").val();
+                let schSTime = $("#schSTime").val();
+                let schStart = schSDate + " " + schSTime;
+                let schEDate = $("#schEDate").val();
+                let schETime = $("#schETime").val();
+                let schEnd = schEDate + " " + schETime;
+                let schLoc = $("#schLoc").val().trim();
+                let schCont = $("#schCont").val().trim();
+
+                // validation
+                if (schName == "") {
+                    alert("일정명이 입력되지 않았습니다.");
+                    return false;
+                }
+
+                if (schSDate == "") {
+                    alert("시작일이 입력되지 않았습니다.");
+                    return false;
+                }
+
+                if (schEDate == "") {
+                    alert("종료일이 입력되지 않았습니다.");
+                    return false;
+                }
+
+                let data = {
+                    empNo: empNo,
+                    schdulSeCd: schSeCd,
+                    schdulSj: schName,
+                    schdulBeginDate: schStart,
+                    schdulEndDate: schEnd,
+                    schdulLoc: schLoc,
+                    schdulCn: schCont,
+                    schdulNo: schdulNo,
+                };
+
+                console.log("data : ", data);
+
+                $("#schModal").removeClass("open");
+                updateEvent(info, data);
+            });
+
+            // 일정 삭제 버튼 누르면 모달 닫고 일정 삭제 진행
+            $("#deleteBtn").on("click", function () {
+                console.log("del schdulNo : ", schdulNo);
+
+                $("#schModal").removeClass("open");
+                deleteEvent(info, schdulNo);
+            });
+        }
+
+        // 체크박스 선택이 변경되면 일정 다시 불러오기
+        $(".chkSch").change(function () {
+            getSchedule().done(function (data) {
+                calendar.removeAllEvents(); // 기존 이벤트 제거
+                calendar.addEventSource(data); // 새로운 이벤트 추가
+                calendar.refetchEvents(); // 이벤트 다시 로드
+            });
+        });
+
+        // 일정들 불러오고 난 뒤 실행
+        getSchedule().done(function (data) {
+            console.log(data);
+
+            let calendarEl = document.getElementById("calendar");
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                height: "700px",
+                slotMinTime: "08:00", // Day 캘린더에서 시작 시간
+                slotMaxTime: "22:00", // Day 캘린더에서 종료 시간
+                // 헤더에 표시할 툴바
+                headerToolbar: {
+                    left: "prev,next today",
+                    center: "title",
+                    right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
+                },
+                initialView: "dayGridMonth", // 초기 로드 될 때 보이는 캘린더 화면 (기본 설정 : 달)
+                navLinks: true, // 날짜를 선택하면 Day 캘린더나 Week 캘린더로 링크
+                editable: true, // 수정 가능
+                selectable: true, // 달력 일자 드래그 설정 가능
+                droppable: true, // 드래그 앤 드롭
+                events: data,
+                locale: "ko", // 한국어 설정
+
+                // 일정 클릭하면 일정 상세 모달 표시
+                eventClick: function (info) {
+                    showSchDetail(info);
+                },
+
+                // 캘린더에서 클릭 또는 드래그로 일정 등록 모달 표시
+                select: function (info) {
+                    console.log(info.end);
+                    // 초기화
+                    document.getElementById("selectSch").value = "mySch";
+                    document.getElementById("schName").value = "";
+                    document.getElementById("schSTime").value = "08:00";
+                    document.getElementById("schETime").value = "08:00";
+                    document.getElementById("schLoc").value = "";
+                    document.getElementById("schCont").value = "";
+                    document.getElementById("schSDate").value = info.startStr;
+                    document.getElementById("schEDate").value = formatEDate(info.end);
+                    document.getElementById("schModal").classList.add("open");
+                },
+
+                // 드래그로 이벤트 수정
+                /* eventDrop: function (info) {
+                if (confirm("'" + info.event.title + "'을 수정하시겠습니까?")) {
+                    var events = new Array(); // Json 데이터를 받기 위한 배열 선언
+                    var obj = new Object();
+                    obj.title = info.event._def.title;
+                    obj.start = info.event._instance.range.start;
+                    obj.end = info.event._instance.range.end;
+                    obj.oldTitle = info.oldEvent._def.title;
+                    obj.oldStart = info.oldEvent._instance.range.start;
+                    obj.oldEnd = info.oldEvent._instance.range.end;
+                    events.push(obj);
+                    console.log(events);
+                } else {
+                    location.reload(); // 새로 고침
+                }
+                $(function updateSchedule() {
+                    $.ajax({
+                        url: "/schedule",
+                        method: "PUT",
+                        dataType: "json",
+                        data: JSON.stringify(events),
+                        contentType: "application/json",
+                    });
+                });
+            },
+
+                eventResize: function (info) {
+                console.log(info);
+                if (confirm("'" + info.event.title + "'을 변경하시겠습니까?'")) {
+                    var events = new Array(); // JSON 데이터를 받기 위한 배열
+                    var obj = new Object();
+                    obj.title = info.event._def.title;
+                    obj.start = info.event._instance.range.start;
+                    obj.end = info.event._instance.range.end;
+                    obj.oldTitle = info.oldEvent._def.title;
+                    obj.oldStart = info.oldEvent._instance.range.start;
+                    obj.oldEnd = info.oldEvent._instance.range.end;
+                    events.push(obj);
+                    console.log(events);
+                } else {
+                    location.reload(); // 새로고침
+                }
+                $(function updateSchedule() {
+                    $.ajax({
+                        url: "/schedule",
+                        method: "PUT",
+                        dataType: "json",
+                        data: JSON.stringify(events),
+                        contentType: "application/json",
+                    });
+                });
+            }, */
+            });
+            calendar.render();
+        });
+    });
+</script>
+
+<!--------------------------------- body 시작 --------------------------------->
+<div class="wf-tit-wrap">
+    <h1 class="page-tit">일정</h1>
+    <div class="side-util">
+        <button type="button" class="btn2" id="createBtn">일정 등록</button>
+    </div>
+</div>
+<div class="wf-content-wrap">
+    <div class="wf-flex-box">
+        <div class="wf-content-area" id="calctgrbox">
+            <ul class="checkbox-radio-custom category-ul">
+                <li class="category-li">
+                    <div class="wf-flex-box">
+                        <input type="checkbox" class="chkSch" id="mySch" checked />
+                        <label for="mySch">내 일정 </label>
+                        <span class="circle" id="mySchCircle"></span>
+                    </div>
+                </li>
+                <li class="category-li">
+                    <div class="wf-flex-box">
+                        <input type="checkbox" class="chkSch" id="teamSch" />
+                        <label for="teamSch">팀 일정</label>
+                        <span class="circle" id="teamSchCircle"></span>
+                    </div>
+                </li>
+                <li class="category-li">
+                    <div class="wf-flex-box">
+                        <input type="checkbox" class="chkSch" id="deptSch" />
+                        <label for="deptSch">부서 일정</label>
+                        <span class="circle" id="deptSchCircle"></span>
+                    </div>
+                </li>
+                <li class="category-li">
+                    <div class="wf-flex-box">
+                        <input type="checkbox" class="chkSch" id="compSch" />
+                        <label for="compSch">회사 일정</label>
+                        <span class="circle" id="compSchCircle"></span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="wf-content-area" id="calbox">
+            <div id="calendar"></div>
+        </div>
+    </div>
+</div>
+<!--------------------------------- body 끝 --------------------------------->
+
+<!--------------------------------- 일정 등록/수정 모달 시작 --------------------------------->
+<div class="modal" id="schModal">
+    <div class="modal-cont">
+        <h1 class="modal-tit" id="modalTit">일정 등록</h1>
+        <div class="modal-content-area">
+            <ul class="wf-insert-form2 vertical">
+                <li>
+                    <label for="selectSch">일정 종류<i class="i">*</i></label>
+                    <div>
+                        <div class="wf-select-group">
+                            <select name="selectSch" id="selectSch">
+                                <option value="mySch">내 일정</option>
+                                <option value="teamSch">팀 일정</option>
+                                <option value="deptSch">본부 일정</option>
+                                <option value="compSch">회사 일정</option>
+                            </select>
+                        </div>
+                    </div>
+                </li>
+                <li id="schEmpNameBox">
+                    <label for="schEmpName">팀원 이름</label>
+                    <div>
+                        <input type="text" name="schEmpName" id="schEmpName" />
+                    </div>
+                </li>
+                <li>
+                    <label for="schName">일정명<i class="i">*</i></label>
+                    <div>
+                        <input type="text" name="schName" id="schName" placeholder="일정명 필수입력" />
+                    </div>
+                </li>
+                <li>
+                    <label for="cc">일시<i class="i">*</i></label>
+                    <div class="wf-flex-box">
+                        <input type="date" name="schSDate" id="schSDate" />
+                        <div class="wf-select-group">
+                            <select name="schSTime" id="schSTime">
+                                <option value="08:00">08:00</option>
+                                <option value="09:00">09:00</option>
+                                <option value="10:00">10:00</option>
+                                <option value="11:00">11:00</option>
+                                <option value="12:00">12:00</option>
+                                <option value="13:00">13:00</option>
+                                <option value="14:00">14:00</option>
+                                <option value="15:00">15:00</option>
+                                <option value="16:00">16:00</option>
+                                <option value="17:00">17:00</option>
+                                <option value="18:00">18:00</option>
+                                <option value="19:00">19:00</option>
+                                <option value="20:00">20:00</option>
+                                <option value="21:00">21:00</option>
+                                <option value="22:00">22:00</option>
+                            </select>
+                        </div>
+                        <span class="hyphen">-</span>
+                        <input type="date" name="schEDate" id="schEDate" />
+                        <div class="wf-select-group">
+                            <select name="schETime" id="schETime">
+                                <option value="08:00">08:00</option>
+                                <option value="09:00">09:00</option>
+                                <option value="10:00">10:00</option>
+                                <option value="11:00">11:00</option>
+                                <option value="12:00">12:00</option>
+                                <option value="13:00">13:00</option>
+                                <option value="14:00">14:00</option>
+                                <option value="15:00">15:00</option>
+                                <option value="16:00">16:00</option>
+                                <option value="17:00">17:00</option>
+                                <option value="18:00">18:00</option>
+                                <option value="19:00">19:00</option>
+                                <option value="20:00">20:00</option>
+                                <option value="21:00">21:00</option>
+                                <option value="22:00">22:00</option>
+                            </select>
+                        </div>
+                        <span class="checkbox-radio-custom">
+                            <input type="checkbox" name="allDay" id="allDay" />
+                            <label for="allDay">종일</label>
+                        </span>
+                    </div>
+                </li>
+                <li>
+                    <label for="schLoc">장소</label>
+                    <div>
+                        <input type="text" name="schLoc" id="schLoc" placeholder="장소입력" />
+                    </div>
+                </li>
+                <li>
+                    <label for="schCont">상세 내용</label>
+                    <div>
+                        <textarea name="schCont" id="schCont" placeholder="상세내용"></textarea>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="modal-btn-wrap" id="createBtnGroup">
+            <button class="btn6">취소</button>
+            <button class="btn2" id="createConfBtn">등록</button>
+        </div>
+
+        <div class="modal-btn-wrap" id="updateBtnGroup">
+            <button class="btn6" id="deleteBtn">삭제</button>
+            <button class="btn2" id="updateConfbtn">수정</button>
+        </div>
+
+        <button class="close-btn" id="schModalCloseBtn"></button>
+    </div>
+</div>
+<!--------------------------------- 일정 등록/수정 모달 끝 --------------------------------->

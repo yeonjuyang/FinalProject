@@ -1,0 +1,63 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+
+<script src="/resources/script/approval/main.js"></script>
+
+<script>
+	// 서버에서 받은 데이터
+	const jsonData = ${ Json };
+	console.log(jsonData);
+// 	let sortedData = {};
+// 	for (let i = 0; i < jsonData.length; i++) {
+// 	    let oneVO = jsonData[i];
+// 	    if (!sortedData[oneVO.apvNo]) {
+// 	        sortedData[oneVO.apvNo] = [];
+// 	        sortedData[oneVO.apvNo].push(oneVO);
+// 	    } else {
+// 	        sortedData[oneVO.apvNo].push(oneVO);
+// 	    }
+// 	}
+// 	console.log("sortedData : ", sortedData);
+	
+	let sortedData = jsonData.reduce((acc, current)=>{
+		if(!acc[current.apvNo]){
+			acc[current.apvNo] = [];
+		}
+		acc[current.apvNo].push(current);
+		return acc;
+	}, {});
+	console.log("sortedData : ", sortedData);
+	
+</script>
+
+<!-- =============== 상단타이틀영역 시작 =============== -->
+<div class="wf-tit-wrap">
+	<h1 class="page-tit">전자결재</h1>
+	<div class="side-util"></div>
+</div>
+<!-- =============== 상단타이틀영역 끝 =============== -->
+<!-- =============== 컨텐츠 영역 시작 =============== -->
+
+<div class="wf-content-wrap approval-cont-wrap">
+
+	<div class="wf-flex-box between" style="height: 100%;">
+		<div class="wf-content-area" style="flex: 1; overflow-y: auto;">
+			<p class="heading1">결재 진행 상황</p>
+			<div class="approval-process">
+				<section>
+					<div class="date-top">2024-00-00 금요일</div>
+					<div class="process-cont">
+						<div class="process-bar"></div>
+					</div>
+				</section>
+			</div>
+		</div>
+		<div class="wf-content-area" style="width: 450px;">
+			<p class="heading1">전자서명</p>
+			<div style="border: 1px solid #fff;">전자서명 기능(입력, 수정, 등록된 서명은
+				결재에 사용 가능하게)</div>
+		</div>
+	</div>
+</div>
+<!-- =============== 컨텐츠 영역 끝 =============== -->

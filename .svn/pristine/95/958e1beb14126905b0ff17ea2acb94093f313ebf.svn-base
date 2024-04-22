@@ -1,0 +1,33 @@
+package com.team1.workforest.admin.reservation.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.team1.workforest.admin.reservation.service.AdminResourcesService;
+import com.team1.workforest.reservation.car.vo.CarVO;
+import com.team1.workforest.reservation.meetingroom.vo.MtrVO;
+
+@RestController
+@RequestMapping("/admin")
+public class AdminResourcesController {
+
+	@Autowired
+	AdminResourcesService adminResourcesService;
+
+	// 회의실 목록 불러오기
+	@GetMapping("/mtrs")
+	public List<MtrVO> getMtrList() {
+		return adminResourcesService.getMtrList();
+	}
+
+	// 차량 목록 불러오기
+	@GetMapping("/cars")
+	public List<CarVO> getCarList() {
+		return adminResourcesService.getCarList();
+	}
+
+}

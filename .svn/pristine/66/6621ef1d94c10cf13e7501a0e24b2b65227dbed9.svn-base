@@ -1,0 +1,13 @@
+package com.team1.workforest.schedulerUtil.mapper;
+
+import java.util.List;
+
+import com.team1.workforest.attendance.vo.AttendanceManageVO;
+
+public interface SchedulerMapper {
+
+	public List<AttendanceManageVO> getAttendanceList();
+
+	public List<String> getEmpList();
+
+}

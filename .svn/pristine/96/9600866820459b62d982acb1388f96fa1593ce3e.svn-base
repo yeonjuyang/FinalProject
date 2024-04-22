@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.team1.workforest.schedule.mapper.ScheduleMapper">
+    <select id="getMySchedules" resultType="scheduleVO">
+    	SELECT 
+				  SCHDUL_NO
+				, EMP_NO
+				, DEPT_NO
+				, SCHDUL_SE_CD
+				, SCHDUL_SJ
+				, SCHDUL_BEGIN_DATE
+				, SCHDUL_END_DATE
+				, SCHDUL_LOC
+				, SCHDUL_CN		
+		FROM 
+				SCHEDULE 
+		WHERE 
+				SCHDUL_SE_CD='1' 
+		AND 
+				EMP_NO='2019007'
+    </select>
+    
+    <select id="getTeamSchedules" resultType="scheduleVO">
+    	SELECT 
+				  SCHDUL_NO
+				, EMP_NO
+				, DEPT_NO
+				, SCHDUL_SE_CD
+				, SCHDUL_SJ
+				, SCHDUL_BEGIN_DATE
+				, SCHDUL_END_DATE
+				, SCHDUL_LOC
+				, SCHDUL_CN		
+		FROM SCHEDULE 
+		WHERE (SCHDUL_SE_CD='1' AND DEPT_NO=(SELECT DEPT_NO FROM EMPLOYEE WHERE EMP_NO='2019007') AND EMP_NO != '2019007') 
+						OR (SCHDUL_SE_CD='2' AND DEPT_NO=(SELECT DEPT_NO FROM EMPLOYEE WHERE EMP_NO='2019007'))
+    </select>
+    
+    <select id="getDeptSchedules" resultType="scheduleVO">
+    	SELECT 
+				  SCHDUL_NO
+				, EMP_NO
+				, DEPT_NO
+				, SCHDUL_SE_CD
+				, SCHDUL_SJ
+				, SCHDUL_BEGIN_DATE
+				, SCHDUL_END_DATE
+				, SCHDUL_LOC
+				, SCHDUL_CN		
+		FROM SCHEDULE 
+		WHERE SCHDUL_SE_CD='3' AND DEPT_NO=(SELECT SUBSTR(DEPT_NO,1,6) FROM EMPLOYEE WHERE EMP_NO='2019007')
+    </select>
+    
+    <select id="getCompSchedules" resultType="scheduleVO">
+    	SELECT 
+				  SCHDUL_NO
+				, EMP_NO
+				, DEPT_NO
+				, SCHDUL_SE_CD
+				, SCHDUL_SJ
+				, SCHDUL_BEGIN_DATE
+				, SCHDUL_END_DATE
+				, SCHDUL_LOC
+				, SCHDUL_CN		
+		FROM 
+				SCHEDULE 
+		WHERE 
+				SCHDUL_SE_CD='4'
+    </select>
+    
+    <select id="getSchedule" resultType="scheduleVO">
+    	SELECT 
+				  SCHDUL_NO
+				, EMP_NO
+				, DEPT_NO
+				, SCHDUL_SE_CD
+				, SCHDUL_SJ
+				, SCHDUL_BEGIN_DATE
+				, SCHDUL_END_DATE
+				, SCHDUL_LOC
+				, SCHDUL_CN		
+		FROM 
+				SCHEDULE 
+		WHERE 
+				SCHDUL_NO=#{schdulNo}
+    </select>
+    
+    <insert id="createSchedule" parameterType="scheduleVO">
+    	INSERT INTO SCHEDULE(
+   							  SCHDUL_NO
+   							, EMP_NO
+   							, DEPT_NO
+   							, SCHDUL_SE_CD
+   							, SCHDUL_BEGIN_DATE
+   							, SCHDUL_END_DATE
+   							, SCHDUL_SJ
+			   				<if test="schdulCn!=null and schdulCn!=''">
+							, SCHDUL_CN
+							</if>
+							<if test="schdulLoc!=null and schdulLoc!=''">
+							, SCHDUL_LOC
+							</if>
+							)
+		VALUES (
+							  (SELECT NVL(MAX(SCHDUL_NO), 0) + 1 FROM SCHEDULE)
+							, '2019007'
+							, (SELECT DEPT_NO FROM EMPLOYEE WHERE EMP_NO='2019007')
+							, #{schdulSeCd}
+							, TO_DATE(#{schdulBeginDate},'YYYY-MM-DD HH24:MI:SS')
+							, TO_DATE(#{schdulEndDate},'YYYY-MM-DD HH24:MI:SS')
+							, #{schdulSj}
+							<if test="schdulCn!=null and schdulCn!=''">
+							, #{schdulCn}
+							</if>
+							<if test="schdulLoc!=null and schdulLoc!=''">
+							, #{schdulLoc}
+							</if>	
+							)
+    </insert>
+    
+    <delete id="deleteSchedule">
+    	DELETE FROM SCHEDULE 
+    	WHERE SCHDUL_NO=#{schdulNo}
+    </delete>
+</mapper>

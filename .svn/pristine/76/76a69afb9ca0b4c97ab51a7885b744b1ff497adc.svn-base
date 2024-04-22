@@ -1,0 +1,19 @@
+package com.team1.workforest.board.notice.vo;
+
+import java.util.Date;
+
+import lombok.Data;
+
+@Data
+public class NoticeBoardVO {
+	private String noticeBrdNo;
+	private String empNo;
+	private String noticeBrdSj;
+	private Date writngDate;
+	private int rdcnt;
+	private Date updtDate;
+	private String noticeBrdSeCd;
+	private Date fixingEndDate;
+	private String noticeBrdCn;
+	private String atchmnflNo;
+}

@@ -1,0 +1,62 @@
+@charset "UTF-8";
+
+/* .box1{
+	width: 150px;
+	height: 120px;
+	text-align: center;
+	background-image: linear-gradient(to top, rgba(255, 99, 132, 0.7) 0%, rgba(255, 99, 132, 0.7) 30%, var(--glass-bg) 20%, var(--glass-bg) 100%)
+} */
+.yearClassify{
+	height:50px;
+	
+}
+.yearClassify1{
+	display: flex;
+	flex-direction: column;
+}
+.box1{
+	width: 170px;
+	height: 120px;
+	text-align: center;
+	padding-top: 30px;
+	font-size: 1.2rem;
+}
+.box2{
+	width: 200px;
+	height: 120px;
+	text-align: center;
+}
+.box2 .heading1{
+	position: relative;
+	top: 10px;
+}
+.box3{
+	height: 220px;
+	margin-top: 30px;
+}
+.empInfo{
+	width: 100%;
+	position: relative;
+	top: 3px;
+}
+.line2{
+	margin-top: 20px;
+	height: 320px;
+}
+.align-center{
+	text-align: center;
+}
+.chart-container{
+	height: 300px;
+	margin: 0 auto;
+	display: flex;
+  	justify-content: center; /* 내부 요소를 가운데 정렬 */
+}
+.listBox{
+	width: 380px;
+	height: 460px;
+}
+.showList{
+	overflow: scroll;
+	height:95%;
+}

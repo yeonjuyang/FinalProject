@@ -1,0 +1,85 @@
+package com.team1.workforest.admin.service.serviceImpl;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.team1.workforest.admin.mapper.AdminEmpMapper;
+import com.team1.workforest.admin.service.AdminEmpService;
+
+@Service
+public class AdminEmpServiceImpl implements AdminEmpService{
+
+	@Autowired
+	AdminEmpMapper adminEmpMapper;
+
+	@Override
+	public List<Integer> getAgeGraph(Map<String, String> map) {
+		
+		List<Integer> dataList = new ArrayList<Integer>();
+		int data = 0;
+		
+		for(int i=5; i<=11; i++) {
+			String start = (5*(i-1) + 1) + "";
+			String end = 5*i + "";
+			
+			if(i == 11) {
+				end = "100";
+			}
+			
+			map.put("start", start);
+			map.put("end", end);
+			data = this.adminEmpMapper.getAgeGraph(map);
+			dataList.add(data);
+			
+		}
+		
+		return dataList;
+	}
+
+	@Override
+	public int getAvgAge(Map<String, String> map) {
+		return this.adminEmpMapper.getAvgAge(map);
+	}
+
+	@Override
+	public int getEmpCount(Map<String, String> map) {
+		return this.adminEmpMapper.getEmpCount(map);
+	}
+
+	@Override
+	public List<Integer> getGenderRate(Map<String, String> map) {
+		List<Integer> dataList = new ArrayList<Integer>();
+		
+		map.put("gender", "1");
+		int data = this.adminEmpMapper.getGenderRate(map);
+		dataList.add(data);
+		
+		
+		map.put("gender", "2");
+		data = this.adminEmpMapper.getGenderRate(map);
+		dataList.add(data);
+		
+		return dataList;
+	}
+
+	@Override
+	public List<Integer> getRetireCount(Map<String, String> map) {
+		
+		List<Integer> dataList = new ArrayList<Integer>();
+		
+		map.put("retire", "3");
+		int data = this.adminEmpMapper.getRetireCount(map);
+		dataList.add(data);
+		
+		
+		map.put("retire", "4");
+		data = this.adminEmpMapper.getRetireCount(map);
+		dataList.add(data);
+		
+		return dataList;
+	}
+}

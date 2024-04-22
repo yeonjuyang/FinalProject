@@ -1,0 +1,17 @@
+package com.team1.workforest.mail.mapper;
+
+import java.util.List;
+import java.util.Map;
+
+import com.team1.workforest.mail.vo.EmailVO;
+
+public interface EmailMapper {
+
+	public List<EmailVO> getMailList(Map<String, Object> map);
+
+	public int getTotal(Map<String, Object> map);
+
+	public EmailVO getMailDetail(String emailNo);
+	
+
+}

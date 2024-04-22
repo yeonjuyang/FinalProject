@@ -1,0 +1,260 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+	
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="/resources/css/duty/senderMain.css">
+    
+ <!--  fullcalender -->
+
+<link href="/resources/css/fullcalendar.css" rel="stylesheet" />
+<script src="/resources/js/fullcalendar.js"></script>
+<script src="/resources/js/fullcalendar-ko.js"></script> 
+ 
+ 
+<div class="wf-main-container">
+	<!-- =============== body 시작 =============== -->
+	<!-- =============== 상단타이틀영역 시작 =============== -->
+	<div class="wf-tit-wrap">
+		<h1 class="page-tit">업무</h1>
+		<div class="side-util"></div>
+	</div>
+	<!-- =============== 상단타이틀영역 끝 =============== -->
+	<!-- =============== 컨텐츠 영역 시작 =============== -->
+	<div class="wf-content-wrap">
+
+		<!-- 상단영역 시작 -->
+		<div class="wf-content-area box3">
+			<div class="wf-flex-box">
+				<div class="wf-content-box">
+					<p class="heading2">사원 업무 통계</p>	
+					<div id="senderChart1"></div>
+				</div>
+				<div class="wf-content-box">				
+					<div id="myDay"></div>					
+				</div>
+
+				<div class="wf-content-box">
+					<div id="monthDay"></div>					
+				</div>
+			</div>
+		</div>
+		<!-- 상단영역 끝 -->
+
+		<!-- 하단영역 시작 -->
+		<div class="wf-content-area">
+
+			<div class="tab-type tab-type1">
+				<div class="wf-flex-box between">
+					<p class="heading1">받은 업무함</p>
+					<div class="tab-menu">
+						<button data-tab="tab1" type="button" class="tab-btn active">전체</button>
+						<button data-tab="tab2" type="button" class="tab-btn" id="ingBar">진행중</button>
+						<button data-tab="tab3" type="button" class="tab-btn" id="doneBar">완료</button>
+						<div class="tab-indicator"
+							style="width: 140px; transform: translateX(0px);"></div>
+					</div>
+				</div>
+
+				<!-- tab1  -->
+				<div data-tab="tab1" class="tab-content active">
+					<div class="tab-board-lst">
+					<div id="tabId1"></div>
+					</div>
+				</div>
+
+				<!-- tab2  -->
+				<div data-tab="tab2" class="tab-content">
+					<div class="tab-board-lst">
+					<div id="tabId2"></div>
+					</div>
+				</div>
+
+				<!-- tab3  -->
+				<div data-tab="tab3" class="tab-content">
+					<div class="tab-board-lst">
+					<div id="tabId10"></div>
+				</div>
+			</div>
+
+		</div>
+		<!-- 하단영역 끝 -->
+	</div>
+	<!-- =============== 컨텐츠 영역 끝 =============== -->
+	<!-- =============== body 끝 =============== -->
+</div>    
+
+
+<script type="text/javascript">
+_senderBadge={
+	"중단":"wf-badge5",
+	"준비":"wf-badge1",
+	"진행":"wf-badge2",
+	"완료":"wf-badge4"
+	};
+	
+_senderStyle={
+		"중단":1,
+		"준비":2,
+		"진행":3,
+		"완료":4
+		};
+let _senderRate={
+		0:"wf-badge5",
+		1:"wf-badge1",
+		2:"wf-badge2",
+		3:"wf-badge2",
+		4:"wf-badge2",
+		5:"wf-badge2",
+		6:"wf-badge2",
+		7:"wf-badge2",
+		8:"wf-badge2",
+		9:"wf-badge2",
+		10:"wf-badge4"
+	}
+
+$(()=>{
+	let sessionEmpNo= <%=session.getAttribute("empNo") %>;
+	
+	let data={
+		"empNo":sessionEmpNo
+	};
+	
+	//관리자의 왼쪽 상단 통계--------------------------------
+	$.ajax({
+		url:"/duty/senderChart1",
+		data:JSON.stringify(data),
+		contentType:"application/json;charset=utf-8",
+		type:"post",
+		dataType:"json",
+		beforeSend:function(xhr){
+			xhr.setRequestHeader("${_csrf.headerName}","${_csrf.token}");
+		},
+		success:function(res){  
+	 		console.log(res);
+	   		console.log("weekDoList",res);
+		    let str="";
+	   		str +=  `<div class="wf-flex-box between">
+					</div>
+					<ul class="wf-list-style"><br>`;
+		 $.each(res, function(idx, vo){	
+			str +=  `<li class="style\${_senderStyle[vo.prgsRate]}">
+						<span class="user-thumb" >
+                			<img src="/resources/img/icon/\${vo.proflImageUrl}" style="width:30px; height:30px;">
+            			</span>
+					\${vo.empNm}
+						<p style="float:right; padding:3px;">
+						\${vo.col1 ? `<badge class="wf-badge5">\${vo.col1}</badge>` : ''}
+						\${vo.col2 ? `<badge class="wf-badge1">\${vo.col2}</badge>` : ''}
+						\${vo.col3 ? `<badge class="wf-badge2">\${vo.col3}</badge>` : ''}
+						\${vo.col4 ? `<badge class="wf-badge4">\${vo.col4}</badge>` : ''}
+						</p></li>`;
+						
+		 })
+			 str +=`</ul>`;
+			 $("#senderChart1").html(str);
+		}
+		
+	   }); //관리자의 왼쪽 상단 통계 끝----------------------- 
+	
+	//관리자의 중앙 통계--------------------------------
+	$.ajax({
+		url:"/duty/senderChart2",
+		data:JSON.stringify(data),
+		contentType:"application/json;charset=utf-8",
+		type:"post",
+		dataType:"json",
+		beforeSend:function(xhr){
+			xhr.setRequestHeader("${_csrf.headerName}","${_csrf.token}");
+		},
+		success:function(res){  
+	   		console.log("todayDoList",res);
+	   		let $myDay = $("#myDay");
+	   		$myDay.html();
+	   	    let str = ``;
+	            str +=`<p class="heading2"><i class="xi-angle-left btnMinus"></i> \${res[0].sendDate}  오늘의 업무 <i class="xi-angle-right btnPlus"></i></p><br>`;
+	        	str += `<ul class="wf-list-style">`;
+	        $.each(res, function(idx, vo){
+	        	str +=`<li class="style\${idx+1} todayList" data-emp-no="\${vo.empNo}" data-duty-no="\${vo.dutyNo}">\${vo.closTime}시<span class="heading2"> &nbsp;&nbsp;\${vo.empNm}</span>` ; 
+	        	str +=`<p class="heading2" style="float:right; padding:3px;">\${vo.dutySj}</p></li>`; 
+
+	        })
+	        	str +=`</ul>`;
+	        $myDay.html(str);   
+		}
+	   }); //관리자의 중앙 통계 끝----------------------- 
+	   
+	   
+	   
+    var calendarEl = document.getElementById('monthDay');
+   	empNo=sessionEmpNo;   
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+    	initialView: 'dayGridWeek',
+        //slotDuration: '', // 시간 슬롯을 비활성화
+        allDaySlot: true, // 종일 이벤트만 표시하도록 설정
+    	aspectRatio: 1.5 ,
+        events: function(etchInfo, successCallback, failureCallback){
+        	data ={
+        		"empNo"	:empNo
+        	};
+        	 $.ajax({
+        		   	url:"/duty/senderChart3",
+        				data:JSON.stringify(data),
+        				contentType:"application/json;charset=utf-8",
+        				type:"post",
+        				dataType:"json",
+        				beforeSend:function(xhr){
+        					xhr.setRequestHeader("${_csrf.headerName}","${_csrf.token}");
+        				},
+        				success:function(res){  
+        			   		let calendar=calendarData(res);
+        			   		console.log("senderChart3",calendar);	   	 
+        			   		
+        			
+        			   		successCallback(calendar);
+    			       
+        				}
+        		   }); 
+
+        },
+        
+        eventContent: function(info) {
+        	 console.log(info.event.extendedProps.description);
+		   let rate=info.event.extendedProps.description;
+        	 
+            return {
+            	 html: "<badge class='" + _senderRate[rate] + "'>"+info.event.title+"</badge>"
+                	 
+            };
+        },
+        eventRender: function(info) {
+        	 info.el.style.border = 'none'; // border를 없애기 위해 투명색으로 설정
+        }
+      });
+
+      calendar.render();
+      calendarEl.style.width = '400px';
+      calendarEl.style.height = '200px';
+      
+	   
+	   
+	   
+	   
+	   
+})//$function 끝-------------------------------------------
+
+
+function calendarData(data) {  
+    return data.map(task => {
+        var transformedTask = {
+        	   id:task.empNo,	
+            title: task.empNm,
+            start:task.closDate+"T"+task.closTime,
+            end: task.closDate+"T"+task.closTime,
+            description:task.prgsRate
+        };
+        return transformedTask;
+    });
+}
+
+
+</script>

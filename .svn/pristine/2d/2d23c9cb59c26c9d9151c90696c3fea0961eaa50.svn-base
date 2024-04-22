@@ -1,0 +1,45 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<style>
+.main-container{
+	width: 100%;
+}
+</style>
+<script>
+let realSize = window.innerWidth;
+let empNo = <%=session.getAttribute("empNo")%>
+
+
+$("body").css("width",realSize)
+window.addEventListener("resize", function() {
+	let realSize = window.innerWidth;
+	$("body").css("width",realSize)
+})
+
+$("header").html("")
+$("header").css("height","0px")
+$("aside").html("")
+$(function(){
+	console.log(empNo)
+	$.ajax({
+		url:"/chat/getChatRoom?empNo="+empNo,
+		data:{"empNo":empNo},
+		type:"get",
+		success:function(res){
+			let str = "";
+			str += `<div class="wf-content-wrap">`
+			$.each(res,function(i,v){
+				str += `<div class="wf-content-area myChatRoom" idx="\${v.chatRoomNo}" style="margin-top:2px;">
+					<p class="heading1">\${v.chatRoomNm}</p>
+					</div>`
+			})
+			
+			str += `</div>`
+			
+			$("aside").html(str)
+			
+		}
+	})
+})
+
+</script>

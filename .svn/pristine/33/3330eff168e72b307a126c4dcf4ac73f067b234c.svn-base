@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.team1.workforest.reservation.meetingroom.mapper.MtrResveMapper">
+	
+	<resultMap type="mtrReservationVO" id="mtrResveMap">
+		<result property="resveCn" column="RESVE_CN"/>
+		<result property="mtrResveNo" column="MTR_RESVE_NO"/>
+		<result property="mtrNo" column="MTR_NO"/>
+		<result property="empNo" column="EMP_NO"/>
+		<result property="resveBeginDate" column="RESVE_BEGIN_DATE"/>
+		<result property="resveEndDate" column="RESVE_END_DATE"/>
+		<collection property="mtrVO" resultMap="mtrMap"></collection>
+	</resultMap>
+	
+	<resultMap type="mtrVO" id="mtrMap">
+		<result property="mtrNo" column="MTR_NO"/>
+		<result property="mtrLoc" column="MTR_LOC"/>
+		<result property="mtrNm" column="MTR_NM"/>
+	</resultMap>
+	
+	
+	<!-- 회의실 예약 리스트 불러오기 -->
+	<select id="getMtrResveList" resultMap="mtrResveMap">
+		SELECT 
+    			  R.MTR_RESVE_NO
+    			, M.MTR_LOC
+   				, M.MTR_NM
+    			, R.EMP_NO
+    			, R.RESVE_BEGIN_DATE
+    			, R.RESVE_END_DATE
+    			, R.RESVE_CN 
+		FROM 
+    			MEETINGROOM_RESERVATION R INNER JOIN MEETINGROOM M ON R.MTR_NO = M.MTR_NO
+	</select>
+	
+	<!-- 특정 예약 불러오기 -->
+	<select id="getMtrResve" parameterType="String" resultMap="mtrResveMap">
+		SELECT 
+    			  R.MTR_RESVE_NO
+    			, M.MTR_LOC
+   				, M.MTR_NM
+    			, R.EMP_NO
+    			, R.RESVE_BEGIN_DATE
+    			, R.RESVE_END_DATE
+    			, R.RESVE_CN 
+		FROM 
+    			MEETINGROOM_RESERVATION R INNER JOIN MEETINGROOM M ON R.MTR_NO = M.MTR_NO
+		WHERE
+				R.MTR_RESVE_NO = #{mtrResveNo}
+				
+	</select>
+	
+	<!-- 내 예약 불러오기 -->
+	<select id="getMyMtrResve" resultMap="mtrResveMap">
+		SELECT 
+    			  R.MTR_RESVE_NO
+    			, M.MTR_LOC
+   				, M.MTR_NM
+    			, R.RESVE_BEGIN_DATE
+    			, R.RESVE_END_DATE
+    			, R.RESVE_CN 
+		FROM 
+    			MEETINGROOM_RESERVATION R INNER JOIN MEETINGROOM M ON R.MTR_NO = M.MTR_NO  			
+    	WHERE
+				R.EMP_NO = #{empNo}
+	</select>
+	
+	<!-- 회의실 예약 추가 -->
+	<insert id="createMtrResve" parameterType="mtrReservationVO">
+		INSERT INTO MEETINGROOM_RESERVATION
+    						(
+   							  MTR_RESVE_NO
+   							, MTR_NO
+							, EMP_NO
+							, RESVE_BEGIN_DATE
+							, RESVE_END_DATE
+							, RESVE_CN
+							)
+		VALUES 
+							(
+							SEQ_MTR_RESVE.NEXTVAL
+							, #{mtrNo}
+							, #{empNo}		
+							, TO_DATE(#{resveBeginDate},'YYYY-MM-DD HH24:MI:SS')
+							, TO_DATE(#{resveEndDate},'YYYY-MM-DD HH24:MI:SS')
+							, #{resveCn}	
+							)
+	</insert>
+	
+	<!-- 회의실 예약 수정 -->
+	<update id="updateMtrResve" parameterType="mtrReservationVO">
+		UPDATE MEETINGROOM_RESERVATION SET 
+   							  MTR_NO = #{mtrNo}
+							, EMP_NO = #{empNo}
+							, RESVE_BEGIN_DATE = TO_DATE(#{schdulBeginDate},'YYYY-MM-DD HH24:MI:SS')
+							, RESVE_END_DATE = TO_DATE(#{schdulEndDate},'YYYY-MM-DD HH24:MI:SS')
+							, RESVE_CN = #{resveCn}
+							
+   							, SCHDUL_BEGIN_DATE 
+   							, SCHDUL_END_DATE 
+   							, SCHDUL_SJ = #{schdulSj}
+			   				
+							WHERE MTR_RESVE_NO = #{mtrResveNo}
+	</update>
+	
+	<!-- 회의실 예약 취소 -->
+	<delete id="deleteMtrResve" parameterType="String">
+		DELETE 
+				FROM MEETINGROOM_RESERVATION
+		WHERE
+				MTR_RESVE_NO = #{mtrResveNo}
+	</delete>
+	
+</mapper>

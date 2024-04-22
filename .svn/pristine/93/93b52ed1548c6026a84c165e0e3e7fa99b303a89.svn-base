@@ -1,0 +1,61 @@
+@charset "UTF-8";
+
+:root { 
+	-color-mySch: #32b677; 
+	-color-teamSch: #029be6; 
+	-color-deptSch: #7987ca; 
+	-color-compSch: #f5521c;
+}
+
+#calctgrbox {
+	height: 200px;
+	width: 10%;
+}
+
+#calbox {
+	width: 90%;
+}
+
+.category-ul {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	gap: 12px;
+}
+
+.category-li {
+	margin-left: 0 !important;
+	width: 80%;
+}
+
+.circle {
+	display: inline-block;
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	margin-left: auto;
+}
+
+#mySchCircle {
+	background-color: var(- -color-mySch);
+}
+
+#teamSchCircle {
+	background-color: var(- -color-teamSch);
+}
+
+#deptSchCircle {
+	background-color: var(- -color-deptSch);
+}
+
+#compSchCircle {
+	background-color: var(- -color-compSch);
+}
+
+#schEmpNameBox {
+	display: none;
+}
+
+#updateBtnGroup {
+	display: none;
+}

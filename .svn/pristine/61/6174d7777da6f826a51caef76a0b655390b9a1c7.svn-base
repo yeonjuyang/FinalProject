@@ -1,0 +1,225 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<%@ include file="/WEB-INF/views/tiles/taglib.jsp"%>
+
+<aside class="sidebar custom">
+    <div class="sidebar-user-info">
+        <!------------------------- 로그인 안했을 때  시작 ------------------------->
+		<sec:authorize access="isAnonymous()">
+		<div class="user-panel mt-3 pb-3 mb-3 d-flex">
+			<div class="info">
+				<a href="/" class="d-block">로그인해주세요</a>
+			</div>
+		</div>
+		</sec:authorize>
+		<!------------------------- 로그인 안했을 때  끝 ------------------------->
+
+		<!------------------------- 로그인 했을 때  시작 ------------------------->
+		<div class="img-box">
+	            <img src="/resources/img/icon/${proflImageUrl}">
+			</div>
+		<sec:authorize access="isAuthenticated()">
+    	<sec:authentication property="principal.empVO" var="empVO" />
+		
+<!-- 			<div class="img-box"> -->
+<%-- 	            <img src="/resources/img/icon/${empVO.proflImageUrl}"> --%>
+<!-- 			</div> -->
+			<span class="name">${empNm} ${rspnsblCtgryNm}</span>
+			<span class="team">${empVO.deptNm}</span>	
+		
+
+        <%-- <div class="image">
+              <img src="/resources/img/icon/${empVO.proflImageUrl}" class="img-circle elevation-2" alt="User Image">
+        </div> --%>
+		<%-- <a href="/emp/detailLogin" class="d-block">
+	    <span class="name">${empVO.empNm}</span>  ${rspnsblCtgryNm}<br>
+	     <span class="team">${empVO.deptNm}</span>
+	    </a> --%>
+       <%-- <form action="/logout" method="post">
+                <button type="submit" class="btn btn-block btn-outline-primary btn-xs">로그아웃</button>
+                <input name="${_csrf.parameterName}" type="hidden" value="${_csrf.token}"/>
+                <sec:csrfInput />
+            </form> --%>
+		</sec:authorize>
+
+		<!------------------------- 로그인 했을 때  끝 ------------------------->
+    
+
+     </div> 
+    <div id="leftside-navigation" class="leftside-navigation">
+        <ul class="depth1">
+            <li class="sub-menu">
+                <a href="javascript:void(0)" class="arrow">
+                    <i class="xi-business"></i>
+                    <span>업무관리</span>
+                </a>
+                <ul class="depth2">
+                    <li>
+                        <a href="/duty/main">업무</a>
+                    </li>
+                    <li>
+                        <a href="/project/projects">프로젝트</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        <ul class="depth1">
+            <li class="sub-menu">
+                <a href="javascript:void(0)" class="arrow">
+                    <i class="xi-document"></i>
+                    <span>전자결재</span>
+                </a>
+                <ul class="depth2">
+        	        <li>
+                        <a href="/approval/mainView">전자결재</a>
+                    </li>
+                    <li>
+                        <a href="/approval/listView">내 문서함</a>
+                    </li>
+                    <li>
+                        <a href="/approval/deptListView">부서 문서함</a>
+                    </li>
+                    <li>
+                        <a href="/approval/referListView">참조 문서함</a>
+                    </li>
+                </ul>
+                
+            </li>
+        </ul>
+        <ul class="depth1">
+            <li class="sub-menu">
+                <a href="javascript:void(0)" class="arrow">
+                    <i class="xi-pen"></i>
+                    <span>예약/신청</span>
+                </a>
+                <ul class="depth2">
+                    <li>
+                        <a href="/reservation/mtr/main">회의실 예약</a>
+                    </li>
+                    <li>
+                        <a href="/reservation/car/main">차량 예약</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        <ul class="depth1">
+            <li class="sub-menu">
+                <a href="javascript:void(0)" class="arrow">
+                    <i class="xi-calendar"></i>
+                    <span>일정관리</span>
+                </a>
+                <ul class="depth2">
+                    <li>
+                        <a href="/schedule/main">일정</a>
+                    </li>
+                    <li>
+                        <a href="/vacation/main">휴가</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        <ul class="depth1">
+            <li>
+                <a href="/attendance/main">
+                    <i class="xi-alarm-clock"></i>
+                    <span>근태관리</span>
+                </a>
+            </li>
+        </ul>
+        <ul class="depth1">
+            <li class="sub-menu">
+                <a href="javascript:void(0)" class="arrow">
+                    <i class="xi-align-justify"></i>
+                    <span>게시판</span>
+                </a>
+                <ul class="depth2">
+                    <li>
+                        <a href="/notice/list">공지사항</a>
+                    </li>
+                    <li>
+                        <a href="/suggestion/list">건의게시판</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        <ul class="depth1">
+            <li class="sub-menu">
+                <a href="javascript:void(0)" class="arrow">
+                    <i class="xi-group"></i>
+                    <span>조직도(주소록)</span>
+                </a>
+                 <ul class="depth2">
+                  <li>
+                        <a href="/emp/list">조직도(주소록)</a>
+                    </li>
+                    <li>
+                        <a href="/news/news">크롤링</a>
+                    </li>
+                   
+                </ul>
+            </li>
+        </ul>
+        <ul class="depth1">
+          <li class="sub-menu">
+              <a href="/mail/main" class="arrow">
+                  <i class="xi-mail"></i>
+                  <span>메일</span>
+              </a>   
+          </li>
+        </ul>
+
+        <ul class="depth1">
+            <li class="sub-menu">
+                <a href="javascript:void(0)" class="arrow">
+                    <i class="xi-chart-bar"></i>
+                    <span>통계(관리자)</span>
+                </a>
+                <ul class="depth2">
+                    <li>
+                        <a href="/adminEmp/main">사원통계</a>
+                    </li>
+                    <li>
+                        <a href="/adminProject/main">프로젝트통계</a>
+                    </li>
+                      <li>
+                        <a href="/adminAttendance/main">근태통계</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        <ul class="depth1">
+            <li class="sub-menu">
+                <a href="javascript:void(0)" class="arrow">
+                    <i class="xi-pen"></i>
+                    <span>예약관리(관리자)</span>
+                </a>
+                <ul class="depth2">
+                    <li>
+                        <a href="/admin/reservation/manageMtrResves">회의실 예약 관리</a>
+                    </li>
+                    <li>
+                        <a href="/admin/reservation/manageCarResves">차량 예약 관리</a>
+                    </li>
+                    <li>
+                        <a href="/admin/reservation/manageResources">시설/자원관리</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        <ul class="depth1">
+            <li class="sub-menu">
+                <a href="/admin/list" class="arrow">
+                    <i class="xi-group"></i>
+                    <span>조직관리(관리자)</span>
+                </a>   
+            </li>
+        </ul>
+        <ul class="depth1">
+            <li class="sub-menu">
+                <a href="javascript:void(0)" class="arrow">
+                    <i class="xi-document"></i>
+                    <span>설문(관리자)</span>
+                </a>   
+            </li>
+        </ul>
+    </div>
+</aside>

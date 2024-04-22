@@ -1,0 +1,18 @@
+package com.team1.workforest.admin.service;
+
+import java.util.List;
+import java.util.Map;
+
+public interface AdminEmpService {
+
+	public List<Integer> getAgeGraph(Map<String, String> map);
+
+	public int getAvgAge(Map<String, String> map);
+
+	public int getEmpCount(Map<String, String> map);
+
+	public List<Integer> getGenderRate(Map<String, String> map);
+
+	public List<Integer> getRetireCount(Map<String, String> map);
+
+}

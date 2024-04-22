@@ -1,0 +1,56 @@
+$(function () {
+
+	// 미리보기 이벤트
+	$('#preview_btn').on('click', preview);
+
+	// 작성한 기안 저장
+    $('#save_btn').on('click', function () {
+        let empNo = $('#empNo').val(); // 기안자
+        let tit = $('#tit').val();     // 제목
+        let cont = $('#cont').val();   // 내용
+        let docFormNo = $('#docFormNo option:selected').val();
+
+        let data = {
+            "docFormNo": docFormNo,
+            "empNo": empNo,
+            "apvSj": tit,
+            "apvCn": cont
+        }
+
+        console.log("data : ", data);
+
+        $.ajax({
+            type: "post",
+            url: "/approval/create",
+            data: JSON.stringify(data),
+            dataType: "text",
+            success: function (result) {
+                if (result > 0) {
+                    alert(_msg.approval.insertSuccessAlert);
+                    
+                    // 상세로 이동
+                    location.href="/approval/approvalDetailView";
+                } else {
+                    alert(_msg.approval.insertFailAlert);
+                }
+            }
+        });
+    }); 
+
+});
+
+// 미리보기
+function preview() {
+	const tit = $('#tit').val();
+	const cont = $('#cont').val();
+
+	$('#preview-modal').addClass('open');
+
+	// 기안날짜
+	let today = new Date();
+	$('#preview-modal #apv_date').text(today.toLocaleString());
+
+	// 제목, 내용
+	$('#preview-modal #apv_tit').text(tit);
+	$('#preview-modal #apv_cont').text(cont);
+}

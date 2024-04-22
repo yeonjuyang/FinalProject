@@ -1,0 +1,30 @@
+package com.team1.workforest.reservation.meetingroom.service;
+
+import java.util.List;
+
+import com.team1.workforest.reservation.meetingroom.vo.MtrReservationVO;
+import com.team1.workforest.reservation.meetingroom.vo.MtrVO;
+
+public interface MtrResveService {
+	
+	public List<MtrReservationVO> getMtrResveList();
+
+	public MtrReservationVO getMtrResve(String mtrResveNo);
+	
+	public List<MtrReservationVO> getMyMtrResve(String empNo);
+	
+	public List<MtrReservationVO> getMyPastMtrResve(String empNo);
+
+	public int createMtrResve(MtrReservationVO mtrResveVO);
+
+	public int updateMtrResve(MtrReservationVO mtrResveVO);
+
+	public int deleteMtrResve(String mtrResveNo);
+
+	public MtrVO getMtrInfo(String mtrNo);
+
+	
+
+	
+
+}

@@ -1,0 +1,330 @@
+const _HTML = {
+	msg: {
+		docNm: {
+			1: '품의서',
+			2: '출장신청서',
+			3: '도서구입신청서',
+		}
+	},
+	main: {
+		progress_ul: function(param) {
+			let frst = param.apvLine.shift();
+			let last = param.apvLine.pop();
+			
+			let middle = param.apvLine.find((e) => e.apvSttusCd == '0');
+			if(middle == undefined) {
+				middle = param.apvLine[param.apvLine.length - 1];
+			}
+			
+			function getLastNm(obj) {
+				return obj.apvRspnsbl != '팀원' ? obj.apvRspnsbl : obj.apvPosition;
+			}
+			
+			function getStatusCls(obj) {
+				let cls = {
+					// 기안
+					'1': {
+						'0': 'pending',
+						'Y': 'completed',
+					},
+					// 검토
+					'2': {
+						'0': 'wf-progress',
+						'Y': 'completed',
+					},
+					// 결재
+					'3': {
+						'0': middle.apvSttusCd == 'Y' ? 'wf-progress' : 'pending',
+						'Y': 'completed',
+					}
+				};
+				return cls[obj.apvSeCd][obj.apvSttusCd];
+			}
+			
+			return `
+			<ul class="approval-process-wrap" title="결재상세 문서로 이동">
+                <li class="process-icon">
+                    <div class="icon"></div>
+                </li>
+                <li>
+                    <div class="apv-type">
+                        <span class="type-img">
+                            <img src="/resources/img/icon/icon2.png" alt="">
+                        </span>
+                        <span class="type-name">${param.docFormNm}</span>
+                    </div>
+                    <div class="apv-info">
+                        <span class="tit">${param.apvSj}</span>
+                        <span class="date">${param.drftDate}</span>
+                    </div>
+                    <ul class="timeline">
+                        <li class="${getStatusCls(frst)} level1">
+                            <div class="icon-box">
+                                <span class="icon"></span>
+                            </div>
+                            <div class="emp-box">
+                                <span class="img-wrap">
+                                    <img src="/resources/img/icon/avatar.png" alt="">
+                                </span>
+                                <span class="name">${frst.empNm} ${getLastNm(frst)}</span>
+                            </div>
+                        </li>
+                        <li class="${getStatusCls(middle)} level2">
+                            <div class="icon-box">
+                                <span class="icon"></span>
+                            </div>
+                            <div class="emp-box">
+                                <span class="img-wrap">
+                                    <img src="/resources/img/icon/avatar.png" alt="">
+                                </span>
+                                <span class="name">${middle.empNm} ${getLastNm(middle)}</span>
+                            </div>
+                        </li>
+                        <li class="${getStatusCls(last)} level3">
+                            <div class="icon-box">
+                                <span class="icon"></span>
+                            </div>
+                            <div class="emp-box">
+                                <span class="img-wrap">
+                                    <img src="/resources/img/icon/avatar.png" alt="">
+                                </span>
+                                <span class="name">${last.empNm} ${getLastNm(last)}</span>
+                            </div>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+			`;
+		},
+	},
+	myList: {
+		tab1: {
+			colgroup: function() {
+				return `
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+				`;
+			},
+			th_tr: function(param) {
+				return `
+					<tr>
+                        <th>번호</th>
+                        <th>문서종류</th>
+                        <th>제목</th>
+                        <th>기안자</th>
+                        <th>직급/직책</th>
+                        <th>소속부서</th>
+                        <th>기안일시</th>
+                    </tr>
+				`;
+			},
+			tr: function(param) {
+				return `
+					<tr data-apv-no='${param.apvNo}'>
+						<td>${param.num}</td>
+						<td>${param.docName}</td>
+						<td>${param.apvSj}</td>
+						<td>${param.empNm}</td>
+						<td>${param.apvPosition}/${param.apvRspnsbl}</td>
+						<td>${param.deptNm}</td>
+						<td>${param.drftDate}</td>
+					</tr>
+				`;
+			},
+		},
+		tab2: {
+			colgroup: function() {
+				return `
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+				`;
+			},
+			th_tr: function(param) {
+				return `
+					<tr>
+                        <th>번호</th>
+                        <th>문서종류</th>
+                        <th>제목</th>
+                        <th>기안자</th>
+                        <th>직급/직책</th>
+                        <th>기안부서</th>
+                        <th>기안일시</th>
+                    </tr>
+				`;
+			},
+			tr: function(param) {
+				return `
+					<tr data-apv-no='${param.apvNo}'>
+						<td>${param.num}</td>
+						<td>${param.docName}</td>
+						<td>${param.apvSj}</td>
+						<td>${param.empNm}</td>
+						<td>${param.apvPosition}/${param.apvRspnsbl}</td>
+						<td>${param.deptNm}</td>
+						<td>${param.drftDate}</td>
+					</tr>
+				`;
+			},
+		},
+		tab3: {
+			colgroup: function() {
+				return `
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+				`;
+			},
+			th_tr: function(param) {
+				return `
+					<tr>
+                        <th>번호</th>
+                        <th>문서종류</th>
+                        <th>제목</th>
+                        <th>기안자</th>
+                        <th>직급/직책</th>
+                        <th>소속부서</th>
+                        <th>기안일시</th>
+                        <th>최종결재일시</th>
+                    </tr>
+				`;
+			},
+			tr: function(param){
+				return `
+					<tr data-apv-no='${param.apvNo}'>
+						<td>${param.num}</td>
+						<td>${param.docName}</td>
+						<td>${param.apvSj}</td>
+						<td>${param.empNm}</td>
+						<td>${param.apvPosition}/${param.apvRspnsbl}</td>
+						<td>${param.deptNm}</td>
+						<td>${param.drftDate}</td>
+						<td>${param.apvDate}</td>
+					</tr>	
+				`;
+			},
+		},
+		tab4: {
+			colgroup: function() {
+				return `
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+				`;
+			},
+			th_tr: function(param) {
+				return `
+					<tr>
+                        <th>번호</th>
+                        <th>문서종류</th>
+                        <th>제목</th>
+                        <th>기안일시</th>
+                        <th>반려일시</th>
+                    </tr>
+				`;
+			},
+			tr: function(param){
+				return `
+					<tr data-apv-no='${param.apvNo}'>
+						<td>${param.num}</td>
+						<td>${param.docName}</td>
+						<td>${param.apvSj}</td>
+						<td>${param.drftDate}</td>
+						<td>${param.refuseDate}</td>
+					</tr>		
+				`;
+			},
+		},
+		tab5: {
+			colgroup: function() {
+				return `
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+				`;
+			},
+			th_tr: function(param) {
+				return `
+					<tr>
+                        <th>번호</th>
+                        <th>문서종류</th>
+                        <th>제목</th>
+                        <th>기안일시</th>
+                        <th></th>
+                    </tr>
+				`;
+			},
+			tr: function(param){
+				return `
+					<tr data-apv-no='${param.apvNo}'>
+						<td>${param.num}</td>
+						<td>${param.docName}</td>
+						<td>${param.apvSj}</td>
+						<td>${param.drftDate}</td>
+						<td>
+							<a href="javascript:void(0)" style="padding: 5px 20px;" class="btn7">재기안</a>
+							<a href="javascript:void(0)" style="padding: 5px 20px;" class="btn5">삭제</a>
+						</td>
+					</tr>	
+				`;
+			},
+		},
+		tab6: {
+			colgroup: function() {
+				return `
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+					<col style="width: auto;">
+				`;
+			},
+			th_tr: function(param) {
+				return `
+					<tr>
+                        <th>번호</th>
+                        <th>문서종류</th>
+                        <th>제목</th>
+                        <th>생성일시</th>
+                        <th></th>
+                    </tr>
+				`;
+			},
+			tr: function(param){
+				return `
+					<tr data-apv-no='${param.apvNo}'>
+						<td>${param.num}</td>
+						<td>${param.docName}</td>
+						<td>${param.apvSj}</td>
+						<td>${param.drftDate}</td>
+						<td>
+							<a href="javascript:void(0)" style="padding: 5px 20px;" class="btn7">재기안</a>
+							<a href="javascript:void(0)" style="padding: 5px 20px;" class="btn5">삭제</a>
+						</td>
+					</tr>	
+				`;
+			},
+		},
+		noData: function() {
+			return '<tr><td colspan="10" style="text-align: center;">문서가 없습니다.</td></tr>';
+		},
+	}
+};

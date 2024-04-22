@@ -1,0 +1,35 @@
+package com.team1.workforest.security;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+import com.team1.workforest.employee.mapper.EmployeeMapper;
+import com.team1.workforest.employee.vo.EmployeeVO;
+
+import lombok.extern.slf4j.Slf4j;
+import sun.rmi.runtime.Log;
+@Slf4j
+@Service
+public class CustomUserDetailsService implements UserDetailsService {
+    
+    @Autowired
+    private EmployeeMapper empMapper;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        // 사원 정보 검색(username : 로그인 시 입력받은 사번)
+        EmployeeVO empVO = empMapper.detail(username);
+        log.info("empVO : {}", empVO);
+
+        if (empVO == null) {
+            throw new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + username);
+        }
+
+        // CustomUser로 리턴
+        //return new CustomUser(empVO);
+        return empVO == null?null:new CustomUser(empVO);
+    }
+}

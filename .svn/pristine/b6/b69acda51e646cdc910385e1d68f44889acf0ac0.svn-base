@@ -1,0 +1,374 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<script src="https://ssl.daumcdn.net/dmaps/map_js_init/postcode.v2.js"></script>
+
+<div class="wf-main-container">
+	<!-- =============== body 시작 =============== -->
+	<!-- =============== 상단타이틀영역 시작 =============== -->
+	<div class="wf-tit-wrap">
+		<h1 class="page-tit">My Page</h1>
+
+	</div>
+	<!-- =============== 상단타이틀영역 끝 =============== -->
+
+	<!-- =============== 컨텐츠 영역 시작 =============== -->
+	<div class="wf-content-wrap">
+		<div class="tab-type tab-type2">
+			<div class="tab-menu">
+				<!-- "active"가 추가되면 메뉴가 활성화됩니다. -->
+				<button data-tab="tab1" type="button" class="tab-btn active">내 정보</button>
+				<button data-tab="tab2" type="button" class="tab-btn">문서/증명서</button>
+				<div class="tab-indicator" style="width: 53.7031px; transform: translateX(0px);"></div>
+			</div>
+
+			<!-- tab-content에 "active"가 추가되면 컨텐츠창이 활성화됩니다. -->
+			<!-- tab1  -->
+			<div data-tab="tab1" class="tab-content active">
+				<ul class="tab-board-lst">
+					<div class="wf-content-area">
+						<ul class="wf-insert-form2 detail">
+							<li><label>프로필 이미지</label>
+								<div class="wf-flex-box">
+									<div class="img-box">
+										<img src="/resources/img/icon/${empVO.proflImageUrl}">
+									</div>
+								</div> <br><br>
+								<p>&nbsp;&nbsp;<strong>${empVO.empNm}</strong> 님</p>
+								<input type="hidden" id="empNo" value="${empVO.empNo}" /></li>
+							<li>
+								<label>사원번호</label>
+								<div>
+									<p>${empVO.empNo}</p>
+								</div>
+								 <br><br> 
+								<label>소속 부서</label>
+								<div>
+									<p>${empVO.deptNm}</p>
+								</div>
+							</li>
+							<li><label>직급</label>
+								<div>
+									<p>${empVO.position}</p>
+								</div></li>
+							<li><label>직책</label>
+								<div>
+									<p>${empVO.rspnsblCtgryNm}</p>
+								</div></li>
+							<li><label>입사일</label>
+								<div>
+									<p>${empVO.ecnyDate}</p>
+								</div></li>
+							<li><label>내선번호</label>
+								<div>
+									<p>${empVO.lxtn}</p>
+								</div></li>
+							<li><label>생년월일</label>
+								<div>
+									<p>${empVO.bdate}</p>
+								</div></li>
+							<li><label>개인 연락처</label>
+								<div>
+									<p>${empVO.cntcNo}</p>
+									<br> <input type="text" name="cntcNo" value="${empVO.cntcNo}"
+										class="form-control" id="cntcNo" placeholder="개인 연락처"
+										style="display: none;" />
+								</div></li>
+							<li><label>근무지 위치</label>
+								<div>
+									<p>${empVO.workLocation}</p>
+								</div></li>
+							<li><label>이메일 주소</label>
+								<div>
+									<p>${empVO.email}</p>
+									<br> <input type="text" name="email" value="${empVO.email}"
+										class="form-control" id="email" placeholder="이메일 주소"
+										style="display: none;" />
+								</div></li>
+
+							<li><label>주소</label>
+								<div>
+									<p>${empVO.zipCode}/ ${empVO.basisAdres}
+										${empVO.detailAdres}</p>
+									<br>
+									<button type="button" id="btnZip"
+										class="btn btn-default btn-sm form-control"
+										style="display: none;">우편번호 검색</button>
+									<input type="text" name="zipCode" value="${empVO.zipCode}" class="form-control"
+										id="zipCode" placeholder="우편번호" style="display: none;" /> <input
+										type="text" name="basisAdres" value="${empVO.basisAdres}" class="form-control"
+										id="basisAdres" placeholder="기본 주소" style="display: none;" />
+									<input type="text" name="detailAdres" value="${empVO.detailAdres}"
+										class="form-control" id="detailAdres" placeholder="상세 주소"
+										style="display: none;" />
+								</div></li>
+							<li style="display: none;">
+								<p>${empVO}</p>
+							</li>
+
+						</ul>
+					</div>
+					<br>
+					<!--  일반 모드-->
+					<div id="spn1" class="wf-flex-box"
+						style="justify-content: flex-end;">
+						<button type="button" id="edit" class="btn2">수정</button>
+					</div>
+					<!-- 수정 모드 -->
+					<div id="spn2" class="wf-flex-box" style="display: none;">
+						<button type="button" id="cancel" class="btn1">취소</button>
+						<button type="submit" id="confirm" class="btn2">확인</button>
+					</div>
+				</ul>
+			</div>
+<!-- //////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+			<!-- tab2  -->
+			<div data-tab="tab2" class="tab-content">
+				<ul class="tab-board-lst">
+					<div class="wf-content-area">
+						<table class="wf-table">
+							<colgroup>
+								<col style="width: 25%;">
+								<col style="width: 25%;">
+								<col style="width: 25%;">
+								<col style="width: 25%;">
+
+							</colgroup>
+							<thead>
+								<tr>
+									<th>서류명</th>
+									<th>상태</th>
+									<th>미리보기</th>
+									<th>발급</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>
+										<p>재직증명서</p>
+									</td>
+									<td>
+										<p>
+											<span class="wf-badge1">O</span>
+										</p>
+									</td>
+									<td>
+										<button type="button" class="btn1" modal-id="modal-name">미리보기</button>
+									</td>
+									<td>
+										<button type="button" class="btn5">
+											PDF <i class="xi-download"></i>
+										</button>
+									</td>
+
+								</tr>
+								<tr>
+									<td>
+										<p>급여명세서</p>
+									</td>
+									<td>
+										<p>
+											<span class="wf-badge1">O</span>
+										</p>
+									</td>
+									<td>
+										<button type="button" class="btn1" modal-id="modal-name">미리보기</button>
+									</td>
+									<td>
+										<button type="button" class="btn5">
+											PDF <i class="xi-download"></i>
+										</button>
+									</td>
+
+								</tr>
+								<tr>
+									<td>
+										<p>연봉계약서</p>
+									</td>
+									<td>
+										<p>
+											<span class="wf-badge3">X</span>
+										</p>
+									</td>
+									<td>
+										<button type="button" class="btn1" modal-id="modal-name">미리보기</button>
+									</td>
+									<td>
+										<button type="button" class="btn5">
+											PDF <i class="xi-download"></i>
+										</button>
+									</td>
+									<td></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+
+				</ul>
+			</div>
+
+		</div>
+	</div>
+	<!-- =============== 컨텐츠 영역 끝 =============== -->
+	<!-- =============== body 끝 =============== -->
+	<div class="modal" id="modal-name">
+		<div class="modal-cont">
+			<h1 class="modal-tit">문서이름</h1>
+			<div class="modal-content-area">
+				<form action="" method="">
+					<ul class="wf-insert-form2">
+						<li><label>이미지<i class="i">*</i></label>
+							<div class="wf-flex-box">
+								<div class="img-box">
+									<img src="/img/icon/avatar.png">
+								</div>
+								<input type="file">
+							</div></li>
+						<li><label for="bb">소속<i class="i">*</i></label>
+							<div>
+								<input type="text" id="bb" placeholder="텍스트를 입력해주세요">
+							</div></li>
+						<li><label for="cc">사원번호<i class="i">*</i></label>
+							<div>
+								<input type="text" id="cc" placeholder="텍스트를 입력해주세요">
+							</div></li>
+						<li><label for="cc">박스2개 (class="wf-flex-box")<i
+								class="i">*</i></label>
+							<div class="wf-flex-box">
+								<input type="text" id="cc" placeholder="텍스트를 입력해주세요"> <span
+									class="hyphen">-</span> <input type="text" id="cc"
+									placeholder="텍스트를 입력해주세요">
+							</div></li>
+						<li><label for="dd">입사일</label>
+							<div>
+								<input type="date" id="dd">
+							</div></li>
+						<li><label for="ee">내선번호</label>
+							<div>
+								<input type="text" id="ee" placeholder="텍스트를 입력해주세요">
+							</div></li>
+						<li><label for="ff">근무지</label>
+							<div>
+								<input type="text" id="ff" placeholder="텍스트를 입력해주세요">
+							</div></li>
+						<li><label for="gg">휴직 여부</label>
+							<div>
+								<ul class="checkbox-radio-custom">
+									<li><input type="radio" name="radio" id="radio1">
+										<label for="radio1">남</label></li>
+									<li><input type="radio" name="radio" id="radio2">
+										<label for="radio2">여</label></li>
+								</ul>
+								<ul class="checkbox-radio-custom">
+									<li><input type="checkbox" name="checkbox" id="chk1">
+										<label for="chk1">남</label></li>
+									<li><input type="checkbox" name="checkbox" id="chk2">
+										<label for="chk2">여</label></li>
+								</ul>
+							</div></li>
+						<li><label for="ff">휴직 여부</label>
+							<div>
+								<div class="wf-select-group">
+									<select name="" id="">
+										<option value="">옵션</option>
+										<option value="">옵션</option>
+									</select>
+								</div>
+							</div></li>
+						<li><label for="cc">textarea<i class="i">*</i></label>
+							<div>
+								<textarea name="" id=""></textarea>
+							</div></li>
+					</ul>
+
+				</form>
+			</div>
+
+			<div class="modal-btn-wrap">
+				<button class="btn6">취소</button>
+				<button class="btn2">저장</button>
+			</div>
+
+			<button class="close-btn"></button>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+$(function() {
+
+	//다음 우편번호 검색
+	$("#btnZip").on("click",function(){
+		//console.log("우편번호 검색하실게요");
+		new daum.Postcode({
+			//다음 창에서 검색이 완료되면
+			oncomplete:function(data){
+				$("#zipCode").val(data.zonecode); //우편번호
+				$("#basisAdres").val(data.address); //주소
+				$("#detailAdres").val(data.buildongName); //상세주소
+			}
+		}).open();
+	});
+});
+
+//수정 버튼 클릭시 - spn1:none, spn2:block
+$("#edit").on("click",function(){
+	$("#spn1").css("display","none");
+	$("#spn2").css("display","block").css("float","right");
+	//$("#spn2").css("float","right");
+	$(".form-control").css("display","block");
+
+	//id가 frm인 form태그에 접근해서 action속성의 값을
+	// /emp/create?modify로 변경해보자
+	//let empNo = "${param.empNo}";
+	//$("#frm").attr("action","/emp/modDetail");
+	
+});
+
+//확인(수정)
+$("#confirm").on("click",function() {
+	let empNo = $("#empNo").val();
+	let cntcNo = $("#cntcNo").val(); //수정 대상
+	let email = $("#email").val(); //수정 대상
+	let zipCode = $("#zipCode").val(); //수정 대상
+	let basisAdres = $("#basisAdres").val(); //수정 대상
+	let detailAdres = $("#detailAdres").val(); //수정 대상
+	
+	//json오브젝트
+	let data = {
+		"empNo": empNo,
+		"cntcNo":cntcNo,
+		"email":email,
+		"zipCode":zipCode,
+		"basisAdres":basisAdres,
+		"detailAdres":detailAdres
+	};
+	console.log("data : ",data);
+	
+	$.ajax({
+		url: "/emp/modDetail",
+		contentType: "application/json;charset=utf-8",
+		data: JSON.stringify(data),
+		type: "post",
+		dataType: "text",
+		beforeSend:function(xhr){
+			xhr.setRequestHeader("${_csrf.headerName}","${_csrf.token}");
+		},
+		success:function(result){
+			console.log("result :",result);
+
+			
+			$("#cancel").click();
+		}
+	});
+});
+
+//취소 버튼 클릭시
+$("#cancel").on("click",function(){
+ 	let empNo="${param.empNo}";
+	location.href="/emp/detail?empNo="+empNo;
+});
+
+
+
+</script>

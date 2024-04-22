@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.team1.workforest.vacation.mapper.VacationMapper">
+
+	<!-- 내 휴가 목록 가져오기 -->
+	<select id="getMyVacationList" parameterType="String" resultType="empVacationManageVO">
+		SELECT    
+		          M.EMP_NO
+		        , V.VCATN_CTGRY_NO
+		        , V.VCATN_CTGRY_SJ
+		        , V.VCATN_CTGRY_CN
+		        , M.REMAIN_CNT
+		FROM 
+	        	EMP_VACATION_MANAGE M
+	    JOIN 
+	    		VACATION_CATEGORY V ON M.VCATN_CTGRY_NO = V.VCATN_CTGRY_NO
+	    WHERE 
+	    		M.EMP_NO = #{empNo}
+	    ORDER BY V.VCATN_CTGRY_NO ASC
+	
+	</select>
+	
+	<!-- 내 휴가 사용 기록 -->
+	<select id="getMyVacationRecordList">
+		SELECT 
+				  VCATN_USE_DATE
+				, VCATN_CTGRY_NO
+				, VCATN_SE_CD
+				, VCATN_CN
+		FROM 
+				VACATION_RECORD 
+		WHERE 
+				EMP_NO= '2019007' 
+		AND 
+				VCATN_USE_DATE > '20240101'
+		AND 
+				SYSDATE > VCATN_USE_DATE
+	</select>
+	
+	<!-- 종일 연차 카운트 -->
+	<select id="getAllDayVacationRecordsCount">
+		SELECT
+				COUNT(*) 
+		FROM 
+				VACATION_RECORD 
+		WHERE 
+				VCATN_CTGRY_NO = '1' 
+		AND 
+				VCATN_SE_CD = '1' 
+		AND 
+				EMP_NO= #{empNo} 
+		AND 
+				VCATN_USE_DATE > '20240101'
+		AND 
+				SYSDATE > VCATN_USE_DATE
+		
+	</select>
+	
+	<!-- 반차 카운트 -->
+	<select id="getHalfDayVacationRecordsCount">
+		SELECT
+				COUNT(*) 
+		FROM 
+				VACATION_RECORD 
+		WHERE 
+				VCATN_CTGRY_NO = '1' 
+		AND 
+				VCATN_SE_CD != '1' 
+		AND 
+				EMP_NO= #{empNo} 
+		AND 
+				VCATN_USE_DATE > '20240101'
+		AND 
+				SYSDATE > VCATN_USE_DATE
+	</select>
+
+</mapper>

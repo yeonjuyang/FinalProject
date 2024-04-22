@@ -1,0 +1,49 @@
+package com.team1.workforest.schedulerUtil.controller;
+
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.team1.workforest.schedulerUtil.service.ChatServiceImpl;
+
+@Controller
+@RequestMapping("/admin")
+public class ChatController {
+
+	@Autowired
+	ChatServiceImpl chatServiceImpl;
+	
+	@GetMapping("/chat")
+	public String chatChat() {
+		return "admin/webSocket";
+	}
+	
+	@GetMapping("/chat2")
+	public String chatChat2() {
+		return "admin/webSocket2";
+	}
+	
+	@ResponseBody
+	@GetMapping("/addAlram")
+	public int addAlram(@RequestParam Map<String, String> map) {
+		
+		int data = this.chatServiceImpl.addAlram(map);
+		
+		return data;
+	}
+	
+	@ResponseBody
+	@GetMapping("/alram")
+	public String alram(@RequestParam Map<String, String> map) {
+		
+		String data = this.chatServiceImpl.alram(map);
+		
+		return data;
+	}
+	
+}

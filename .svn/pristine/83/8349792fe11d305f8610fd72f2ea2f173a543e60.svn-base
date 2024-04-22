@@ -1,0 +1,243 @@
+import { createDoc1, createDoc2, createDoc3 } from './createDoc.js';
+
+// 공통으로 들어가는 항목
+let _docFormNo; // 선택된 양식
+let _tit;       // 제목
+let _cont;      // 내용
+
+let _apvLineData; // 최종 결재라인
+let _refer;       // 최종 참조자
+
+let _formData = new FormData();
+
+createDoc3(); // 도서구입신청서
+createDoc2(); // 출장신청서
+createDoc1(); // 품의서
+
+$(function () {
+    const _empNo = $('#empNo').val(); // 기안자 (세션)
+
+    // 미리보기 이벤트
+    $('#preview_btn').on('click', preview);
+
+    // 첨부파일 이벤트
+    $('#file-custom').change(function (e) {
+
+        let input = e.target;
+        let files = input.files;
+
+        // 파일 목록에 추가
+        for (let i = 0; i < files.length; i++) {
+            let file = files[i];
+            let fileSize = file.size;
+            let fileName = file.name;
+
+            // 파일 크기를 KB 단위로 변환
+            let fileSizeKB = Math.round(fileSize / 1024);
+
+            // 파일 목록에 추가할 HTML 생성
+            let HTML = `
+	           	<li>
+	                <span class="checkbox-radio-custom">
+	                    <input type="checkbox" name="chck" id="chck">
+	                    <label for="chck"></label>
+	                </span>
+	                <span class="file-name">${fileName}</span>
+	                <span class="file-size">${fileSizeKB}KB</span>
+	                <button type="button" class="file-remove"></button>
+	            </li>`;
+
+            // 파일 목록에 추가
+            $('.file-lst').append(HTML);
+
+            // @RequestPart
+            // formData에 파일 추가
+            _formData.append('files', file);
+        }
+
+        // "file-remove" 버튼 클릭 시 해당 요소 삭제
+        $('.file-remove').click(function () {
+            $(this).parent('li').remove();
+        });
+
+        // "전체 삭제" 클릭 시 "all-check" 제외한 모든 체크박스 삭제
+        $('.file-all-remove').click(function () {
+
+            // 모든 체크박스가 체크되어 있는지 확인
+            let allChecked = true;
+            $('input[name="chck"]').each(function () {
+                if (!$(this).prop('checked')) {
+                    allChecked = false;
+                    return false;
+                }
+            });
+
+            // 모든 체크박스가 체크되어 있을 때만 삭제
+            if (allChecked) {
+                $('input[name="chck"]').not('#all-check').closest('li').remove();
+                $('#all-check').prop('checked', false);
+            }
+        });
+
+        // "all-check" 클릭 시 모든 체크박스 선택
+        $('#all-check').click(function () {
+            $('input[name="chck"]').prop('checked', $(this).prop('checked'));
+        });
+
+    });
+
+    // 양식 선택 이벤트
+    $('select#docFormNo').change(function (e) {
+        _docFormNo = $(this).val();
+        console.log("선택 -> ", _docFormNo);
+
+        switch (_docFormNo) {
+            case "1":
+                createDoc1();
+                break;
+            case "2":
+                createDoc2();
+                break;
+            case "3":
+                createDoc3();
+                break;
+            default:
+                break;
+        }
+    });
+
+    // 작성한 기안 저장 이벤트
+    $('#save_btn').on('click', function () {
+        const selectedDocData = getSelectedDocData();
+        createApv(selectedDocData);
+    });
+
+});
+
+// 미리보기
+function preview() {
+    // 모달창 활성화
+    $('#preview_modal').addClass('open');
+    $('html').removeClass('scroll-hidden');
+
+    _tit = $('#doc_cont').find('#tit').val();
+    _cont = $('#doc_cont').find('#cont').val();
+
+    console.log("preview : ", _tit + ", " + _cont);
+
+    // 데이터 추가
+    const today = new Date();
+    $('#preview_modal #apv_date').text(today.toLocaleString());
+    $('#preview_modal #apv_tit').text(_tit);
+    $('#preview_modal #apv_cont').text(_cont);
+}
+
+// 기안 저장 (기안 상신 처리)
+function createApv(docData) {
+
+    $.ajax({
+        type: "post",
+        url: "/approval/create",
+        data: JSON.stringify(docData),
+        // processData: false,
+        // contentType: false,
+        contentType: "application/json;charset=utf-8",
+        dataType: "json",
+        success: function (result) {
+            console.log("결재번호 -> ", result);
+
+            let apvNo = result;
+
+            if (result > 0) {
+                alert(_msg.approval.insertSuccessAlert);
+                location.href =
+                    "/approval/approvalDetailView?apvNo=" + apvNo;
+            } else {
+                alert(_msg.approval.insertFailAlert);
+            }
+        }
+    });
+}
+
+// 선택된 문서 데이터 가져오는 함수
+function getSelectedDocData() {
+    _tit = $('#tit').val();   // 제목
+    _cont = $('#cont').val(); // 내용(또는 비고)
+    console.log("getSelectedDocData : ", _tit + " , " + _cont);
+    console.log("_empNo : ", _empNo);
+    switch (_docFormNo) {
+
+        // 품의서
+        case "1":
+
+            // 결재라인 데이터
+            _apvLineData = _finalSelectedEmp.reduce((acc, e) => {
+                acc.push({
+                    apvEmpNo: e.empNo,
+                    apvSeCd: e.apvSeCd,
+                    apvLineSeq: e.apvLineSeq,
+                });
+                return acc;
+            }, []);
+
+            console.log("결재라인 데이터 -> ", _apvLineData);
+
+            // 참조인 데이터
+            _refer = _finalRefer.reduce((acc, e) => {
+                acc.push({
+                    empNo: e.empNo
+                });
+                return acc;
+            }, []);
+            console.log("참조인 데이터 -> ", _refer);
+
+            let data = {
+                "apv": {
+                    "docFormNo": _docFormNo, // 문서 양식 번호
+                    "empNo": _empNo,         // 기안자 사번
+                    "apvSj": _tit,           // 제목
+                    "apvCn": _cont,          // 내용
+                    "sttusCd": "Y"           // 상태코드
+                },
+                "apvLine": _apvLineData,
+                "refer": _refer
+            }
+
+            //@RequestPart
+            _formData.append('data', JSON.stringify({
+                "apv": {
+                    "docFormNo": _docFormNo,
+                    "empNo": _empNo,
+                    "apvSj": _tit,
+                    "apvCn": _cont,
+                    "sttusCd": "Y"
+                },
+                "apvLine": _apvLineData,
+                "refer": _refer
+            }));
+
+            // return _formData;
+            return data;
+        // 출장신청서
+
+        case "2":
+            return {
+                "docFormNo": _docFormNo,
+                "empNo": _empNo,
+                "apvSubject": _tit,
+                "apvContent": _cont
+                // 출장신청서 양식에 따른 추가 필드
+            };
+        // 도서구입신청서
+
+        case "3":
+            return {
+                "docFormNo": _docFormNo,
+                "employeeId": _empNo,
+                "bookList": _cont
+                // 도서구입신청서 양식에 따른 추가 필드
+            };
+        default:
+            return null;
+    }
+}

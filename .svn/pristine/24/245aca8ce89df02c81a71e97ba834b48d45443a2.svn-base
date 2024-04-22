@@ -1,0 +1,73 @@
+// ajax 요청 결과 캐싱을 위한 flag 변수
+let flag = false;
+const _docName = {
+	1: '품의서',
+	2: '출장신청서',
+	3: '도서구입신청서',
+};
+
+$(function () {
+
+	// 기존  click event 삭제, 추가
+	$('.tab-btn').off('click').on('click', (e) => {
+		createTable(`tab${$(e.currentTarget).index()+1}`);
+		
+		$('.tab-content').removeClass('active')
+		// active
+		$(e.currentTarget).addClass('active').siblings('button').removeClass('active');
+		// indicator
+		const buttonRect = e.currentTarget.getBoundingClientRect();
+        const tabIndicatorOffset = buttonRect.left - $(e.currentTarget).parent()[0].getBoundingClientRect().left;
+        $('.tab-indicator').css({ width: `${buttonRect.width}px`, transform: `translateX(${tabIndicatorOffset}px)` });
+		// 
+		$('.tab-content').addClass('active');
+		
+	});	
+	
+	let paramMap = getParamMap();
+	let tabNum = paramMap['tabId'];
+	if(tabNum && !isNaN(Number(tabNum)) && Number(tabNum)<7) {
+		$(`.tab-btn:eq(${ Number(paramMap['tabId'])-1 })`).click();
+	} else {
+		$('.tab-btn:eq(0)').click();
+	}
+});
+
+
+function createTable(tab) {
+
+	let colgroup = $('.tab-content colgroup');
+	let thead = $('.tab-content thead');
+	let tbody = $('.tab-content tbody');
+	
+	$.ajax({
+		url: `${_ctx}/approval/listView/${tab}`,
+		type: "GET",
+		dataType: "json",
+		success: function (result) {
+
+			console.log("결재 대기 -> ", result);
+			colgroup.empty();
+			thead.empty();
+			tbody.empty();
+
+			let html = _HTML.myList[tab];
+			colgroup.append(html.colgroup());
+			thead.append(html.th_tr());
+
+			if (Array.isArray(result)) {
+				result.forEach((e, i) => {
+					
+					let tr = html.tr({
+						i: i+1,
+						docName: _docName[e.docFormNo],
+						...e
+					});
+					tbody.append(tr);
+				});
+			} else {
+				tbody.append(_HTML.myList.noData());
+			}
+		}
+	});
+}

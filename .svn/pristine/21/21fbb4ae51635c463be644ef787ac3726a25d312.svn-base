@@ -1,0 +1,82 @@
+package com.team1.workforest.chat.service.impl;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.team1.workforest.chat.mapper.ChattingMapper;
+import com.team1.workforest.chat.service.ChattingService;
+import com.team1.workforest.chat.vo.ChatRoomEmployeeVO;
+import com.team1.workforest.chat.vo.MessageVO;
+import com.team1.workforest.employee.vo.EmployeeVO;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+public class ChattingServiceImpl implements ChattingService{
+
+	@Autowired
+	ChattingMapper chattingMapper;
+
+	@Override
+	public List<ChatRoomEmployeeVO> getChatRoom(Map<String, String> map) {
+		return this.chattingMapper.getChatRoom(map);
+	}
+
+	@Override
+	public List<MessageVO> getChat(Map<String, String> map) {
+		List<MessageVO> msgVOList = this.chattingMapper.getChat(map);
+		List<MessageVO> msgVOList2 = new ArrayList<MessageVO>();
+		
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm");
+		
+		for(MessageVO vo : msgVOList) {
+			Date date = vo.getMssageDate();
+			String fDate = formatter.format(date);
+			log.error(fDate);
+			vo.setFormatDate(fDate);
+			msgVOList2.add(vo);
+		}
+		
+		return msgVOList2;
+	}
+
+	@Override
+	public int addChat(Map<String, String> map) {
+		
+		
+		return this.chattingMapper.addChat(map);
+	}
+
+	@Override
+	public EmployeeVO getEmp(Map<String, String> map) {
+		return this.chattingMapper.getEmp(map);
+	}
+
+	@Override
+	public MessageVO getChatRoomLastChat(Map<String, String> map) {
+		MessageVO vo = this.chattingMapper.getChatRoomLastChat(map);
+		
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_hh:mm");
+		
+		Date date = vo.getMssageDate();
+		String fDate = formatter.format(date);
+		vo.setFormatDate(fDate);
+		
+		return vo;
+	}
+
+	@Override
+	public List<EmployeeVO> getEmpList(Map<String, String> map) {
+		return this.chattingMapper.getEmpList(map);
+	}
+	
+	
+	
+}

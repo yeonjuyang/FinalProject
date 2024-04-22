@@ -1,0 +1,173 @@
+$(function () {
+
+	// 문서별 갯수
+	getTotalCnt();
+
+	// 결재완료 목록
+	getCompletedOfMine();
+
+	// 결재 대기
+	getPending();
+
+	// 결재 진행 현황
+	getAllProgress();
+
+	// 전자 서명
+	$('#SIGN_BTN').on('click', (e) => {
+		$('#sign_modal').addClass('open');
+		$('html').addClass('scroll-hidden');
+	});
+
+});
+
+// 검토자 결재 현황 tooltip
+$(document).on('mouseenter', '.level2', (e) => {
+	$(e.currentTarget).find('.middle-tooltip').addClass('active');
+}).on('mouseleave', '.level2', (e) => {
+	$(e.currentTarget).find('.middle-tooltip').removeClass('active');
+});
+// 날짜 변환
+function dateConverter(date) {
+	return date.substring(0, 10);
+}
+
+// 문서별 갯수 조회
+function getTotalCnt() {
+	$.ajax({
+		url: `${_ctx}/approval/mainView/totalCnt`,
+		type: "GET",
+		dataType: "json",
+		success: function (data) {
+			$('#pendingCnt').countNumber(0, data.pendingCnt);
+			$('#progressCnt').countNumber(0, data.progressCnt);
+			$('#completedCnt').countNumber(0, data.completedCnt);
+			$('#refusedCnt').countNumber(0, data.refusedCnt);
+		}
+	});
+}
+
+// 대기 목록 조회
+function getPending() {
+	$.ajax({
+		url: `${_ctx}/approval/mainView/pending`,
+		type: "GET",
+		dataType: "json",
+		success: function (data) {
+
+			console.log('대기목록 -> ', data);
+
+			data.forEach((e) => {
+				let HTML = `
+		            <li>
+		                <a href="${_ctx}/approval/approvalDetailView?apvNo=${e.apvNo}">
+		                    <div class="img-wrap">
+								<img src="${_ctx}/resources/img/icon/avatar.png">
+							</div>
+							<div class="emp-wrap">
+								<div class="tit">${e.apvSj}</div>
+								<div class="sub">
+									<div class="empInfo">${e.empNm} ${e.apvPosition} _ ${e.deptNm}</div>
+									<div class="date">${e.drftDate.split(' ')[0]}</div>
+								</div>
+							</div>
+		                </a>
+		            </li>
+		        `;
+				$('#pending .form-list').append(HTML);
+			});
+		}
+	});
+}
+
+// 결재 완료 목록 조회
+function getCompletedOfMine() {
+	$.ajax({
+		url: `${_ctx}/approval/mainView/completed`,
+		type: "GET",
+		dataType: "json",
+		success: function (data) {
+			console.log('결재 완료 목록 -> ', data);
+
+
+			data.forEach((e) => {
+				let HTML = `
+		            <li>
+		                <a href="/approval/approvalDetailView?apvNo=${e.apvNo}">
+		                    <i class="xi-document"></i>
+		                    <div class="tit">${e.apvSj}</div>
+		                    <div class="date">${e.drftDate.split(' ')[0]}</div>
+		                </a>
+		            </li>
+		        `;
+				$('#completed .form-list').append(HTML);
+			});
+		}
+	});
+}
+
+// 결재 진행 현황
+function getAllProgress() {
+	$.ajax({
+		url: `${_ctx}/approval/mainView/allProgress`,
+		type: "GET",
+		dataType: "json",
+		success: function (data) {
+			data = Object.values(data.reduce((acc, e) => {
+				if (acc[e.apvNo] == undefined) {
+					acc[e.apvNo] = {
+						apvNo: e.apvNo,
+						apvSj: e.apvSj,
+						docFormNm: _HTML.msg.docNm[e.docFormNo],
+						drftDate: e.drftDate.split(' ')[0],
+						apvLine: [],
+					};
+				}
+				acc[e.apvNo].apvLine.push({
+					empNm: e.empNm,
+					apvPosition: e.apvPosition,
+					apvRspnsbl: e.apvRspnsbl,
+					deptNm: e.deptNm,
+					apvSttusCd: e.apvSttusCd,
+					apvSeCd: e.apvSeCd,
+				});
+				return acc;
+			}, {}));
+
+
+			data.forEach((e, i, arr) => {
+				$('.process-cont').append(_HTML.main.progress_ul(e));
+			});
+
+		}
+	});
+}
+
+// 임시보관함 목록 조회
+function getTempList() {
+
+	// let HTML = `
+	//     <li class="no-data">
+	//         문서가 없습니다.
+	//     </li>
+	// `;
+
+
+	// let HTML = `
+	//         <li>
+	//             <a href="/approval/approvalDetailView?apvNo=${e.apvNo}">
+	//                 <i class="xi-library-books"></i>
+	//                 <div class="tit">${e.apvSj}</div>
+	//                 <div class="date">${dateConverter(`${e.drftDate}`)}</div>
+	//             </a>
+	//         </li>
+	//     `;
+
+	$('#temp .form-list').append(HTML);
+}
+
+
+
+
+
+
+

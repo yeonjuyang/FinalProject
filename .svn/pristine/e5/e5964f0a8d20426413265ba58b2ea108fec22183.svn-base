@@ -1,0 +1,57 @@
+package com.team1.workforest.reservation.meetingroom.service.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.team1.workforest.reservation.meetingroom.mapper.MtrResveMapper;
+import com.team1.workforest.reservation.meetingroom.service.MtrResveService;
+import com.team1.workforest.reservation.meetingroom.vo.MtrReservationVO;
+import com.team1.workforest.reservation.meetingroom.vo.MtrVO;
+
+@Service
+public class MtrResveServiceImpl implements MtrResveService{
+	
+	@Autowired
+	MtrResveMapper mtrResveMapper;
+	
+	@Override
+	public List<MtrReservationVO> getMtrResveList() {
+		
+		return mtrResveMapper.getMtrResveList();
+	}
+
+	@Override
+	public MtrReservationVO getMtrResve(String mtrResveNo) {
+		return mtrResveMapper.getMtrResve(mtrResveNo);
+	}
+	
+	@Override
+	public List<MtrReservationVO> getMyMtrResve(String empNo) {
+		return mtrResveMapper.getMyMtrResve(empNo);
+	}
+
+	@Override
+	public int createMtrResve(MtrReservationVO mtrResveVO) {
+		return mtrResveMapper.createMtrResve(mtrResveVO);
+	}
+
+	@Override
+	public int updateMtrResve(MtrReservationVO mtrResveVO) {
+		return mtrResveMapper.updateMtrResve(mtrResveVO);
+	}
+
+	@Override
+	public int deleteMtrResve(String mtrResveNo) {
+		return mtrResveMapper.deleteMtrResve(mtrResveNo);
+	}
+
+	@Override
+	public MtrVO getMtrInfo(String mtrNo) {
+		return mtrResveMapper.getMtrInfo(mtrNo);
+	}
+
+	
+
+}

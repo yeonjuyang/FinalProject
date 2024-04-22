@@ -1,0 +1,224 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+
+<!-- =============== 상단타이틀영역 시작 =============== -->
+<div class="wf-tit-wrap">
+    <h1 class="page-tit">전자결재</h1>
+    <div class="side-util"></div>
+</div>
+<!-- =============== 상단타이틀영역 끝 =============== -->
+<!-- =============== 컨텐츠 영역 시작 =============== -->
+<div class="wf-content-wrap approval-cont-wrap">
+
+    <div class="wf-flex-box between" style="height: 100%;">
+        <div class="wf-content-area" style="flex:1;">
+            <p class="heading1">결재 진행 상황</p>
+            <div class="approval-process">
+                <section>
+                    <div class="date-top">2024-03-23 금요일</div>
+                    <div class="process-cont">
+                        <div class="process-bar"></div>
+                        <ul class="approval-process-wrap active">
+                            <li class="process-icon">
+                                <div class="icon"></div>
+                            </li>
+                            <li>
+                                <div class="apv-type">
+                                    <span class="type-img">
+                                        <img src="/resources/img/icon/icon2.png" alt="">
+                                    </span>
+                                    <span class="type-name">품의서</span>
+                                </div>
+                                <div class="apv-info">
+                                    <span class="tit">마케팅 제안의 건</span>
+                                    <span class="date">2024-03-24 09:22:21</span>
+                                </div>
+                                <ul class="timeline">
+                                    <li class="completed level1">
+                                        <div class="icon-box">
+                                            <span class="icon"></span>
+                                        </div>
+                                        <div class="emp-box">
+                                            <span class="img-wrap">
+                                                <img src="/resources/img/icon/avatar.png" alt="">
+                                            </span>
+                                            <span class="name">이소망 대리</span>
+                                        </div>
+                                    </li>
+                                    <li class="wf-progress level2">
+                                        <div class="icon-box">
+                                            <span class="icon"></span>
+                                        </div>
+                                        <div class="emp-box">
+                                            <span class="img-wrap">
+                                                <img src="/resources/img/icon/avatar.png" alt="">
+                                            </span>
+                                            <span class="name">박서준 과장</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <ul class="approval-process-wrap">
+                            <li class="process-icon">
+                                <div class="icon"></div>
+                            </li>
+                            <li>
+                                <div class="apv-type">
+                                    <span class="type-img">
+                                        <img src="/resources/img/icon/icon2.png" alt="">
+                                    </span>
+                                    <span class="type-name">품의서</span>
+                                </div>
+                                <div class="apv-info">
+                                    <span class="tit">마케팅 제안의 건</span>
+                                    <span class="date">2024-03-24 09:22:21</span>
+                                </div>
+                                <ul class="timeline">
+                                    <!-- completed / wf-progress / pending -->
+                                    <li class="completed level1">
+                                        <div class="icon-box">
+                                            <span class="icon"></span>
+                                        </div>
+                                        <div class="emp-box">
+                                            <span class="img-wrap">
+                                                <img src="/resources/img/icon/avatar.png" alt="">
+                                            </span>
+                                            <span class="name">이소망 대리</span>
+                                        </div>
+                                    </li>
+                                    <li class="wf-progress level2">
+                                        <div class="icon-box">
+                                            <span class="icon"></span>
+                                        </div>
+                                        <div class="emp-box">
+                                            <span class="img-wrap">
+                                                <img src="/resources/img/icon/avatar.png" alt="">
+                                            </span>
+                                            <span class="name">박서준 팀장</span>
+                                        </div>
+                                    </li>
+                                    <li class="pending level3">
+                                        <div class="icon-box">
+                                            <span class="icon"></span>
+                                        </div>
+                                        <div class="emp-box">
+                                            <span class="img-wrap">
+                                                <img src="/resources/img/icon/avatar.png" alt="">
+                                            </span>
+                                            <span class="name">이효리 사장</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </section>
+                <section>
+                    <div class="date-top">2024-03-22 목요일</div>
+                    <div class="process-cont">
+                        <div class="process-bar"></div>
+                        <ul class="approval-process-wrap active">
+                            <li class="process-icon">
+                                <div class="icon"></div>
+                            </li>
+                            <li>
+                                <div class="apv-type">
+                                    <span class="type-img">
+                                        <img src="/resources/img/icon/icon2.png" alt="">
+                                    </span>
+                                    <span class="type-name">품의서</span>
+                                </div>
+                                <div class="apv-info">
+                                    <span class="tit">마케팅 제안의 건</span>
+                                    <span class="date">2024-03-24 09:22:21</span>
+                                </div>
+                                <ul class="timeline">
+                                    <li class="completed level1">
+                                        <div class="icon-box">
+                                            <span class="icon"></span>
+                                        </div>
+                                        <div class="emp-box">
+                                            <span class="img-wrap">
+                                                <img src="/resources/img/icon/avatar.png" alt="">
+                                            </span>
+                                            <span class="name">이소망 대리</span>
+                                        </div>
+                                    </li>
+                                    <li class="wf-progress level2">
+                                        <div class="icon-box">
+                                            <span class="icon"></span>
+                                        </div>
+                                        <div class="emp-box">
+                                            <span class="img-wrap">
+                                                <img src="/resources/img/icon/avatar.png" alt="">
+                                            </span>
+                                            <span class="name">박서준 과장</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <ul class="approval-process-wrap">
+                            <li class="process-icon">
+                                <div class="icon"></div>
+                            </li>
+                            <li>
+                                <div class="apv-type">
+                                    <span class="type-img">
+                                        <img src="/resources/img/icon/icon2.png" alt="">
+                                    </span>
+                                    <span class="type-name">품의서</span>
+                                </div>
+                                <div class="apv-info">
+                                    <span class="tit">마케팅 제안의 건</span>
+                                    <span class="date">2024-03-24 09:22:21</span>
+                                </div>
+                                <ul class="timeline">
+                                    <!-- completed / wf-progress / pending -->
+                                    <li class="completed level1">
+                                        <div class="icon-box">
+                                            <span class="icon"></span>
+                                        </div>
+                                        <div class="emp-box">
+                                            <span class="img-wrap">
+                                                <img src="/resources/img/icon/avatar.png" alt="">
+                                            </span>
+                                            <span class="name">이소망 대리</span>
+                                        </div>
+                                    </li>
+                                    <li class="wf-progress level2">
+                                        <div class="icon-box">
+                                            <span class="icon"></span>
+                                        </div>
+                                        <div class="emp-box">
+                                            <span class="img-wrap">
+                                                <img src="/resources/img/icon/avatar.png" alt="">
+                                            </span>
+                                            <span class="name">박서준 팀장</span>
+                                        </div>
+                                    </li>
+                                    <li class="pending level3">
+                                        <div class="icon-box">
+                                            <span class="icon"></span>
+                                        </div>
+                                        <div class="emp-box">
+                                            <span class="img-wrap">
+                                                <img src="/resources/img/icon/avatar.png" alt="">
+                                            </span>
+                                            <span class="name">이효리 사장</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </section>
+            </div>
+        </div>
+        <div class="wf-content-area" style="width: 450px;">
+            <p class="heading1">전자서명</p>
+            <div style="border: 1px solid #fff;">전자서명 기능(입력, 수정, 등록된 서명은 결재에 사용 가능하게)</div>
+        </div>
+    </div>
+</div>
+<!-- =============== 컨텐츠 영역 끝 =============== -->

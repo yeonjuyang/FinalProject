@@ -1,0 +1,206 @@
+$(function () {
+
+    // 문서별 갯수
+    totalCnt();
+
+    // 결재 진행 현황
+    // 객체는 함수(forEach등등)를 직접 호출할 수 없음. 객체의 키와 값에 접근해서 반복문 수행
+    let apvVoAllList = [];
+
+    for (let apvListOne in sortedData) {
+        apvVoAllList.push(sortedData[apvListOne]);
+    }
+
+    console.log("list 체크 : ", apvVoAllList);
+
+    apvVoAllList.forEach((apvVoList, i) => {
+        console.log("apvVoList -> ", apvVoList);
+
+
+        let HTML;
+
+        for (let apvVo in apvVoList) {
+
+            let docFormNo;
+            switch (apvVoList[apvVo].docFormNo) {
+                case "1":
+                    docFormNo = "품의서";
+                    break;
+                case "2":
+                    docFormNo = "출장신청서";
+                    break;
+                case "3":
+                    docFormNo = "도서구입신청서";
+                    break;
+
+                default:
+                    break;
+            }
+
+            console.log("apvVO ->", apvVoList[apvVo]);
+
+            HTML = `
+            <ul class="approval-process-wrap" title="결재상세 문서로 이동">
+                <li class="process-icon">
+                    <div class="icon"></div>
+                </li>
+                <li>
+                    <div class="apv-type">
+                        <span class="type-img">
+                            <img src="/resources/img/icon/icon2.png" alt="">
+                        </span>
+                        <span class="type-name">${docFormNo}</span>
+                    </div>
+                    <div class="apv-info">
+                        <span class="tit">${apvVoList[apvVo].apvSj}</span>
+                        <span class="date">${dateConverter(`${apvVoList[apvVo].drftDate}`)}</span>
+                    </div>
+                    <ul class="timeline">
+                        <li class="completed level1">
+                            <div class="icon-box">
+                                <span class="icon"></span>
+                            </div>
+                            <div class="emp-box">
+                                <span class="img-wrap">
+                                    <img src="/resources/img/icon/avatar.png" alt="">
+                                </span>
+                                <span class="name">이소망 대리</span>
+                            </div>
+                        </li>
+                        <li class="wf-progress level2">
+                            <div class="icon-box">
+                                <span class="icon"></span>
+                            </div>
+                            <div class="emp-box">
+                                <span class="img-wrap">
+                                    <img src="/resources/img/icon/avatar.png" alt="">
+                                </span>
+                                <span class="name">박서준 과장</span>
+                            </div>
+                        </li>
+                        <li class="pending level3">
+                            <div class="icon-box">
+                                <span class="icon"></span>
+                            </div>
+                            <div class="emp-box">
+                                <span class="img-wrap">
+                                    <img src="/resources/img/icon/avatar.png" alt="">
+                                </span>
+                                <span class="name">유재석 사장</span>
+                            </div>
+                        </li>
+                    </ul>
+                </li>
+            </ul>`;
+
+            $('.process-cont').append(HTML);
+        }
+
+    });
+
+});
+
+// 날짜 변환
+function dateConverter(date) {
+    return date.substring(0, 10);
+}
+
+// 문서별 갯수 조회
+function totalCnt() {
+    let pendingCnt = _totalCnt.pendingCnt;     // 대기
+    let progressCnt = _totalCnt.progressCnt;   // 진행
+    let completedCnt = _totalCnt.completedCnt; // 완료
+    let rejectedCnt = _totalCnt.rejectedCnt;   // 반려
+
+    // 각 문서별 카운트 업 애니메이션 적용
+    countUp("pendingCnt", pendingCnt, 1000);
+    countUp("progressCnt", progressCnt, 1000);
+    countUp("completedCnt", completedCnt, 1000);
+    countUp("rejectedCnt", rejectedCnt, 1000);
+}
+
+// 숫자 카운트 업 애니메이션 함수
+function countUp(elementId, finalValue, duration) {
+    let start = 0;
+    let increment = finalValue / (duration / 100);
+    let element = document.getElementById(elementId);
+    let timer = setInterval(function () {
+        start += increment;
+        element.innerText = Math.ceil(start);
+        if (start >= finalValue) {
+            clearInterval(timer);
+            element.innerText = finalValue;
+        }
+    }, 100);
+}
+
+// 결재 완료 목록 조회 (작업중!!!!!!!!!)
+function getCompleted() {
+
+    _completedList.forEach((e) => {
+
+        let HTML = `
+            <li data-apv-no=${e.apvNo}>
+                <i class="xi-document"></i>
+                <div class="tit">${e.apvSj}</div>
+                <div class="date">${dateConverter(`${e.drftDate}`)}</div>
+            </li>
+        `;
+
+        $('#completed .form-list').append(HTML);
+    });
+}
+
+
+
+// function data1(name) {
+//     return `
+//     <li class="completed level1">
+//     <div class="icon-box">
+//         <span class="icon"></span>
+//     </div>
+//     <div class="emp-box">
+//         <span class="img-wrap">
+//             <img src="/resources/img/icon/avatar.png" alt="">
+//         </span>
+//         <span class="name">${name}</span>
+//     </div>
+// </li>
+//     `;
+// }
+
+// function data2(name) {
+//     return `
+
+//     <li class="wf-progress level2">
+//     <div class="icon-box">
+//         <span class="icon"></span>
+//     </div>
+//     <div class="emp-box">
+//         <span class="img-wrap">
+//             <img src="/resources/img/icon/avatar.png" alt="">
+//         </span>
+//         <span class="name">${name}</span>
+//     </div>
+// </li>
+//     `;
+// }
+
+// function data3(name) {
+//     return `
+//         <li class="pending level3">
+//         <div class="icon-box">
+//             <span class="icon"></span>
+//         </div>
+//         <div class="emp-box">
+//             <span class="img-wrap">
+//                 <img src="/resources/img/icon/avatar.png" alt="">
+//             </span>
+//             <span class="name">${name}</span>
+//         </div>
+//     </li>
+//     `;
+// }
+
+
+

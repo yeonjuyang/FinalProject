@@ -1,0 +1,15 @@
+package com.team1.workforest.mail.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.team1.workforest.mail.vo.EmailVO;
+
+public interface MailService {
+
+	public List<EmailVO> getMailList(Map<String, Object> map);
+
+	public int getTotal(Map<String, Object> map);
+
+	public EmailVO getMailDetail(String emailNo);
+}

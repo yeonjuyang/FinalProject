@@ -1,0 +1,31 @@
+package com.team1.workforest.survey.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.team1.workforest.employee.vo.EmployeeVO;
+import com.team1.workforest.survey.vo.SurveyVO;
+import com.team1.workforest.vo.DepartmentVO;
+
+public interface SurveyService {
+
+	public List<SurveyVO> getSurveyList(Map<String, Object> map);
+
+	public int getkeywordTotal(Map<String, Object> map);
+
+	public List<EmployeeVO> empSearch(SurveyVO vo);
+
+	public EmployeeVO empImpomation(SurveyVO vo);
+
+	public List<DepartmentVO> deptSearch(DepartmentVO vo);
+
+	public DepartmentVO deptImpomation(DepartmentVO vo);
+	
+	// 설문조사 생성
+	public int createSurvey(SurveyVO vo);
+	
+	// 인원 넣기
+	public int createChild(SurveyVO vo);
+	
+	
+}

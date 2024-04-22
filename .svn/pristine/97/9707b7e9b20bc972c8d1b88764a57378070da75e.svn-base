@@ -1,0 +1,8 @@
+$(function(){
+	$(".xi-wechat").on("click",function(){
+		let url = "/chat/main?empNo="+headerEmpNo
+		let name = "채팅방"
+		let option = "width = 800, height = 800, left=2000, location=no, toolbars=no, status=no"
+		open(url,name,option)
+	})
+})

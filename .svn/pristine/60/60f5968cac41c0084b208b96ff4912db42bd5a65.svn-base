@@ -1,0 +1,672 @@
+import { createDoc1, createDoc2, createDoc3 } from './createDoc.js';
+
+// 공통으로 들어가는 항목
+let _empNo = document.querySelector('#empNo').value;                  // 사원번호
+let _empNm = document.querySelector('#empNm').value;                  // 사원명
+let _deptNm = document.querySelector('#deptNm').value;                // 부서명
+let _position_s = document.querySelector('#position_s').value;        // 직급
+let _rspnsblCtgryNm = document.querySelector('#rspnsblCtgryNm').value;// 직책
+
+let _docFormNo; // 선택된 양식
+let _tit;       // 제목
+let _cont;      // 내용
+
+let _apvLineData; // 최종 결재라인
+let _refer;       // 최종 참조자
+
+createDoc2(); // 출장신청서
+createDoc3(); // 도서구입신청서
+createDoc1(); // 품의서
+
+$(function () {
+
+    // 자동완성
+    $('#autoInput').on('click', autoInput);
+
+    // 출장자 추가 버튼 이벤트
+    $(document).on('click', '.emp-add-btn', () => {
+        console.log('test');
+    });
+
+    // 작성한 기안 저장 이벤트
+    $('#save_btn').on('click', createApv);
+
+    // 미리보기 이벤트
+    $('#preview_btn').on('click', preview);
+
+    // 첨부파일
+    $('#file-custom').change((e) => {
+
+        let input = e.target;
+        let files = input.files;
+
+        // 파일 목록에 추가
+        for (let i = 0; i < files.length; i++) {
+            let file = files[i];
+            let fileSize = file.size;
+            let fileName = file.name;
+
+            // 파일 크기를 KB 단위로 변환
+            let fileSizeKB = Math.round(fileSize / 1024);
+
+            // 파일 목록에 추가할 HTML 생성
+            let HTML = `
+	           	<li>
+	                <span class="checkbox-radio-custom">
+	                    <input type="checkbox" name="chck" id="chck">
+	                    <label for="chck"></label>
+	                </span>
+	                <span class="file-name">${fileName}</span>
+	                <span class="file-size">${fileSizeKB}KB</span>
+	                <button type="button" class="file-remove"></button>
+	            </li>`;
+
+            // 파일 목록에 추가
+            $('.file-lst').append(HTML);
+        }
+
+        // "file-remove" 버튼 클릭 시 해당 요소 삭제
+        $('.file-remove').click((e) => {
+            $(e.currentTarget).parent('li').remove();
+        });
+
+        // "전체 삭제" 클릭 시 "all-check" 제외한 모든 체크박스 삭제
+        $('.file-all-remove').click(() => {
+
+            // 모든 체크박스가 체크되어 있는지 확인
+            let allChecked = true;
+            $('input[name="chck"]').each(function () {
+                if (!$(this).prop('checked')) {
+                    allChecked = false;
+                    return false;
+                }
+            });
+
+            // 모든 체크박스가 체크되어 있을 때만 삭제
+            if (allChecked) {
+                $('input[name="chck"]').not('#all-check').closest('li').remove();
+                $('#all-check').prop('checked', false);
+            }
+        });
+
+        // "all-check" 클릭 시 모든 체크박스 선택
+        $('#all-check').click(function () {
+            $('input[name="chck"]').prop('checked', $(this).prop('checked'));
+        });
+
+    });
+
+    // 양식 선택 이벤트
+    $('select#docFormNo').change((e) => {
+        _docFormNo = $(e.currentTarget).val();
+        console.log("문서선택 -> ", _docFormNo);
+
+        switch (_docFormNo) {
+            case "1":
+                $('#doc_cont').attr('data-id', '1');
+                createDoc1();
+                break;
+            case "2":
+                $('#doc_cont').attr('data-id', '2');
+                createDoc2();
+                break;
+            case "3":
+                $('#doc_cont').attr('data-id', '3');
+                createDoc3();
+                break;
+            default:
+                $('#doc_cont').attr('data-id', '1');
+                createDoc1();
+                break;
+        }
+    });
+
+    // 재기안
+    getDraftToRewrite()
+});
+
+// 미리보기
+function preview() {
+
+    // 모달창 활성화
+    $('#preview_modal').addClass('open');
+    $('html').removeClass('scroll-hidden');
+
+    // 기존 내용 비우기
+    $('.apv-doc-form').empty();
+
+    // 데이터 추가
+    const today = new Date();
+    let apv_date = today.toLocaleString();
+
+
+    _tit = $('#doc_cont').find('#tit').val();
+    _cont = $('#doc_cont').find('#cont').val();
+
+    $('#preview_modal #apv_tit').text(_tit);
+    $('#preview_modal #apv_cont').text(_cont);
+    $('#apv_empNm').text(_empNm);
+    $('#apv_deptNm').text(_deptNm);
+
+
+    let HTML;
+    switch (_docFormNo) {
+        case "1":
+            HTML = type1();
+            break;
+        case "2":
+            HTML = type2();
+            break;
+        case "3":
+            HTML = type3();
+            break;
+        // default:
+        //     HTML = type1();
+        //     break;
+    }
+
+    function type1() {
+        return `
+            <table>
+            <colgroup>
+                <col style="width: 10%;">
+                <col style="width: 25%;">
+                <col style="width: 10%;">
+                <col style="width: auto;">
+                <col style="width: 7%;">
+                <col style="width: auto;">
+            </colgroup>
+            <tbody>
+                <tr>
+                    <td colspan="2"><span class="form-tit">품의서</span></td>
+                    <td colspan="4">
+                        <!-- 결재라인 사인 -->
+                        <table class="apv-sign-table">
+                            <colgroup>
+                                <col style="width: 5%;">
+                                <col style="width: 20%;">
+                                <col style="width: 20%;">
+                                <col style="width: 20%;">
+                            </colgroup>
+                            <tbody>
+                                <tr>
+                                    <th rowspan="4">결재</th>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <th>기안부서</th>
+                    <td id="apv_deptNm"></td>
+                    <th>기 안 일</th>
+                    <td colspan="4">${apv_date}</td>
+                    <!-- <th>문서번호</th>
+                    <td></td> -->
+                </tr>
+                <tr>
+                    <th>기안자</th>
+                    <td id="apv_empNm">${_empNm}</td>
+                    <th>보존년한</th>
+                    <td colspan="4">3년</td>
+                    <!-- <th>비밀등급</th>
+                <td></td> -->
+                </tr>
+                <tr>
+                    <th>제목</th>
+                    <td colspan="5">
+                        <span class="data" id="apv_tit">${_tit}</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6">
+                        <!-- <div class="data" id="apv_cont">${_cont}</div> -->
+                        <textarea id="apv_cont" style="min-height: 300px;">${_cont}</textarea>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+    	`;
+    }
+
+    function type2() {
+
+        const inputData = getInputField();
+
+        return `
+           <table>
+                <colgroup>
+                    <col style="width: 10%;">
+                    <col style="width: 25%;">
+                    <col style="width: 7%;">
+                    <col style="width: 20%;">
+                    <col style="width: 7%;">
+                    <col style="width: 20%;">
+                </colgroup>
+                <tbody>
+                    <tr>
+                        <td colspan="2"><span class="form-tit">출장 신청서</span></td>
+                        <td colspan="4">
+                            <!-- 결재라인 사인 -->
+                            <table class="apv-sign-table">
+                                <colgroup>
+                                    <col style="width: 5%;">
+                                    <col style="width: 20%;">
+                                    <col style="width: 20%;">
+                                    <col style="width: 20%;">
+                                </colgroup>
+                                <tbody>
+                                    <tr>
+                                        <th rowspan="4">결재</th>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>기안부서</th>
+                        <td id="apv_deptNm"></td>
+                        <th>기 안 일</th>
+                        <td colspan="4">${apv_date}</td>
+                    </tr>
+                    <tr>
+                        <th>기안자</th>
+                        <td id="apv_empNm"></td>
+                        <th>보존년한</th>
+                        <td colspan="4">3년</td>
+                    </tr>
+                    <tr>
+                        <th>제목</th>
+                        <td colspan="5">
+                            <span class="data" id="apv_tit">${_tit}</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>내용</th>
+                        <td colspan="5" id="apv_cont" style="text-align: left;">
+                            ${_cont}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <table style="margin-top: 20px;">
+                <colgroup>
+                    <col width="10%">
+                    <col width="25%">
+                    <col width="20%">
+                    <col width="20%">
+                    <col width="15%">
+                </colgroup>
+                <tbody>
+                    <tr>
+                        <th rowspan="2">출장자</th>
+                        <th>성명</th>
+                        <th>소속</th>
+                        <th>직급</th>
+                        <th>사번</th>
+                    </tr>
+                    <tr>
+                        <td>${inputData.name}</td>
+                        <td>${inputData.dept}</td>
+                        <td>${inputData.position}</td>
+                        <td>${inputData.empId}</td>
+                    </tr>
+                    <tr>
+                        <th>출장지</th>
+                        <td colspan="4">${inputData.destination}</td>
+                    </tr>
+                    <tr>
+                        <th rowspan="2">출장일정별</th>
+                        <th>일자</th>
+                        <th>방문처</th>
+                        <th colspan="2">업무내용</th>
+                    </tr>
+                    <tr>
+                        <td colspan="2">${inputData.startDate} ~ ${inputData.endDate}</span></td>
+                        <td colspan="2">${inputData.task}</td>
+                    </tr>
+                    <tr>
+                        <th rowspan="6">출장비</th>
+                        <th>항목</th>
+                        <th>금액</th>
+                        <th colspan="2">산출내역</th>
+                    </tr>
+                    <tr>
+                        <td>숙박비</td>
+                        <td>${inputData.accommodation}원</td>
+                        <td colspan="2">숙박비 = 숙박 일수 × 일일 숙박료 <br> = 3일 × 100,000원 = ${inputData.accommodation}원</td>
+                    </tr>
+                    <tr>
+                        <td>일 당</td>
+                        <td>${inputData.dailyAllowance}원</td>
+                        <td colspan="2">일당 = 출장자 일당 × 출장 일수</td>
+                    </tr>
+                    <tr>
+                        <td>교 통 비</td>
+                        <td>${inputData.transportation}원</td>
+                        <td colspan="2">교통비 = 이동 거리 및 교통 수단에 따라 변동</td>
+                    </tr>
+                    <tr>
+                        <td>기타</td>
+                        <td>${inputData.other}</td>
+                        <td colspan="2">식대: 50,000원<br>
+                                        통신비: 30,000원<br>
+                                        기타: 20,000원</td>
+                    </tr>
+                    <tr>
+                        <td>계</td>
+                        <td>${inputData.total}원</td>
+                        <td colspan="2">숙박비 + 일당 + 교통비 + 기타</td>
+                    </tr>
+                    <tr>
+                        <th>비고</th>
+                        <td colspan="4"></td>
+                    </tr>
+                </tbody>
+            </table>
+		`;
+    }
+
+    $('.apv-doc-form').append(HTML);
+}
+
+// 선택된 문서 데이터 가져오는 함수
+function getSelectedDocData() {
+    _tit = $('#tit').val();   // 제목
+    _cont = $('#cont').val(); // 내용
+
+    switch (_docFormNo) {
+
+        // 품의서 =================================
+        case "1":
+
+            // 결재라인 데이터
+            _apvLineData = _finalSelectedEmp.reduce((acc, e) => {
+                acc.push({
+                    apvEmpNo: e.empNo,
+                    apvSeCd: e.apvSeCd,
+                    apvLineSeq: e.apvLineSeq,
+                });
+                return acc;
+            }, []);
+
+            console.log("결재라인 데이터 -> ", _apvLineData);
+
+            // 참조인 데이터
+            _refer = [];
+            if (_finalRefer) { // 참조인이 있을때
+                _refer = _finalRefer.reduce((acc, e) => {
+                    acc.push({
+                        empNo: e.empNo
+                    });
+                    return acc;
+                }, []);
+            } else { // 참조인이 없을때
+                _refer = [];
+            }
+
+            return {
+                "apv": {
+                    "docFormNo": _docFormNo,
+                    "empNo": _empNo,
+                    "apvSj": _tit,
+                    "apvCn": _cont,
+                    "sttusCd": "Y"
+                },
+                "apvLine": _apvLineData,
+                "refer": _refer
+            };
+
+
+        // 출장신청서 =================================
+        case "2":
+
+            // 결재라인 데이터
+            _apvLineData = _finalSelectedEmp.reduce((acc, e) => {
+                acc.push({
+                    apvEmpNo: e.empNo,
+                    apvSeCd: e.apvSeCd,
+                    apvLineSeq: e.apvLineSeq,
+                });
+                return acc;
+            }, []);
+
+            // 참조인 데이터
+            _refer = [];
+            if (_finalRefer) { // 참조인이 있을때
+                _refer = _finalRefer.reduce((acc, e) => {
+                    acc.push({
+                        empNo: e.empNo
+                    });
+                    return acc;
+                }, []);
+            } else { // 참조인이 없을때
+                _refer = [];
+            }
+
+            return {
+                "apv": {
+                    "docFormNo": _docFormNo,
+                    "empNo": _empNo,
+                    "apvSj": _tit,
+                    "apvCn": _cont,
+                    "sttusCd": "Y",
+                },
+                "apvLine": _apvLineData,
+                "refer": _refer
+            };
+
+        // 도서구입신청서 =================================
+        case "3":
+
+            // 결재라인 데이터
+            _apvLineData = _finalSelectedEmp.reduce((acc, e) => {
+                acc.push({
+                    apvEmpNo: e.empNo,
+                    apvSeCd: e.apvSeCd,
+                    apvLineSeq: e.apvLineSeq,
+                });
+                return acc;
+            }, []);
+
+            // 참조인 데이터
+            _refer = [];
+            if (_finalRefer) { // 참조인이 있을때
+                _refer = _finalRefer.reduce((acc, e) => {
+                    acc.push({
+                        empNo: e.empNo
+                    });
+                    return acc;
+                }, []);
+            } else { // 참조인이 없을때
+                _refer = [];
+            }
+
+            return {
+                "apv": {
+                    "docFormNo": _docFormNo,
+                    "empNo": _empNo,
+                    "apvSj": _tit,
+                    "apvCn": _cont,
+                    "sttusCd": "Y"
+                },
+                "apvLine": _apvLineData,
+                "refer": _refer
+            };
+
+        default:
+            return null;
+    }
+}
+
+// 기안 저장
+function createApv() {
+
+    const formData = new FormData();
+
+    const selectedDocData = getSelectedDocData();
+
+    // 출장신청서 
+    if (_docFormNo === "2") {
+        let inputData = {
+            "name": $('#name').val(),                       // 출장자
+            "dept": $('#dept').val(),                       // 소속부서
+            "position": $('#position').val(),               // 직급
+            "empId": $('#empId').val(),                     // 사번
+            "destination": $('#destination').val(),         // 출장지
+            "startDate": $('#startDate').val(),             // 시작일자
+            "endDate": $('#endDate').val(),                 // 종료일자
+            "task": $('#task').val(),                       // 업무내용
+            "accommodation": $('#accommodation').val(),     // 숙박비
+            "dailyAllowance": $('#dailyAllowance').val(),   // 일당
+            "transportation": $('#transportation').val(),   // 교통비
+            "other": $('#other').val(),                     // 기타
+            "total": $('#total').val()                      // 총액
+        }
+
+        // 출장신청서 데이터(객체를 배열로 변환)
+        let inputDataList = [];
+        for (let key in inputData) {
+            let map = {};
+            map[key] = inputData[key];
+            inputDataList.push(map);
+        }
+
+        console.log("출장 데이터 : ", inputDataList);
+
+        formData.append("apvEtc",
+            new Blob([JSON.stringify(inputDataList)], { type: "application/json;charset=utf-8" }));
+    }
+
+    // 파일
+    const files = $('#file-custom')[0].files;
+    for (let i = 0; i < files.length; i++) {
+        formData.append('files', files[i]);
+    }
+
+    formData.append("data",
+        new Blob([JSON.stringify(selectedDocData)], { type: "application/json;charset=utf-8" }));
+
+    // 결재 상신 요청
+    $.ajax({
+        url: `${_ctx}/approval/create`,
+        type: 'post',
+        data: formData,
+        processData: false,
+        contentType: false,
+        dataType: "json",
+        success: function (result) {
+
+            let apvNo = result;
+
+            if (result > 0) {
+                alert(_msg.approval.insertSuccessAlert);
+                location.href =
+                    `${_ctx}/approval/approvalDetailView?apvNo=` + apvNo;
+            } else {
+                alert(_msg.approval.insertFailAlert);
+            }
+        }
+    });
+}
+
+// 출장신청서 입력 데이터 반환
+function getInputField() {
+
+    return {
+        "name": $('#name').val(),                   // 출장자
+        "dept": $('#dept').val(),                   // 소속부서
+        "position": $('#position').val(),           // 직급
+        "empId": $('#empId').val(),                 // 사번
+        "destination": $('#destination').val(),     // 출장지
+        "startDate": $('#startDate').val(),         // 시작일자
+        "endDate": $('#endDate').val(),             // 종료일자
+        "task": $('#task').val(),                   // 업무내용
+        "accommodation": $('#accommodation').val(), // 숙박비
+        "dailyAllowance": $('#dailyAllowance').val(),   // 일당
+        "transportation": $('#transportation').val(),   // 교통비
+        "other": $('#other').val(),                 // 기타
+        "total": $('#total').val()                  // 총액
+    }
+
+}
+
+// 자동입력
+function autoInput() {
+    $('#doc_cont').find('#tit').val('MSA 아키텍처 및 Kubernetes 교육 참여 신청');
+    $('#doc_cont').find('#cont').val(`1. 출장 목적:
+Microservices Architecture (MSA) 및 Kubernetes 기술에 대한 심층적인 이해 증진
+현대적인 애플리케이션 아키텍처 설계와 관리에 필요한 역량 강화
+
+2. 교육 내용 및 참여 계획:
+MSA 아키텍처의 개념과 원리에 대한 이해
+Kubernetes의 컨테이너 오케스트레이션 기능 및 운영 방법 습득
+마이크로서비스 간 통신 및 관리를 위한 서비스 메시 패턴 학습
+실전 프로젝트를 통한 Kubernetes 클러스터 구축 및 운영 경험 쌓기
+
+3. 예상 효과 및 기대 이익:
+혁신적인 MSA 아키텍처에 대한 이해도 향상 및 적용 능력 향상
+Kubernetes를 활용한 클라우드 네이티브 애플리케이션 운영 능력 강화
+비즈니스 프로세스의 유연성 및 확장성 향상을 통한 업무 효율성 개선`);
+
+    $('#name').val('이소망');
+    $('#dept').val('연구개발본부');
+    $('#position').val('본부장');
+    $('#empId').val('2019001');
+    $('#destination').val('서울 금천구 가산디지털1로 99');
+    $('#startDate').val('2024-03-29');
+    $('#endDate').val('2024-03-31');
+    $('#task').val('Kubernetes를 이용한 DevOps운영과 MSA적용');
+    $('#accommodation').val('300,000');
+    $('#dailyAllowance').val('300,000');
+    $('#transportation').val('300,000');
+    $('#other').val('');
+    $('#total').val('1,000,000');
+}
+
+// 재기안
+function getDraftToRewrite() {
+
+    let apvNo = location.search.slice(7);
+
+    $.ajax({
+        url: `${_ctx}/approval/createView/${apvNo}`,
+        type: 'GET',
+        dataType: 'json',
+        success: (result) => {
+            result.forEach((e) => {
+                $("#docFormNo").val(e.docFormNo);
+                $('#tit').val(e.apvSj);
+                $('#cont').text(e.apvCn);
+            });
+        }
+    })
+}

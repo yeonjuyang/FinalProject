@@ -1,0 +1,9 @@
+package com.team1.workforest.dashboard.mapper;
+
+import com.team1.workforest.dashboard.vo.DashboardVO;
+
+public interface DashboardMapper {
+
+	int updateDashboard(DashboardVO dashboardVO);
+
+}

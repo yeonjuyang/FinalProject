@@ -1,0 +1,11 @@
+package com.team1.workforest.dashboard.vo;
+
+import lombok.Data;
+
+@Data
+public class DashboardVO {
+	private String dashNo;
+	private String empNo;
+	private String dashNm;
+	private int orderIndex;
+}

@@ -1,0 +1,366 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!-- Javascript -->
+<script src="${pageContext.request.contextPath}/resources/script/common/commonForSchAndRsv.js" defer></script>
+<script>
+    $(function () {
+        adminGetCarResves();
+
+        // 예약 현황 탭 클릭하면 차량 예약 목록 불러오기
+        $("#carRsvBtn").on("click", function () {
+            adminGetCarResves();
+        });
+
+        // 반납 관리 탭 클릭하면 반납 처리 해야되는 예약 목록 불러오기
+        $("#rturnWaitBtn").on("click", function () {
+            adminGetWaitReturnCarResves();
+        });
+
+        // 지난 예약 탭 클릭하면 지난 차량 예약 목록 불러오기
+        $("#pastCarRsvBtn").on("click", function () {
+            adminGetPastCarResves();
+        });
+    });
+
+    // 차량 예약 목록 불러오기
+    function adminGetCarResves() {
+        $.ajax({
+            url: "/admin/reservations/car",
+            type: "GET",
+            dataType: "json",
+            success: function (rsvs) {
+                console.log("rsvs : ", rsvs);
+                $("#carRsvBody").empty();
+                if (!rsvs.length) {
+                    let rowStr = `<tr>
+                                    <td colspan="8">
+                                        <p>저장된 차량 예약이 없습니다.</p>
+                                    </td>
+                                </tr>`;
+                    $("#carRsvBody").append(rowStr);
+                } else {
+                    $.each(rsvs, function (index, rsv) {
+                        let rowStr = "";
+                        // 팀원 정보 불러와서 채우기
+                        getEmpInfo(rsv.empNo, function (empInfo) {
+                            let deptNm = empInfo.deptNm;
+                            let empNm = empInfo.empNm;
+                            let position = empInfo.position;
+                            let rspnsblCtgryNm = empInfo.rspnsblCtgryNm;
+                            if (rspnsblCtgryNm != "팀원") {
+                                position = rspnsblCtgryNm;
+                            }
+
+                            let rturnCd = rsv.rturnCd;
+                            console.log("rturnCd", rturnCd);
+                            let rturnStr = "";
+                            if (rturnCd == "1") {
+                                rturnStr = "<span class='wf-badge5'>반납 전</span>";
+                            } else if (rturnCd == "2") {
+                                rturnStr = "<span class='wf-badge4'>반납 처리 중</span>";
+                            } else {
+                                rturnStr = "<span class='wf-badge3'>반납 완료</span>";
+                            }
+
+                            rowStr += ` <tr>
+                                            <td>
+                                                <p>\${index+1}</p>
+                                            </td>
+                                            <td>
+                                                <p>\${rsv.carNm}</p>
+                                            </td>
+                                            <td>
+                                                <p>\${rsv.carNo}</p>
+                                            </td>
+                                            <td>
+                                                <p>\${empNm} \${position}(\${deptNm})</p>
+                                            </td>
+                                            <td>
+                                                <p>\${rsv.resveBeginDate.substr(0,16)}-\${rsv.resveEndDate.substr(0,16)}</p>
+                                            </td>
+                                            <td>
+                                                <p>\${rsv.resveCn}</p>
+                                            </td>
+                                            <td>
+                                            <p>\${rturnStr}</p>
+                                            </td>
+                                            <td>
+                                                <p>
+                                                    <button type="button" class="btn4 listDelBtn" data-id="\${rsv.carResveNo}">예약 취소</button>
+                                                    <button type="button" class="btn3 listDelBtn" data-id="\${rsv.carResveNo}">예약 취소</button>
+                                                </p>
+                                            </td>
+                                        </tr>`;
+                            $("#carRsvBody").append(rowStr);
+                        });
+                    });
+                }
+            },
+        });
+    }
+
+    // 반납 처리해야되는 차량 예약 불러오기
+    function adminGetWaitReturnCarResves() {
+        $.ajax({
+            url: "/admin/reservations/car/waitReturn",
+            type: "GET",
+            dataType: "json",
+            success: function (rsvs) {
+                console.log(rsvs);
+            },
+        });
+    }
+
+    // 지난 차량 예약 목록 불러오기
+    function adminGetPastCarResves() {
+        $.ajax({
+            url: "/admin/reservations/car/past",
+            type: "GET",
+            dataType: "json",
+            success: function (rsvs) {
+                console.log(rsvs);
+            },
+        });
+    }
+</script>
+<!--------------------------------- body 시작 --------------------------------->
+<div class="wf-tit-wrap">
+    <h1 class="page-tit">차량 예약 관리</h1>
+</div>
+<div class="wf-content-wrap">
+    <div class="tab-type tab-type2">
+        <div class="tab-menu">
+            <!-- "active"가 추가되면 메뉴가 활성화됩니다. -->
+            <button data-tab="tab1" type="button" class="tab-btn active" id="carRsvBtn">예약 현황</button>
+            <button data-tab="tab2" type="button" class="tab-btn" id="rturnWaitBtn">반납 대기</button>
+            <button data-tab="tab3" type="button" class="tab-btn" id="pastCarRsvBtn">지난 예약</button>
+            <div class="tab-indicator"></div>
+        </div>
+
+        <!-- tab1  -->
+        <div data-tab="tab1" class="tab-content active">
+            <div class="tab-board-lst">
+                <div class="wf-content-area">
+                    <table class="wf-table">
+                        <colgroup>
+                            <col style="width: 5%" />
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 15%" />
+                            <col style="width: 20%" />
+                            <col style="width: 15%" />
+                            <col style="width: 10%" />
+                            <col style="width: 15%" />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>번호</th>
+                                <th>차량명</th>
+                                <th>차량번호</th>
+                                <th>예약자</th>
+                                <th>예약일시</th>
+                                <th>사용목적</th>
+                                <th>반납상태</th>
+                                <th>상태변경</th>
+                            </tr>
+                        </thead>
+                        <tbody id="carRsvBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- 페이지네이션 시작 -->
+                <nav class="wf-pagination-wrap">
+                    <ul class="pagination">
+                        <li class="page-item">
+                            <a class="page-link prev" href="#">
+                                <i class="xi-angle-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item active">
+                            <a class="page-link" href="#">1</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">2</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">3</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link next" href="#">
+                                <i class="xi-angle-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- 페이지네이션 끝 -->
+
+                <!-- 검색영역 시작 -->
+                <div class="wf-search-area">
+                    <div class="select-box">
+                        <select name="" id="">
+                            <option value="">예약자명</option>
+                            <option value=""></option>
+                            <option value=""></option>
+                        </select>
+                    </div>
+                    <input type="text" placeholder="검색할 내용을 입력해주세요" />
+                    <button type="button" class="btn4">
+                        <i class="xi-search"></i>
+                    </button>
+                </div>
+                <!-- 검색영역 끝 -->
+            </div>
+        </div>
+
+        <!-- tab2  -->
+        <div data-tab="tab2" class="tab-content">
+            <div class="tab-board-lst">
+                <div class="wf-content-area">
+                    <table class="wf-table">
+                        <colgroup>
+                            <col style="width: 5%" />
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 15%" />
+                            <col style="width: 20%" />
+                            <col style="width: 20%" />
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>번호</th>
+                                <th>차량명</th>
+                                <th>차량번호</th>
+                                <th>예약자</th>
+                                <th>예약일시</th>
+                                <th>사용목적</th>
+                                <th>반납상태</th>
+                                <th>상태변경</th>
+                            </tr>
+                        </thead>
+                        <tbody id="PastCarRsvBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- 페이지네이션 시작 -->
+                <nav class="wf-pagination-wrap">
+                    <ul class="pagination">
+                        <li class="page-item">
+                            <a class="page-link prev" href="#">
+                                <i class="xi-angle-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item active">
+                            <a class="page-link" href="#">1</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">2</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">3</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link next" href="#">
+                                <i class="xi-angle-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- 페이지네이션 끝 -->
+
+                <!-- 검색영역 시작 -->
+                <div class="wf-search-area">
+                    <div class="select-box">
+                        <select name="" id="">
+                            <option value="">예약자명</option>
+                            <option value=""></option>
+                            <option value=""></option>
+                        </select>
+                    </div>
+                    <input type="text" placeholder="검색할 내용을 입력해주세요" />
+                    <button type="button" class="btn4">
+                        <i class="xi-search"></i>
+                    </button>
+                </div>
+                <!-- 검색영역 끝 -->
+            </div>
+        </div>
+
+        <!-- tab3  -->
+        <div data-tab="tab3" class="tab-content">
+            <div class="tab-board-lst">
+                <div class="wf-content-area">
+                    <table class="wf-table">
+                        <colgroup>
+                            <col style="width: 5%" />
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 15%" />
+                            <col style="width: 20%" />
+                            <col style="width: 20%" />
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>번호</th>
+                                <th>차량명</th>
+                                <th>차량번호</th>
+                                <th>예약자</th>
+                                <th>예약일시</th>
+                                <th>사용목적</th>
+                                <th>반납상태</th>
+                                <th>상태변경</th>
+                            </tr>
+                        </thead>
+                        <tbody id="PastCarRsvBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- 페이지네이션 시작 -->
+                <nav class="wf-pagination-wrap">
+                    <ul class="pagination">
+                        <li class="page-item">
+                            <a class="page-link prev" href="#">
+                                <i class="xi-angle-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item active">
+                            <a class="page-link" href="#">1</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">2</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">3</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link next" href="#">
+                                <i class="xi-angle-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- 페이지네이션 끝 -->
+
+                <!-- 검색영역 시작 -->
+                <div class="wf-search-area">
+                    <div class="select-box">
+                        <select name="" id="">
+                            <option value="">예약자명</option>
+                            <option value=""></option>
+                            <option value=""></option>
+                        </select>
+                    </div>
+                    <input type="text" placeholder="검색할 내용을 입력해주세요" />
+                    <button type="button" class="btn4">
+                        <i class="xi-search"></i>
+                    </button>
+                </div>
+                <!-- 검색영역 끝 -->
+            </div>
+        </div>
+    </div>
+
+    <!--------------------------------- body 끝 --------------------------------->
+</div>

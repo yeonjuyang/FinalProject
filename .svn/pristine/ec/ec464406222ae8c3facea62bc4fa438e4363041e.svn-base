@@ -1,0 +1,16 @@
+package com.team1.workforest.approval.vo;
+
+import lombok.Data;
+
+@Data
+public class ApvVO {
+	private String apvNo;          // 결재_번호
+	private String empNo;          // 작성자_사번
+	private String docFormNo;     // 문서_양식_번호
+	private String sttusCd;        // 상태_코드
+	private String apvSj;          // 결재_제목
+	private String apvCn;          // 결재_내용
+	private String drftDate;       // 기안_일자
+	private String tmprStreYnCd; // 임시_저장_여부_코드
+	private String atchmnflNo;     // 첨부파일_번호
+}

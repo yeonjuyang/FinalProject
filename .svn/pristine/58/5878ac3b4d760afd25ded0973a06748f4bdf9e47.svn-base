@@ -1,0 +1,24 @@
+package com.team1.workforest.admin.chart.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/adminDeptAttendance")
+public class AdminDeptAttendanceController {
+	
+	
+	// 관리자 근태 통계 메인 페이지
+	@GetMapping("/main")
+	public String AdminProject() {
+		return "admin/chart/deptAttendance";
+	}
+	
+	
+		
+	
+}

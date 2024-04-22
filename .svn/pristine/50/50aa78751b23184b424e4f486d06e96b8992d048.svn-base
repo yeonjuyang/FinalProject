@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.team1.workforest.admin.chart.mapper.AdminEmpMapper">
+	
+	<select id="getAgeGraph" parameterType="hashMap" resultType="int">
+		SELECT COUNT(EMP_NO)
+		FROM EMPLOYEE
+		WHERE #{year} >= SUBSTR(ECNY_DATE,1,4)
+		AND WORK_SE_CD != 3 AND WORK_SE_CD != 4
+		AND (SYSDATE - TO_DATE(BDATE,'YYYYMMDD'))/365 > #{start}
+		AND #{end} >= (SYSDATE - TO_DATE(BDATE,'YYYYMMDD'))/365
+	</select>
+	
+	<select id="getAvgAge" parameterType="hashMap" resultType="int">
+		SELECT ROUND(AVG((SYSDATE - TO_DATE(BDATE,'yyyymmdd'))/365),0)
+		FROM EMPLOYEE
+		WHERE #{year} >= SUBSTR(ECNY_DATE,1,4)
+		AND WORK_SE_CD != 3 AND WORK_SE_CD != 4
+	</select>
+	
+	<select id="getEmpCount" parameterType="hashMap" resultType="int">
+		SELECT COUNT(EMP_NO)
+		FROM EMPLOYEE
+		WHERE WORK_SE_CD != 3 AND WORK_SE_CD != 4
+		AND #{year} >= SUBSTR(ECNY_DATE,1,4)
+	</select>
+	
+	<select id="getGenderRate" parameterType="hashMap" resultType="int">
+		SELECT COUNT(EMP_NO)
+		FROM EMPLOYEE
+		WHERE WORK_SE_CD != 3 AND WORK_SE_CD != 4
+		AND GENDER = #{gender}
+		AND #{year} >= SUBSTR(ECNY_DATE,1,4)
+		AND WORK_SE_CD != 3 AND WORK_SE_CD != 4
+	</select>
+	
+	<select id="getRetireCount" parameterType="hashMap" resultType="int">
+		SELECT COUNT(EMP_NO)
+		FROM EMPLOYEE
+		WHERE WORK_SE_CD = #{retire}
+		AND #{year} >= SUBSTR(ECNY_DATE,1,4)
+		AND WORK_SE_CD != 3 AND WORK_SE_CD != 4
+	</select>
+	
+	<select id="getHireCount" parameterType="hashMap" resultType="int">
+		SELECT COUNT(EMP_NO)
+		FROM EMPLOYEE
+		WHERE #{year} = SUBSTR(ECNY_DATE,1,4)
+		AND WORK_SE_CD != 3 AND WORK_SE_CD != 4
+	</select>
+
+	<select id="getDeptNo" parameterType="hashMap" resultType="String">
+		SELECT DEPT_NO
+		FROM DEPARTMENT
+		WHERE DEPT_NO != 'DEPT00'
+		ORDER BY DEPT_NO ASC
+	</select>
+	
+	<select id="getDeptCount" parameterType="hashMap" resultType="String">
+		SELECT COUNT(EMP_NO)
+		FROM EMPLOYEE
+		WHERE DEPT_NO = #{deptNo}
+		AND #{year} >= SUBSTR(ECNY_DATE,1,4)
+		AND WORK_SE_CD != 3 AND WORK_SE_CD != 4
+	</select>
+	
+	<select id="getDeptName" parameterType="hashMap" resultType="deptVO">
+		SELECT DEPT_NM, DEPT_NO
+		FROM DEPARTMENT
+		WHERE DEPT_NO != 'DEPT00'
+		ORDER BY DEPT_NO ASC
+	</select>
+	
+	<select id="getRetireRate" parameterType="hashMap" resultType="String">
+		SELECT (
+				SELECT COUNT(EMP_NO)
+				FROM EMPLOYEE
+				WHERE SUBSTR(RETIRE_DATE,1,6) = #{month}
+				AND WORK_SE_CD ='4'
+				)
+				/
+				(
+				SELECT COUNT(EMP_NO)
+				FROM EMPLOYEE
+				WHERE #{month}||'01' > ECNY_DATE
+				AND WORK_SE_CD != '3' AND WORK_SE_CD != '4'
+				)
+		FROM DUAL
+	</select>
+	
+	<select id="getPositionGraph" parameterType="hashMap" resultType="adminEmpVO">
+		SELECT 
+		    COMMON_CODE.CMMN_CD_NM AS POSITION,
+		    NVL(COUNT(EMPLOYEE.POSITION_CD), 0) AS COUNT
+		FROM 
+		    COMMON_CODE
+		LEFT JOIN 
+		    EMPLOYEE ON COMMON_CODE.CMMN_CD = EMPLOYEE.POSITION_CD
+		        AND #{year} >= SUBSTR(ECNY_DATE,1,4)
+		        AND WORK_SE_CD != '3' AND WORK_SE_CD != '4'
+		WHERE 
+		    COMMON_CODE.CMMN_CD_GROUP = 'EMP002'
+		GROUP BY 
+		    COMMON_CODE.CMMN_CD_NM, COMMON_CODE.CMMN_CD 
+		ORDER BY 
+		    COMMON_CODE.CMMN_CD
+	</select>
+	
+	<select id="getLocalCount" parameterType="hashMap" resultType="adminEmpVO">
+		SELECT 
+		    COMMON_CODE.CMMN_CD_NM AS WORKLOCATION,
+		    NVL(COUNT(EMPLOYEE.WORK_LOC_CD), 0) AS COUNT
+		FROM 
+		    COMMON_CODE
+		LEFT JOIN 
+		    EMPLOYEE ON COMMON_CODE.CMMN_CD = EMPLOYEE.WORK_LOC_CD
+		        AND #{year} >= SUBSTR(ECNY_DATE,1,4)
+		        AND WORK_SE_CD != '3' AND WORK_SE_CD != '4'
+		WHERE 
+		    COMMON_CODE.CMMN_CD_GROUP = 'EMP005'
+		GROUP BY 
+		    COMMON_CODE.CMMN_CD_NM, COMMON_CODE.CMMN_CD 
+		ORDER BY 
+		    COMMON_CODE.CMMN_CD
+	</select>
+	
+	<select id="getWorkerCount" parameterType="hashMap" resultType="adminEmpVO">
+		SELECT 
+		    COMMON_CODE.CMMN_CD_NM AS WORKSTATE,
+		    NVL(COUNT(EMPLOYEE.WORK_LOC_CD), 0) AS COUNT
+		FROM 
+		    COMMON_CODE
+		LEFT JOIN 
+		    EMPLOYEE ON COMMON_CODE.CMMN_CD = EMPLOYEE.WORK_SE_CD
+		    AND #{year} >= SUBSTR(ECNY_DATE,1,4)
+		WHERE 
+		    COMMON_CODE.CMMN_CD_GROUP = 'EMP004'
+		AND  COMMON_CODE.CMMN_CD != '3' AND  COMMON_CODE.CMMN_CD != '4'
+		GROUP BY 
+		    COMMON_CODE.CMMN_CD_NM, COMMON_CODE.CMMN_CD 
+		ORDER BY 
+		    COMMON_CODE.CMMN_CD
+	</select>
+	
+
+	
+</mapper>

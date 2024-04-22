@@ -1,0 +1,167 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<script>
+    $(function () {});
+
+    function AdminGetMtrResve() {
+        $.ajax({
+            url: "/admin/reservations/mtr",
+            type: "GET",
+            dataType: "json",
+            success: function (rsvs) {
+                console.log("rsvs : ", rsvs);
+                $("#mtrRsvBody").empty();
+                if (mtrs.length == 0) {
+                    let rowStr = `<tr>
+                                    <td colspan="6">
+                                        <p>저장된 회의실 예약이 없습니다.</p>
+                                    </td>
+                                </tr>`;
+                    $("#mtrRsvBody").append(rowStr);
+                } else {
+                    $.each(rsvs, function (index, rsv) {
+                        let rowStr = `<tr>
+                                        <td>
+                                            <span class="checkbox-radio-custom">
+                                                <input type="checkbox" name="checkbox" id="chk1" />
+                                                <label for="chk1"></label>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <p>\${index+1}</p>
+                                        </td>
+                                        <td>
+                                            <p>\${rsv.mtrNm}</p>
+                                        </td>
+                                        <td>
+                                            <p>\${rsv.mtrLoc}</p>
+                                        </td>`;
+                                                               
+
+
+
+
+                                        `<td>`;
+
+                        rowStr += ` </td>
+                                        <td>
+                                            <div class="select-box">
+                                                <select name="usePosblYnCd" id="usePosblYnCd">
+                                                    <option value="1">Y</option>
+                                                    <option value="0">N</option>
+                                                </select>
+                                            </div>
+                                        </td>
+                                        <td>
+                                    </tr>`;
+                        $("#mtrRsvBody").append(rowStr);
+                    });
+                }
+            },
+        });
+    }
+</script>
+<!--------------------------------- body 시작 --------------------------------->
+<div class="wf-tit-wrap">
+    <h1 class="page-tit">예약 관리</h1>
+</div>
+<div class="wf-content-wrap">
+    <div class="tab-type tab-type2">
+        <div class="tab-menu">
+            <!-- "active"가 추가되면 메뉴가 활성화됩니다. -->
+            <button data-tab="tab1" type="button" class="tab-btn active" id="">회의실 예약</button>
+            <button data-tab="tab2" type="button" class="tab-btn" id="">차량 예약</button>
+            <div class="tab-indicator"></div>
+        </div>
+
+        <!-- tab1  -->
+        <div data-tab="tab1" class="tab-content active">
+            <div class="tab-board-lst">
+                <div class="wf-content-area" id="calbox">
+                    <table class="wf-table">
+                        <colgroup>
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 20%" />
+                            <col style="width: 20%" />
+                            <col style="width: 20%" />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>번호</th>
+                                <th>종류</th>
+                                <th>위치</th>
+                                <th>예약자</th>
+                                <th>예약일시</th>
+                                <th>사용목적</th>
+                                <th>상태변경</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mtrRsvBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- tab2  -->
+        <div data-tab="tab2" class="tab-content">
+            <div class="tab-board-lst">
+                <div class="wf-content-area">
+                    <p class="heading1">예약 현황</p>
+                    <table class="wf-table">
+                        <colgroup>
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 20%" />
+                            <col style="width: 20%" />
+                            <col style="width: 20%" />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>번호</th>
+                                <th>예약자</th>
+                                <th>차량명</th>
+                                <th>차량번호</th>
+                                <th>예약일시</th>
+                                <th>사용목적</th>
+                                <th>상태변경</th>
+                            </tr>
+                        </thead>
+                        <tbody id=""></tbody>
+                    </table>
+                </div>
+                <div class="wf-content-area">
+                    <p class="heading1">반납 대기</p>
+                    <table class="wf-table">
+                        <colgroup>
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 20%" />
+                            <col style="width: 20%" />
+                            <col style="width: 20%" />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>번호</th>
+                                <th>예약자</th>
+                                <th>차량명</th>
+                                <th>차량번호</th>
+                                <th>예약일시</th>
+                                <th>사용목적</th>
+                                <th>상태변경</th>
+                            </tr>
+                        </thead>
+                        <tbody id="carRsvBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--------------------------------- body 끝 --------------------------------->
+</div>

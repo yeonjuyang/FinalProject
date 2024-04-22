@@ -1,0 +1,87 @@
+$(function(){
+    
+    // 참조인선택 클릭시 참조인 선택 모달 활성화
+    $('#refer_modal_btn').on('click', openReferModal);
+
+	// 확인버튼 클릭시 문서화면에 띄우기
+	$('#apvline2_save_btn').on('click', function(){
+	
+    	// 모달 닫기
+        $('#refer_modal').removeClass('open');
+        $('html').removeClass('scroll-hidden');
+
+        // 참조인 문서화면에 띄우기 
+        showRefer();
+	});
+});
+
+
+function openReferModal(){
+    // 모달 활성화
+ 	$('#refer_modal').addClass('open');
+	$('html').addClass('scroll-hidden');
+	
+	// 부서 조직도
+    $('#jstree').jstree({
+        core: {
+            data: []
+        }
+	});
+}
+
+// 조직도에서 선택한 직원들 오른쪽 화면에 나타내기
+function choiceRefer(){
+	
+	let HTML = `
+		<li>
+            <div class="user">
+                <span class="dept">개발팀</span>
+                <span>이소망</span>
+                <span>사원</span>
+                <button type="button" class="delete-btn"></button>
+            </div>
+        </li>
+	`;
+	
+	$('#refer_modal ul.approval-add-user').append(HTML);
+}
+
+// 참조인 삭제버튼 클릭시 이벤트
+$(document).on('click', '#refer_modal .delete-btn', deleteRefer);
+
+// 직원 삭제
+function deleteRefer(e){
+	console.log('직원삭제 :', e.target);
+}
+
+// 최종적으로 선택한 직원들 문서화면에 띄우기
+function showRefer(){
+	console.log("체크");
+
+	// no-data 화면 지우기
+	$('#apv_line2').removeClass('no-data');
+
+	// ### 임시데이터 ###
+	let referList = [
+		{deptNm: "해외마케팅팀", empNm: "최순신", cmmnCdNm: "차장"},
+		{deptNm: "개발팀", empNm: "이순신", cmmnCdNm: "과장"},
+		{deptNm: "디자인팀", empNm: "박순신", cmmnCdNm: "대리"}
+	];
+	
+	// 기존 내용 지우기
+	$('#apv_line2').empty();
+	
+	referList.forEach((e) => {
+		let HTML = `
+			<li>
+	            <div class="user">
+	            	<span class="dept">${e.deptNm}</span>
+	                <span>${e.empNm}</span>
+	                <span>${e.cmmnCdNm}</span>
+	            </div>
+	        </li>
+		`;
+	
+		$('#apv_line2').append(HTML);	
+	});
+}

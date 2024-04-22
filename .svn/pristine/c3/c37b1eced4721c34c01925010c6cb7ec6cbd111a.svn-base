@@ -1,0 +1,50 @@
+package com.team1.workforest.vacation.service.impl;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.team1.workforest.vacation.mapper.VacationMapper;
+import com.team1.workforest.vacation.service.VacationService;
+import com.team1.workforest.vacation.vo.EmpVacationManageVO;
+import com.team1.workforest.vacation.vo.VacationRecordVO;
+
+@Service
+public class VacationServiceImpl implements VacationService{
+	
+	@Autowired
+	VacationMapper vacationMapper;
+
+	@Override
+	public List<EmpVacationManageVO> getMyVacationList(String empNo) {
+		return vacationMapper.getMyVacationList(empNo);
+	}
+	
+	@Override
+	public EmpVacationManageVO getMyVacation(Map<String, String> params) {
+		return vacationMapper.getMyVacation(params);
+	}
+	
+	@Override
+	public List<VacationRecordVO> getMyVacationRecordList(String empNo) {
+		return vacationMapper.getMyVacationRecordList(empNo);
+	}
+
+	@Override
+	public int getVacationRecordsCount(String empNo) {
+		// 종일 연차 카운트
+		int allDayCount = vacationMapper.getAllDayVacationRecordsCount(empNo);
+		// 반차 카운트
+		int halfDayCount = vacationMapper.getHalfDayVacationRecordsCount(empNo);
+		
+		int AllVacationRecordsCount = allDayCount + halfDayCount/2;
+		
+		return AllVacationRecordsCount;
+	}
+
+	
+
+
+}

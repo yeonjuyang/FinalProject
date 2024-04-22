@@ -1,0 +1,181 @@
+package com.team1.workforest.board.suggestion.controller;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.team1.workforest.board.suggestion.service.SuggestionService;
+import com.team1.workforest.board.suggestion.vo.SuggestionReplyVO;
+import com.team1.workforest.board.suggestion.vo.SuggestionVO;
+import com.team1.workforest.util.ArticlePage;
+
+import jdk.nashorn.internal.objects.annotations.Getter;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/suggestion")
+public class SuggestionController {
+	
+	@Autowired
+	SuggestionService suggestService;
+	
+	// 건의게시판 리스트 페이지(메인)
+	@GetMapping("/list")
+	public String getSuggestList(Model model,@RequestParam(value="currentPage", required = false, defaultValue = "1") int currentPage) {
+		
+		
+		Map<String, Object> map = new HashMap<String,Object>();
+		
+		// 페이지 번호
+		map.put("currentPage", currentPage);	
+				
+		//전체 행의 수 (total)
+		int total = this.suggestService.getTotal();
+		log.info("total -> ",total);
+		
+		// 한 화면에 보여지는 행의 수 (기본 10행)
+		int size = 10;
+				
+		List<SuggestionVO> suggestBoardVOList = this.suggestService.list(map);
+		log.info("list -> suggestBoardVOList : "+suggestBoardVOList);
+		
+		model.addAttribute("suggestdata",new ArticlePage<SuggestionVO>(total, currentPage, size, suggestBoardVOList, null));
+		
+		
+		return "board/suggestion/list";
+	}
+	
+	//건의 게시판 상세 조회
+	@RequestMapping(value = "/list/detail",method = RequestMethod.GET)
+	public String detailFreeBoard(Model model, @RequestParam String sugestBrdNo){
+		
+		// 조회수 증가
+		int suggestionView = this.suggestService.suggestionView(sugestBrdNo);
+		// 조회수 증가하는 부분을 맨 위에 두지 않으면 상세 조회페이지로 들어갔을 때 조회수가 증가되지 않음
+		
+		// 선택된 게시판 상세 조회
+		SuggestionVO suggestionVO = this.suggestService.detail(sugestBrdNo);
+		log.info("suggestionVO -> " + suggestionVO);
+		
+		 
+		 
+		 
+		
+		 model.addAttribute("suggestDetail",suggestionVO);
+		 
+		
+		return "board/suggestion/detail";
+	}
+	
+	// 댓글 조회
+	@ResponseBody
+	@PostMapping("/list/reply")
+	public List<SuggestionReplyVO> SuggestionReplyList(
+			@RequestBody SuggestionReplyVO vo){
+			
+		 // 댓글 조회 
+		 List<SuggestionReplyVO> suggestionReplyVOList = this.suggestService.suggestReplylist(vo); 
+		 
+		 log.info("suggestionReplyVOList -> "+suggestionReplyVOList);
+		
+		 
+		 
+		// model.addAttribute("suggestionReplyVOList",suggestionReplyVOList);
+		return suggestionReplyVOList;
+	}
+
+	//댓글 입력
+	@ResponseBody
+	@PostMapping("/list/reply/insert")
+	public SuggestionReplyVO SuggestionReplyInsert(@RequestBody SuggestionReplyVO vo) {
+		
+		//댓글 입력
+		int result  = this.suggestService.SuggestionReplyInsert(vo);
+		log.info("result = "+result);
+		
+		
+		
+		// 댓글 입력 완료 후..
+		SuggestionReplyVO suggestionreplyVO = this.suggestService.insertSuggestionReplyVO(vo);
+		log.info("suggestionreplyVO => "+suggestionreplyVO);
+		
+		
+		return suggestionreplyVO;
+	}
+	
+	
+	// 댓글 삭제
+	@ResponseBody
+	@PostMapping("/list/reply/delete")
+	public int suggestionReplyDelete(@RequestBody SuggestionReplyVO vo) {
+		log.info("vo -> " ,vo);
+		int result = this.suggestService.deleteSuggestionReplyVO(vo);
+		log.info("result -> "+result);
+		
+		return result;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	// 건의 게시글 삭제
+	@ResponseBody
+	@PostMapping("/list/delete")
+	public int deleteSuggestion(@RequestBody SuggestionVO vo) {
+		log.info("vo ->",vo);
+		
+		int result = this.suggestService.deleteSuggestion(vo);
+		log.info("result -> ",result);
+		
+		return result;
+	}
+	
+	// 건의 게시글 등록 페이지
+	@GetMapping("/list/insertSuggestion")
+	public String insertSuggestion() {
+		return "board/suggestion/insert";
+	}
+	
+	
+	// 건의 게시글 등록
+	@PostMapping("/creatSuggest")
+	public String createSuggest(@Validated SuggestionVO suggestionVO,
+			BindingResult brResult) {
+		
+		log.info("createSuggest -> suggestionVO :"+suggestionVO);
+		String empNo = "2020005";
+		suggestionVO.setEmpNo(empNo);
+		
+		int result = this.suggestService.createSuggest(suggestionVO);
+		
+		log.info("result -> ",result);
+		
+		
+		return "redirect:/suggestion/list";
+	}
+	
+	
+	
+	
+	
+	
+}

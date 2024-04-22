@@ -1,0 +1,16 @@
+@charset "UTF-8";
+
+:root {
+    --color-mysch: #32b677;
+    --color-teamsch: #029be6;
+    --color-deptsch: #7987ca;
+    --color-compsch: #f5521c;
+}
+/* 예약자 박스 */
+#rsvEmpNameBox {
+    display: none;
+}
+/* 수정 관련 버튼 */
+#updateBtnGroup {
+    display: none;
+}

@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.team1.workforest.survey.mapper.SurveyMapper">
+	
+	<sql id="where">
+		<if test="surveyCompleteCd != null and surveyCompleteCd !=''">
+		AND SURVEY_COMPLETE_CD =#{surveyCompleteCd}
+		</if>
+	</sql>
+	
+	
+	
+	
+	
+	
+	<select id="getkeywordTotal" parameterType="HashMap" resultType="int">
+		SELECT  COUNT(*)
+		FROM SURVEY A , EMPLOYEE B
+		WHERE 
+		A.SURVEY_EMP_NO = B.EMP_NO
+		<include refid="where"></include>
+	</select>
+	
+	
+	
+	<select id="getSurveyList" parameterType="hashMap" resultType="surveyVO">
+	WITH T AS (
+    SELECT ROWNUM RNUM,
+           F.SURVEY_NO,
+           A.EMP_NM,
+           F.SURVEY_COMPLETE_CD,
+           F.SURVEY_EMP_NO,
+           F.SURVEY_OPEN_DATE,
+           F.SURVEY_TITLE,
+           F.SURVEY_END_DATE
+    FROM (
+        SELECT  
+                 SURVEY_NO
+                 , SURVEY_EMP_NO
+                 , SURVEY_COMPLETE_CD
+                 , SURVEY_OPEN_DATE
+                 , SURVEY_TITLE
+                 , SURVEY_END_DATE
+        FROM     SURVEY
+	        ORDER BY TO_NUMBER(SURVEY_NO) DESC
+	    ) F,
+	    EMPLOYEE A
+	    WHERE F.SURVEY_EMP_NO = A.EMP_NO
+	    <include refid="where"></include>
+			)
+		SELECT *
+		FROM T
+		 WHERE T.RNUM BETWEEN (#{currentPage}* 10) - (10 - 1) AND (#{currentPage}* 10)
+		ORDER BY RNUM
+	</select>
+	
+	
+	<!-- 이름 검색 -->	
+	<select id="empSearch" parameterType="surveyVO" resultType="empVO">
+		SELECT 
+			A.EMP_NM || '(' ||B.DEPT_NM ||')' AS EMP_NM
+           ,A.EMP_NO 
+    	FROM 
+    		EMPLOYEE A
+            ,DEPARTMENT B
+   		WHERE 
+   			1=1  
+        	AND A.EMP_NM LIKE '%'||#{empNm}||'%'
+        	AND A.DEPT_NO =B.DEPT_NO
+	</select>
+	
+	
+	<!-- 직원 정보 찾기 -->
+	<select id="empImpomation" parameterType="surveyVO" resultType="empVO">
+		SELECT 
+		    A.EMP_NM
+		    ,A.EMP_NO
+		    ,A.POSITION_CD
+		    ,A.RSPNSBL_CD
+		    ,A.DEPT_NO
+		    ,B.DEPT_NM
+		    ,C.CMMN_CD_NM RSPNSBL_CTGRY_NM
+		FROM
+		    EMPLOYEE A , DEPARTMENT B , COMMON_CODE C
+		WHERE A.EMP_NO=#{empNo}
+		AND A.DEPT_NO = B.DEPT_NO
+		AND A.POSITION_CD  = C.CMMN_CD
+		AND C.CMMN_CD_GROUP = 'EMP002'
+	
+	</select>
+	
+	<select id="deptSearch" parameterType="deptVO" resultType="deptVO">
+		SELECT 
+	         B.DEPT_NM  
+	         ,B.DEPT_NO
+		FROM 
+		    DEPARTMENT B
+		WHERE 
+		   			1=1  
+		AND DEPT_NM LIKE '%'||#{deptNm}||'%'
+	</select>
+	
+	
+	<select id="deptImpomation" parameterType="deptVO" resultType="deptVO">
+		SELECT * FROM 
+		DEPARTMENT
+		WHERE DEPT_NO = #{deptNo}
+	</select>
+	
+	
+	
+	<insert id="createSurvey" parameterType="surveyVO">
+		INSERT INTO SURVEY 
+		VALUES( 
+		    (SELECT NVL(MAX(TO_NUMBER(SURVEY_NO)), 0)+1 FROM SURVEY)
+		    ,#{surveyEmpNo}
+		    ,'1'
+		    ,SYSDATE
+		    ,#{surveyTitle}
+		    ,#{surveyEndDate}
+		    ,#{surveyAnonyCd}
+		 )
+	</insert>
+	
+	
+	<!-- surveyNo 최댓값 -->
+	<select id="maxsurveyNo" resultType="int">
+		SELECT NVL(MAX(TO_NUMBER(SURVEY_NO)), 0) FROM SURVEY
+	</select>
+	
+	<!-- 부서인원 모음 -->
+	<select id="collectDept" parameterType="String" resultType="surveyParticVO">
+		SELECT EMP_NO  AS SURVEY_PARTIC_NO,EMP_NM FROM EMPLOYEE 
+		WHERE DEPT_NO = #{part}
+	</select>
+	
+	
+	<!-- 부서인원 등록 -->
+	<insert id="insertSurveyPartic" parameterType="surveyParticVO">
+		INSERT INTO SURVEY_PARTIC
+		VALUES(
+			(SELECT NVL(MAX(TO_NUMBER(SURVEY_PARTIC_NO)), 0)+1 FROM SURVEY_PARTIC)
+			,#{surveyNo}
+			,#{surveyParticEmpNo}
+		)
+	</insert>
+	
+	<!-- 질문 넣기 -->
+	<insert id="createQuestion" parameterType="surveyQuestionVO">
+	INSERT INTO SURVEY_QUESTION
+		VALUES(
+		 #{surveyNo}
+		 ,(SELECT NVL(MAX(TO_NUMBER(SURVEY_QUESTION_NO)), 0)+1 FROM SURVEY_QUESTION)
+		 ,#{surveyQuestionTypeCd}
+		 ,#{surveyQuestionSj}
+		 ,#{surveyQuestionId}
+		)
+	</insert>
+	
+	
+	<!--  선택지 넣기--> 
+	<insert id="createChoice" parameterType="surveyChoiceVO">
+		INSERT INTO SURVEY_CHOICE
+		VALUES(
+		 	#{surveyQuestionId}
+			,(SELECT NVL(MAX(TO_NUMBER(SURVEY_CHOICE_NO)), 0)+1 FROM SURVEY_CHOICE)
+		 	,#{surveySj}
+		 	,#{surveyNo}
+		)
+	</insert> 
+	
+	
+</mapper>

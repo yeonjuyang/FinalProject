@@ -1,0 +1,23 @@
+package com.team1.workforest.reservation.meetingroom.mapper;
+
+import java.util.List;
+
+import com.team1.workforest.reservation.meetingroom.vo.MtrReservationVO;
+
+public interface MtrResveMapper {
+
+	public List<MtrReservationVO> getMtrResveList();
+	
+	public MtrReservationVO getMtrResve(String mtrResveNo);
+	
+	public MtrReservationVO getMyMtrResve(String empNo);
+
+	public int createMtrResve(MtrReservationVO mtrResveVO);
+
+	public int updateMtrResve(MtrReservationVO mtrResveVO);
+
+	public int deleteMtrResve(String mtrResveNo);
+
+	
+	
+}

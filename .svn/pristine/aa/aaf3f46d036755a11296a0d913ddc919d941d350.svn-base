@@ -1,0 +1,12 @@
+@charset "UTF-8";
+
+#remainDispBox {
+    width: 150px;
+}
+#apvLevelBox {
+    width: 150px;
+}
+.disable {
+    pointer-events: none;
+    opacity: 0.5;
+}

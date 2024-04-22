@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.team1.workforest.board.suggestion.mapper.SuggestionMapper">
+	
+	
+	<!-- 건의 게시판 리스트 및 페이징 -->
+	<select id="list" parameterType="hashMap" resultType="suggestionVO">
+	WITH T AS (
+		    SELECT ROWNUM RNUM
+		    	   ,F.SUGEST_BRD_NO
+		           ,A.EMP_NM
+		           ,F.SUGEST_BRD_SJ
+		           ,F.WRITNG_DATE
+		           ,F.RDCNT
+    	FROM (
+	        SELECT   SUGEST_BRD_NO
+	               , EMP_NO 
+	               , SUGEST_BRD_SJ
+	               , WRITNG_DATE
+	               , RDCNT
+	         FROM 	SUGGESTION_BOARD ORDER BY TO_NUMBER(SUGEST_BRD_NO) DESC
+    			) F , EMPLOYEE A 
+                WHERE F.EMP_NO = A.EMP_NO
+	)
+	   SELECT * FROM T 
+        WHERE T.RNUM BETWEEN (#{currentPage}* 10) - (10 - 1) AND (#{currentPage}* 10)
+		ORDER BY RNUM
+	</select>
+	
+	<!-- 전체 행수 값  -->
+	<select id="getTotal" resultType="int">
+		SELECT COUNT(*)
+		FROM SUGGESTION_BOARD
+		WHERE 1 = 1
+	</select>
+	
+	
+	
+	<!--  조회수 -->
+	<update id="suggestionView" parameterType="String">
+		UPDATE SUGGESTION_BOARD
+		SET 
+  		RDCNT =  RDCNT + 1   
+		WHERE 
+		SUGEST_BRD_NO = #{sugestBrdNo}
+	</update>
+	
+	
+	
+	
+	<!-- 건의  게시판 상세조회 -->
+	<select id="detail" parameterType="String" resultType="suggestionVO">
+	SELECT 
+	     A.SUGEST_BRD_NO,A.SUGEST_BRD_SJ,A.WRITNG_DATE
+	    ,A.RDCNT,A.SUGEST_BRD_CN,A.ATCHMNFL_NO
+	    ,B.EMP_NM
+	FROM
+	     SUGGESTION_BOARD A 
+	    ,EMPLOYEE B
+	WHERE 
+	    A.EMP_NO = B.EMP_NO
+	    AND
+	    A.SUGEST_BRD_NO=#{sugestBrdNo}
+	</select>
+	
+	
+	
+	
+	<!-- 건의 게시글 댓글 조회 -->
+	<select id="suggestReplylist" parameterType="suggestionReplyVO" resultType="suggestionReplyVO">
+	SELECT
+	A.SUGEST_BRD_RE_NO,
+	    A.RE_SJ,
+	    B.EMP_NM,
+	    A.EMP_NO,
+	    A.WRITNG_DATE,
+	    A.UPDT_DATE ,
+	    A.UPPER_RE
+	FROM 	
+	    SUGGESTION_BOARD_REPLY A, EMPLOYEE B
+	WHERE  
+	    SUGEST_BRD_NO=#{sugestBrdNo}	AND
+	    A.EMP_NO = B.EMP_NO
+	START WITH 
+	    SUGEST_BRD_RE_NO = 1 
+	CONNECT BY NOCYCLE
+	    PRIOR SUGEST_BRD_RE_NO = UPPER_RE
+	ORDER SIBLINGS BY 
+	    SUGEST_BRD_RE_NO 
+	</select>
+	
+	<!-- 건의 게시글 댓글 등록 -->
+	<insert id="SuggestionReplyInsert" parameterType="suggestionReplyVO" >
+		INSERT INTO SUGGESTION_BOARD_REPLY
+		VALUES(
+			(SELECT NVL(MAX(TO_NUMBER(SUGEST_BRD_RE_NO)), 0)+1 FROM SUGGESTION_BOARD_REPLY)
+    		,#{reSj}
+    		,'2020011'
+    		,SYSDATE
+    		,''
+    		,#{sugestBrdNo}
+    		,'1'
+		)
+	</insert> 
+	
+	
+	
+	<!--  건의 게시판 댓글 입력완료 후 최신댓글 보여주기 -->
+	<select id="insertSuggestionReplyVO" parameterType="suggestionReplyVO" resultType="suggestionReplyVO">
+		SELECT 
+		    A.SUGEST_BRD_RE_NO
+		    , A.RE_SJ, A.EMP_NO
+		    , B.EMP_NM
+		    ,A.WRITNG_DATE
+		    , A.UPDT_DATE
+		    , A.SUGEST_BRD_NO
+		    , A.UPPER_RE
+		    , B.DEPT_NO
+		    , B.POSITION_CD
+		    , C.DEPT_NM 
+		    , D.CMMN_CD_NM
+		FROM 
+		    SUGGESTION_BOARD_REPLY A 
+		    , EMPLOYEE B
+		    , DEPARTMENT C
+		    , COMMON_CODE D
+		WHERE 
+		    SUGEST_BRD_NO =#{sugestBrdNo}   AND A.EMP_NO=B.EMP_NO AND C.DEPT_NO=B.DEPT_NO AND B.POSITION_CD = D.CMMN_CD AND 
+		    CMMN_CD_GROUP = 'EMP002'
+		     AND A.SUGEST_BRD_RE_NO = (SELECT MAX(TO_NUMBER(SUGEST_BRD_RE_NO)) FROM SUGGESTION_BOARD_REPLY WHERE SUGEST_BRD_NO =#{sugestBrdNo})
+		    ORDER BY TO_NUMBER(A.SUGEST_BRD_RE_NO) 
+	</select>
+	
+	
+	
+	
+	
+	<!-- 게시글 삭제 -->
+	<delete id="deleteSuggestion" parameterType="suggestionVO">
+		DELETE FROM SUGGESTION_BOARD
+		WHERE SUGEST_BRD_NO = #{sugestBrdNo}
+	</delete>
+	
+	
+	<!-- 건의 게시판 댓글 삭제 -->
+	<delete id="deleteSuggestionReplyVO" parameterType="suggestionReplyVO">
+		DELETE FROM SUGGESTION_BOARD_REPLY
+		WHERE SUGEST_BRD_RE_NO = #{sugestBrdReNo}
+	</delete>
+	
+	
+	<!-- 파일 입출력 -->
+	<insert id="insertAttachedFile" parameterType="attachedFileVO">
+		INSERT INTO ATTACHED_FILE
+		VALUES(
+		(SELECT NVL(MAX(TO_NUMBER(ATCHMNFL_NO)), 0)+1 FROM ATTACHED_FILE),
+		'1',
+		#{atchmnflNm},
+		#{atchmnflOriginNm},
+		#{atchmnflSize},
+		'',
+		#{atchmnflUrl}
+		)
+	</insert>
+	
+	<!-- 업로드한 파일 번호 -->
+	<select id="attachmnflNo" resultType="String">
+	SELECT NVL(MAX(TO_NUMBER(ATCHMNFL_NO)), 0) FROM ATTACHED_FILE
+	</select>
+	
+	
+	<!-- 건의 게시판 등록 -->
+	<insert id="createSuggest" parameterType="suggestionVO">
+		INSERT INTO SUGGESTION_BOARD
+		VALUES(
+		(SELECT NVL(MAX(TO_NUMBER(SUGEST_BRD_NO)), 0)+1 FROM SUGGESTION_BOARD)
+		,#{empNo}
+		,#{sugestBrdSj}
+		,SYSDATE
+		,0
+		,''
+		,#{sugestBrdCn}
+		,#{atchmnflNo}
+		)
+	</insert>
+	
+	
+	
+	
+</mapper>

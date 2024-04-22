@@ -1,0 +1,13 @@
+package com.team1.workforest.duty.vo;
+
+import java.util.Date;
+
+import lombok.Data;
+
+@Data
+public class DutyRecipientVO { // 업무 수신자 테이블
+	private String dutyNo; // 업무번호
+	private String empNo; // 사번
+	private String prgsRate; // 진행률
+	private Date cnfirmDate; // 확인한 일시
+}

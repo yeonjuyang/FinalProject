@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.team1.workforest.approval.mapper.ApprovalMapper">
+	
+	<insert id="create" parameterType="Hashmap">
+		INSERT INTO APV (
+							APV_NO,          <!-- 결재번호 -->
+						    EMP_NO,          <!-- 작성자사번 -->
+						    DOC_FORM_NO,     <!-- 문서양식번호 -->
+						    STTUS_CD,        <!-- 상태코드 -->
+						    APV_SJ,          <!-- 결재 제목 -->
+						    APV_CN,          <!-- 결재 내용 -->
+						    DRFT_DATE,       <!-- 기안 일자 -->
+						    TMPR_STRE_YN_CD, <!-- 임시저장여부코드 -->
+						    ATCHMNFL_NO      <!-- 첨부파일 번호 -->
+					    )
+		VALUES(SEQ_APVNO.NEXTVAL, #{empNo}, #{docFormNo}, #{sttusCd}, #{apvSj}, #{apvCn}, SYSDATE, #{tmprStreYnCd}, #{atchmnflNo});
+	</insert>
+</mapper>

@@ -1,0 +1,12 @@
+@charset "UTF-8";
+
+
+.box3{
+	height:350px;
+	
+}
+
+#myChart {
+    width: 270px;
+    height: 230px;
+} 

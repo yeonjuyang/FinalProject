@@ -1,0 +1,32 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+    
+    
+         		<div class="wf-content-area form">
+
+                            <form action="" method="">
+                                <ul class="wf-insert-form3">
+                                    <li>
+                                        <div class="wf-insert-tit">
+                                            <div class="wf-select-group">
+                                                <select name="" id="">
+                                                    <option value="">분류선택</option>
+                                                    <option value="">분류선택</option>
+                                                    <option value="">분류선택</option>
+                                                    <option value="">분류선택</option>
+                                                </select>
+                                            </div>
+                                            <input type="text" placeholder="제목을 입력해주세요">
+
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <textarea name="editor" class="editor"
+                                            placeholder="Editing with Markdown output"></textarea>
+                                    </li>
+                                    <li>
+                                        <input type="file" name="" id="">
+                                    </li>
+                                </ul>
+                            </form>
+                        </div>

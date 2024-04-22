@@ -1,0 +1,75 @@
+<div class="wf-content-area">
+    <div id="jstree"></div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $("#jstree").jstree({
+            'core': {
+                'data': function(obj, cb) {
+                    console.log("ck1:", obj, this);
+
+                    let xhr = new XMLHttpRequest();
+                    xhr.open("get", "/emp/treeAjax", true);
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState == 4 && xhr.status == 200) {
+                            console.log("xhr.responseText", xhr.responseText);
+                            var data = JSON.parse(xhr.responseText);
+                            var transformedData = transformData(data);
+                            cb.call(obj, transformedData);
+
+                            console.log("transformedData", transformedData);
+                        }
+                    }
+                    xhr.send();
+
+                },
+                "check_callback": true // 요거이 없으면, create_node 안먹음
+            },
+            "plugins": ["wholerow", "dnd"] // 추가: wholerow, dnd 플러그인 활성화
+        });
+    });
+
+    function transformData(data) {
+        // JSON 데이터를 배열로 변환하여 반환
+        return data.map(task => {
+            return {
+                id: task.deptNo,
+                text: task.deptNm+task.empNm,
+                parent: task.upperDept,
+                icon: "https://jstree.com/tree-icon.png",
+                employees: task.employees
+            };
+        });
+    }
+    
+//     function transformData(data) {
+//         // JSON 데이터를 배열로 변환하여 반환
+//         var nodes = [];
+
+//         data.forEach(task => {
+//             // 부서 노드 생성
+//             var deptNode = {
+//                 id: task.deptNo,
+//                 text: task.deptNm,
+//                 parent: task.upperDept,
+//                 icon: "https://jstree.com/tree-icon.png"
+//             };
+
+//             nodes.push(deptNode);
+
+//             // 사원 노드 생성
+//             var empNode = {
+//                 id: task.empNo,
+//                 text: task.empNm,
+//                 parent: task.deptNo,
+//                 icon: "https://jstree.com/tree-icon.png"
+//             };
+
+//             nodes.push(empNode);
+//         });
+       
+
+//         return nodes;
+//     }
+</script>

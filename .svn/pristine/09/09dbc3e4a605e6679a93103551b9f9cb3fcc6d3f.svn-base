@@ -1,0 +1,30 @@
+package com.team1.workforest.approval.service.impl;
+
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.team1.workforest.approval.mapper.ApprovalMapper;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+public class ApprovalServiceImpl implements ApprovalService {
+	
+	@Autowired
+	ApprovalMapper approvalMapper; 
+
+	// 결재 등록
+	@Override
+	public int create(Map<String, Object> map) {
+			
+		// 기안자 상태 Y로 변경
+		map.put("sttusCd", "Y");
+		log.info("map : {} " + map);
+		
+		return this.approvalMapper.create(map);
+	}
+
+}

@@ -1,0 +1,187 @@
+package com.team1.workforest.survey.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.github.mustachejava.reflect.DepthGuard;
+import com.team1.workforest.board.notice.vo.NoticeBoardVO;
+import com.team1.workforest.employee.vo.EmployeeVO;
+import com.team1.workforest.survey.service.SurveyService;
+import com.team1.workforest.survey.util.ArticlePageForSurvey;
+import com.team1.workforest.survey.vo.SurveyChoiceVO;
+import com.team1.workforest.survey.vo.SurveyVO;
+import com.team1.workforest.util.ArticlePagebrdCd;
+import com.team1.workforest.vo.DepartmentVO;
+
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/survey")
+public class SurveyController {
+
+	@Autowired
+	SurveyService surveyService;
+
+	// 설문조사 리스트 페이지
+	@GetMapping("/list")
+	public String getSurveyList() {
+		return "survey/list";
+	}
+
+	@ResponseBody
+	@PostMapping("/getSurveyList")
+	public ArticlePageForSurvey<SurveyVO> getSurveyList(@RequestBody(required = false) Map<String, Object> map) {
+		log.info("map: " + map);
+
+		List<SurveyVO> surveyVOList = this.surveyService.getSurveyList(map);
+
+		log.info("list -> surveyVOList : " + surveyVOList);
+
+		// 검색한 키워드의 행 수
+		int total = this.surveyService.getkeywordTotal(map);
+
+		log.info("listAjax->list -> total : " + total);
+
+		int size = 10;
+
+		String currentPage = map.get("currentPage").toString();
+		String keyword = map.get("keyword").toString();
+		String searchOption = map.get("searchOption").toString();
+		String surveyCompleteCd = map.get("surveyCompleteCd").toString();
+
+		log.info("total : " + total + ", currentPage : " + currentPage + ", size : " + size + ", keyword : " + keyword
+				+ ", searchOption : " + searchOption + ", surveyCompleteCd : " + surveyCompleteCd);
+
+		ArticlePageForSurvey<SurveyVO> data = new ArticlePageForSurvey<SurveyVO>(total, Integer.parseInt(currentPage),
+				size, surveyVOList, keyword, searchOption, surveyCompleteCd);
+
+		log.info("listAjax->data : " + data);
+
+		String url = "/survey/list";
+
+		data.setUrl(url);
+
+		return data;
+	}
+
+	
+	  // 등록 페이지 만들기 용
+	  
+	  @GetMapping("/insert") 
+	  public String insert(){
+		  return "survey/insert"; 
+		  }
+	  
+	  
+	  
+	  @ResponseBody
+	  @PostMapping("/empSearch")
+	  public List<EmployeeVO> empSearch(@RequestBody SurveyVO vo){
+		 List<EmployeeVO> list = this.surveyService.empSearch(vo);
+		 log.info("list----> "+list);
+		 return list;
+	  }
+	  
+	  
+	  @ResponseBody
+	  @PostMapping("/emp/imp")
+	  public EmployeeVO empImpomation(@RequestBody SurveyVO vo) {
+		  log.info("vo-----> "+vo);
+		  EmployeeVO empVO = this.surveyService.empImpomation(vo);
+		  return empVO;
+	  }
+	 
+	  
+	  @ResponseBody
+	  @PostMapping("/deptSearch")
+	  public List<DepartmentVO> deptSearch(@RequestBody DepartmentVO vo){
+		  List<DepartmentVO> list = this.surveyService.deptSearch(vo);
+		  log.info("list---> "+list);
+		  return list;
+	  }
+	  
+	  
+	  @ResponseBody
+	  @PostMapping("/dept/imp")
+	  public DepartmentVO deptImpomation(@RequestBody DepartmentVO vo) {
+		  log.info("vo--------> "+vo);
+		  DepartmentVO deptVO = this.surveyService.deptImpomation(vo);
+		  return deptVO;
+	  }
+	  
+
+	  
+	  // 부모등록
+	  @PostMapping("/creatSurvey")
+	  public String createSurvey(@Validated SurveyVO vo, BindingResult brResult) {
+		  log.info("vo-------> "+vo);
+		  
+		  
+		  int result = this.surveyService.createSurvey(vo);
+		  
+		  log.info("result ----> "+result);
+		  
+		  if(result == 1) {
+			  int result2 = this.surveyService.createChild(vo);
+			  log.info("result2 --------> "+result2);
+			 
+			  
+		  }
+		  
+		  
+		  
+		  
+		  
+		  
+		  /*	사람 구하기
+			  log.info("vo.deptNo" + vo.getDeptNo()); 
+			  String str = vo.getDeptNo(); 
+			  String [] parts = str.split(","); 
+			  for(String part : parts) { 
+				  log.info(""+part); 
+			  }
+		*/ 
+		  
+		  
+		  
+		  
+		  
+		/* 질문 항목 찢기
+		  List<SurveyChoiceVO> aaa= vo.getSurveyChoiceList();
+		  for(SurveyChoiceVO bb : aaa) {
+			  log.info("bb---> "+ bb.getSurveyChoiceSj());
+			  for(String cc : bb.getSurveyChoiceSj()) {
+				  log.info("cc----->"+cc);
+			  }
+		  }
+		  
+		  */
+		  
+		  
+		  return "redirect:/survey/list";
+	  }
+	  
+	  
+	  
+	  
+	  
+	  
+	 
+
+}

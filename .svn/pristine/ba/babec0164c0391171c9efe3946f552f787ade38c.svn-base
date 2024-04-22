@@ -1,0 +1,169 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<script type="text/javascript" src="/resources/js/jquery-3.7.0.min.js"></script>
+<script type="text/javascript" src="/resources/js/stripe-gradient.js"></script>
+<script type="text/javascript">
+$(function(){
+	
+	$.ajax({
+        url:"/mail/inboxAjax",
+        type:"get",
+        dataType:"json",
+        contentType: "application/json; charset=utf-8",
+        success:function(result){
+            console.log("result : ", result);
+            
+            let str = "";
+            
+            //목록 초기화
+            $("#emailList").html("");
+            
+            $.each(result.content,function(idx,emailVO){
+                str += "<tr>";
+                str += "<td>";
+                str += "<span class='checkbox-radio-custom'> "; 
+                str += "<input type='checkbox' name='checkbox' id='chk" + (idx + 2) + "'> ";
+                str += "<label for='chk" + (idx + 2) + "'></label> ";
+                str += "</span>";
+                str += "</td>";
+                str += "<td>";
+                str += "<div class='wf-mail-button-wrap'> "; 
+                str += "<button type='button'> ";
+                str += "<i class='xi-mail-read'></i> ";
+                str += "</button> ";
+                str += "<button type='button'> ";
+                str += "<i class='xi-attachment'></i> ";
+                str += "</button> ";
+                str += "</div> ";
+                str += "</td> ";
+                str += "<td> ";
+                str += "<p>" + emailVO.senderEmplNo + "</p> ";
+                str += "</td> ";
+                str += "<td> ";
+                str += "<p>" + emailVO.emailSj + "</p> ";
+                str += "</td> ";
+                str += "<td> ";
+                str += "<p>" + emailVO.sendDate + "</p> ";
+                str += "</td> ";
+                str += "</tr>";
+            });
+            //마지막 자식 요소로 누적
+            $("#emailList").append(str);
+        }
+    });
+});
+</script>	
+<!-- =============== body 시작 =============== -->
+<!-- =============== 컨텐츠 영역 시작 =============== -->
+
+<div class="wf-mail-wrap">
+	<!-- 메일 왼쪽 파트 -->
+	<div class="wf-content-area wf-mail-left">
+		<button type="button" class="btn2 mail-btn">메일쓰기</button>
+		<div class="wf-mail-top">
+			<button type="button">
+				<span class="data">1</span>안읽음
+			</button>
+			<button type="button">
+				<i class="xi-attachment"></i>첨부
+			</button>
+		</div>
+
+		<div class="wf-mail-menu">
+			<button type="button" class="getmailbtn1">
+				<i class="xi-mail-read-o"></i> 받은메일함
+			</button>
+			<button type="button" class="getmailbtn2">
+				<i class="xi-share"></i> 보낸메일함
+			</button>
+			<button type="button" class="getmailbtn3">
+				<i class="xi-folder-o"></i> 임시보관함
+			</button>
+			<button type="button" class="getmailbtn4">
+				<i class="xi-trash-o"></i> 휴지통
+			</button>
+		</div>
+	</div>
+
+	<!-- 메일 오른쪽 파트 -->
+	<div class="wf-mail-right">
+		<!-- 받은이메일 리스트(메일 첫 화면) -->
+		<div class="wf-content-area getmail">
+			<div class="wf-flex-box between mg-b-10">
+				<h1 class="page-tit2">
+					<i class="xi-mail"></i> 전체메일 <span class="mail-badge">1/51</span>
+				</h1>
+				<div class="side-util">
+					<button type="button" class="btn3">삭제</button>
+				</div>
+			</div>
+			<table class="wf-table">
+				<colgroup>
+					<col style="width: 2%;">
+					<col style="width: auto;">
+					<col style="width: 10%;">
+					<col style="width: auto;">
+					<col style="width: 20%;">
+				</colgroup>
+				<thead>
+					<tr>
+						<th><span class="checkbox-radio-custom"> <input
+								type="checkbox" name="checkbox" id="chk1"> <label
+								for="chk1"></label>
+						</span></th>
+						<th></th>
+						<th>보낸 사람</th>
+						<th>제목</th>
+						<th>받은 시각</th>
+					</tr>
+				</thead>
+				<tbody id="emailList"></tbody>
+
+			</table>
+
+
+		</div>
+
+		<!-- 페이지네이션 시작 -->
+		<nav class="wf-pagination-wrap">
+			<ul class="pagination">
+				<li class="page-item"><a class="page-link prev" href="#"> <i
+						class="xi-angle-left"></i>
+				</a></li>
+				<li class="page-item active"><a class="page-link" href="#">1</a>
+				</li>
+				<li class="page-item"><a class="page-link" href="#">2</a></li>
+				<li class="page-item"><a class="page-link" href="#">3</a></li>
+				<li class="page-item"><a class="page-link next" href="#"> <i
+						class="xi-angle-right"></i>
+				</a></li>
+			</ul>
+		</nav>
+		<!-- 페이지네이션 끝 -->
+
+		<!-- 검색영역 시작 -->
+		<div class="wf-search-area">
+			<div class="select-box">
+				<select name="" id="">
+					<option value="">제목</option>
+					<option value="">제목+내용</option>
+					<option value="">작성자</option>
+				</select>
+			</div>
+			<input type="text" placeholder="검색할 내용을 입력해주세요">
+			<button type="button" class="btn4">
+				<i class="xi-search"></i>
+			</button>
+		</div>
+		<!-- 검색영역 끝 -->
+
+		<!-- 메일쓰기 폼 시작(안보이게)  -->
+
+
+	</div>
+	<!-- 메일 오른쪽 파트 끝 -->
+
+</div>
+<!-- =============== 컨텐츠 영역 끝 =============== -->
+
+<!-- =============== body 끝 =============== -->

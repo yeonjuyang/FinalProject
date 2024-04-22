@@ -1,0 +1,14 @@
+package com.team1.workforest.admin.reservation.service;
+
+import java.util.List;
+
+import com.team1.workforest.reservation.car.vo.CarVO;
+import com.team1.workforest.reservation.meetingroom.vo.MtrVO;
+
+public interface AdminResourcesService {
+	
+	public List<MtrVO> getMtrList();
+
+	public List<CarVO> getCarList();
+
+}

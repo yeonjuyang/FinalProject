@@ -1,0 +1,409 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!-- Javascript -->
+<script src="${pageContext.request.contextPath}/resources/script/common/commonForSchAndRsv.js" defer></script>
+<script>
+    $(function () {
+        // 회의실 목록 불러오기
+        getMtrList();
+
+        // 회의실 탭 클릭하면 회의실 목록 불러오기
+        $("#mtrListBtn").on("click", function () {
+            getMtrList();
+        });
+
+        // 차량 탭 클릭하면 차량 목록 불러오기
+        $("#carListBtn").on("click", function () {
+            getCarList();
+        });
+
+        // 회의실 추가 버튼 클릭하면 모달열기
+        $("#createMtrBtn").on("click", function () {
+            $("#mtrModal").addClass("open");
+        });
+
+        // 차량 추가 버튼 클릭하면 모달열기
+        $("#createCarBtn").on("click", function () {
+            $("#carModal").addClass("open");
+        });
+    });
+
+    // 회의실 목록 불러오기
+    function getMtrList() {
+        $.ajax({
+            url: "/admin/mtrs",
+            type: "GET",
+            dataType: "json",
+            success: function (mtrs) {
+                console.log("mtrs : ", mtrs);
+                $("#mtrBody").empty();
+                if (!mtrs.length) {
+                    let rowStr = `<tr>
+                                    <td colspan="6" style="text-align:center;">
+                                        <p>회의실이 없습니다.</p>
+                                    </td>
+                                </tr>`;
+                    $("#mtrBody").append(rowStr);
+                } else {
+                    $.each(mtrs, function (index, mtr) {
+                        let rowStr = "";
+                        let itemStr = "";
+                        mtr.mtrEquipedList.forEach(function (item) {
+                            if (item.equipYnCd == 0) {
+                                return;
+                            }
+                            let itemType = item.eqpmnNo;
+
+                            if (itemType == 1) {
+                                itemStr += "<p>프로젝터</p>";
+                            } else if (itemType == 2) {
+                                itemStr += "<p>화이트보드</p>";
+                            } else if (itemType == 3) {
+                                itemStr += "<p>마이크</p>";
+                            } else {
+                                itemStr += "<p>컴퓨터</p>";
+                            }
+                        });
+
+                        let useCd = mtr.usePosblYnCd;
+                        let useStr = "";
+                        if (useCd == 1) {
+                            useStr = "Y";
+                        } else {
+                            useStr = "N";
+                        }
+
+                        rowStr += ` <tr>
+                                        <td>
+                                            <span class="checkbox-radio-custom">
+                                                <input type="checkbox" name="mtr\${index+1}Chk" id="mtr\${index+1}Chk" />
+                                                <label for="mtr\${index+1}Chk"></label>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <p>\${index+1}</p>
+                                        </td>
+                                        <td>
+                                            <p>\${mtr.mtrNm}</p>
+                                        </td>
+                                        <td>
+                                            <p>\${mtr.mtrLoc}</p>
+                                        </td>
+                                        <td>
+                                            <p>\${mtr.aceptblNmpr}명</p>
+                                        </td>
+                                        <td>
+                                            \${itemStr}
+                                        </td>
+                                        <td>
+                                            <p><img src='/resources/img/reservation/\${mtr.photoUrl}' style='width:180px'/></p>
+                                        </td>
+                                        <td>
+                                            <div class="select-box">
+                                                <select name="usePosblYnCd" id="usePosblYnCd">
+                                                    <option value="1">Y</option>
+                                                    <option value="0">N</option>
+                                                </select>
+                                            </div>
+                                        </td>
+                                    </tr>`;
+                        $("#mtrBody").append(rowStr);
+                    });
+                }
+            },
+        });
+    }
+
+    // 차량 목록 불러오기
+    function getCarList() {
+        $.ajax({
+            url: "/admin/cars",
+            type: "GET",
+            dataType: "json",
+            success: function (cars) {
+                console.log("cars : ", cars);
+                $("#carBody").empty();
+                if (cars.length == 0) {
+                    let rowStr = `<tr>
+                                    <td colspan="6" style="text-align:center;">
+                                        <p>보유한 차량이 없습니다.</p>
+                                    </td>
+                                </tr>`;
+                    $("#carBody").append(rowStr);
+                } else {
+                    $.each(cars, function (index, car) {
+                        let rowStr = "";
+                        let useCd = car.usePosblYnCd;
+                        let useStr = "";
+                        if (useCd == 1) {
+                            useStr = "Y";
+                        } else {
+                            useStr = "N";
+                        }
+                        rowStr += ` <tr>
+                                        <td>
+                                            <span class="checkbox-radio-custom">
+                                                <input type="checkbox" name="car\${index+1}Chk" id="car\${index+1}Chk" />
+                                                <label for="car\${index+1}Chk"></label>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <p>\${index+1}</p>
+                                        </td>
+                                        <td>
+                                            <p>\${car.carNm}</p>
+                                        </td>
+                                        <td>
+                                            <p>\${car.carNo}</p>
+                                        </td>
+                                        <td>
+                                            <p><img src='/resources/img/reservation/\${car.photoUrl}' style='width:180px'/></p>
+                                        </td>
+                                        <td>
+                                            <div class="select-box">
+                                                <select name="usePosblYnCd" id="usePosblYnCd">
+                                                    <option value="1">Y</option>
+                                                    <option value="0">N</option>
+                                                </select>
+                                            </div>
+                                        </td>
+                                    </tr>`;
+                        $("#carBody").append(rowStr);
+                    });
+                }
+            },
+        });
+    }
+</script>
+<!--------------------------------- body 시작 --------------------------------->
+<div class="wf-tit-wrap">
+    <h1 class="page-tit">시설/자원 관리</h1>
+</div>
+<div class="wf-content-wrap">
+    <div class="tab-type tab-type2">
+        <div class="tab-menu">
+            <!-- "active"가 추가되면 메뉴가 활성화됩니다. -->
+            <button data-tab="tab1" type="button" class="tab-btn active" id="mtrListBtn">회의실</button>
+            <button data-tab="tab2" type="button" class="tab-btn" id="carListBtn">차량</button>
+            <div class="tab-indicator"></div>
+        </div>
+
+        <!-- tab1  -->
+        <div data-tab="tab1" class="tab-content active">
+            <div class="tab-board-lst">
+                <div class="side-util">
+                    <button type="button" class="btn2" id="createMtrBtn">추가</button>
+                    <button type="button" class="btn4" id="updateMtrBtn">수정</button>
+                    <button type="button" class="btn3" id="deleteMtrBtn">삭제</button>
+                </div>
+                <div class="wf-content-area" id="calbox">
+                    <table class="wf-table">
+                        <colgroup>
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 15%" />
+                            <col style="width: 20%" />
+                            <col style="width: 10%" />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>
+                                    <span class="checkbox-radio-custom">
+                                        <input type="checkbox" name="checkbox" id="mtrAllChk" />
+                                        <label for="mtrAllChk"></label>
+                                    </span>
+                                </th>
+                                <th>번호</th>
+                                <th>종류</th>
+                                <th>위치</th>
+                                <th>수용가능인원</th>
+                                <th>보유장비</th>
+                                <th>사진</th>
+                                <th>사용가능여부</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mtrBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- tab2  -->
+        <div data-tab="tab2" class="tab-content">
+            <div class="tab-board-lst">
+                <div class="side-util">
+                    <button type="button" class="btn2" id="createCarBtn">추가</button>
+                    <button type="button" class="btn4" id="updateCarBtn">수정</button>
+                    <button type="button" class="btn3" id="deleteCarBtn">삭제</button>
+                </div>
+                <div class="wf-content-area">
+                    <table class="wf-table">
+                        <colgroup>
+                            <col style="width: 10%" />
+                            <col style="width: 15%" />
+                            <col style="width: 15%" />
+                            <col style="width: 20%" />
+                            <col style="width: 20%" />
+                            <col style="width: 20%" />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>
+                                    <span class="checkbox-radio-custom">
+                                        <input type="checkbox" name="checkbox" id="carAllChk" />
+                                        <label for="carAllChk"></label>
+                                    </span>
+                                </th>
+                                <th>번호</th>
+                                <th>차량명</th>
+                                <th>차량번호</th>
+                                <th>사진</th>
+                                <th>사용가능여부</th>
+                            </tr>
+                        </thead>
+                        <tbody id="carBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--------------------------------- body 끝 --------------------------------->
+
+<!--------------------------------- 회의실 등록/수정 모달 시작 --------------------------------->
+<div class="modal" id="mtrModal">
+    <div class="modal-cont">
+        <h1 class="modal-tit">회의실 등록</h1>
+        <div class="modal-content-area">
+            <form id="mtrForm" enctype="multipart/form-data">
+                <ul class="wf-insert-form2 vertical">
+                    <li>
+                        <label for="cc">회의실 종류<i class="i">*</i></label>
+                        <div>
+                            <input type="text" name="" id="cc" placeholder="소회의실, 중회의실, 대회의실" required />
+                        </div>
+                    </li>
+                    <li>
+                        <label for="cc">회의실 호수<i class="i">*</i></label>
+                        <div>
+                            <input type="text" name="" id="cc" placeholder="회의실 호수" required />
+                        </div>
+                    </li>
+                    <li>
+                        <label for="cc">수용 인원<i class="i">*</i></label>
+                        <div>
+                            <input type="number" name="" id="cc" required />
+                        </div>
+                    </li>
+                    <li>
+                        <label for="gg">비품 목록</label>
+                        <div>
+                            <ul class="checkbox-radio-custom">
+                                <li>
+                                    <input type="checkbox" name="checkbox" id="projector" />
+                                    <label for="chk1">프로젝터</label>
+                                </li>
+                                <li>
+                                    <input type="checkbox" name="checkbox" id="whiteboard" />
+                                    <label for="chk2">화이트보드</label>
+                                </li>
+                                <li>
+                                    <input type="checkbox" name="checkbox" id="computer" />
+                                    <label for="chk2">컴퓨터</label>
+                                </li>
+                                <li>
+                                    <input type="checkbox" name="checkbox" id="micrephone" />
+                                    <label for="chk2">마이크</label>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+
+                    <li>
+                        <label for="cc">회의실 이미지<i class="i">*</i></label>
+                        <div>
+                            <input type="file" id="cc" required />
+                        </div>
+                    </li>
+                    <li>
+                        <label for="gg">사용가능여부</label>
+                        <div>
+                            <ul class="checkbox-radio-custom">
+                                <li>
+                                    <input type="radio" name="radio" id="radio1" />
+                                    <label for="radio1">Y</label>
+                                </li>
+                                <li>
+                                    <input type="radio" name="radio" id="radio2" />
+                                    <label for="radio2">N</label>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </form>
+        </div>
+
+        <div class="modal-btn-wrap">
+            <button class="btn6">취소</button>
+            <button class="btn2">등록</button>
+        </div>
+        <button class="close-btn"></button>
+    </div>
+</div>
+<!--------------------------------- 회의실 등록/수정 모달 끝 --------------------------------->
+
+<!--------------------------------- 차량 등록/수정 모달 시작 --------------------------------->
+<div class="modal" id="carModal">
+    <div class="modal-cont">
+        <h1 class="modal-tit">차량 등록</h1>
+        <div class="modal-content-area">
+            <form id="carForm" enctype="multipart/form-data">
+                <ul class="wf-insert-form2 vertical">
+                    <li>
+                        <label for="cc">차량명<i class="i">*</i></label>
+                        <div>
+                            <input type="text" name="" id="cc" placeholder="자동차 모델을 입력하세요." required />
+                        </div>
+                    </li>
+                    <li>
+                        <label for="cc">차량번호<i class="i">*</i></label>
+                        <div>
+                            <input type="text" name="" id="cc" placeholder="회의실 호수를 입력해주세요." required />
+                        </div>
+                    </li>
+                    <li>
+                        <label for="cc">차량 이미지<i class="i">*</i></label>
+                        <div>
+                            <input type="file" id="cc" required />
+                        </div>
+                    </li>
+                    <li>
+                        <label for="gg">사용가능여부</label>
+                        <div>
+                            <ul class="checkbox-radio-custom">
+                                <li>
+                                    <input type="radio" name="radio" id="radio1" />
+                                    <label for="radio1">Y</label>
+                                </li>
+                                <li>
+                                    <input type="radio" name="radio" id="radio2" />
+                                    <label for="radio2">N</label>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </form>
+        </div>
+
+        <div class="modal-btn-wrap">
+            <button class="btn6">취소</button>
+            <button class="btn2">등록</button>
+        </div>
+        <button class="close-btn"></button>
+    </div>
+</div>
+<!--------------------------------- 차량 등록/수정 모달 끝 --------------------------------->

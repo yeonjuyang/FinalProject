@@ -1,0 +1,9 @@
+package com.team1.workforest.chat.vo;
+
+import lombok.Data;
+
+@Data
+public class ChatRoomEmployeeVO {
+	private String chatRoomNo;
+	private String empNo;
+}

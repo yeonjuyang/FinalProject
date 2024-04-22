@@ -1,0 +1,332 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!-- fullcalendar -->
+<link href="${pageContext.request.contextPath}/resources/css/fullcalendar.css" rel="stylesheet" />
+<script src="${pageContext.request.contextPath}/resources/js/fullcalendar.js"></script>
+<script src="${pageContext.request.contextPath}/resources/js/fullcalendar-ko.js"></script>
+<!-- message -->
+<script src="${pageContext.request.contextPath}/resources/js/message.js"></script>
+<!-- CSS -->
+<link href="${pageContext.request.contextPath}/resources/css/reservation/style.css" rel="stylesheet" />
+<script>
+    let empNo = '<%=(String)session.getAttribute("empNo")%>';
+</script>
+<!-- Javascript -->
+<!--  -->
+<script>
+    $(document).ready(function () {
+        // sweetalert toast 알림
+        const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 3000,
+            didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+            },
+        });
+
+        // 예약 등록(추가) 버튼 클릭하면 모달 표시
+        $("#createBtn").on("click", function () {
+            // 초기화
+            document.getElementById("selectRoom").value = "302";
+            document.getElementById("rsvDate").value = "";
+            document.getElementById("rsvSTime").value = "08:00";
+            document.getElementById("rsvETime").value = "08:00";
+            document.getElementById("rsvCont").value = "";
+            document.getElementById("rsvModal").classList.add("open");
+        });
+
+        // 일정 등록(확인) 버튼 누르면 일정 등록 실행
+        $("#createConfBtn").on("click", function () {
+            let mtrNo = $("#selectRoom").val();
+            let rsvDate = $("#rsvDate").val();
+            let rsvSTime = $("#rsvSTime").val();
+            let rsvETime = $("#rsvETime").val();
+            let rsvStart = rsvDate + " " + rsvSTime;
+            let rsvEnd = rsvDate + " " + rsvETime;
+            let rsvCont = $("#rsvCont").val().trim();
+
+            // validation
+            if (rsvDate == "") {
+                alert("예약일자가 입력되지 않았습니다");
+                return false;
+            }
+
+            if (rsvCont == "") {
+                alert("사용목적이 입력되지 않았습니다.");
+                return false;
+            }
+
+            let data = {
+                mtrNo: mtrNo,
+                empNo: empNo,
+                resveBeginDate: rsvStart,
+                resveEndDate: rsvEnd,
+                resveCn: rsvCont,
+            };
+
+            console.log("data : ", data);
+            createResve(data);
+        });
+
+        // 예약 등록하기
+        function createResve(data) {
+            $.ajax({
+                url: "/api/reservation/mtr",
+                type: "POST",
+                data: JSON.stringify(data),
+                contentType: "application/json;charset=utf-8",
+                dataType: "text",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("${_csrf.headerName}", "${_csrf.token}");
+                },
+                success: function (rslt) {
+                    console.log("create : ", rslt);
+
+                    if (rslt == "success") {
+                        $("#rsvModal").removeClass("open");
+                        // 알림 출력
+                        Toast.fire({
+                            icon: "success",
+                            title: _msg.common.insertSuccessAlert,
+                        });
+                        // 캘린더에 반영
+                        calendar.addEvent({
+                            title: data.schdulSj,
+                            start: data.resveBeginDate,
+                            end: data.resveEndDate,
+                            backgroundColor: color,
+                        });
+                    } else {
+                        Toast.fire({
+                            icon: "success",
+                            title: _msg.common.insertFailAlert,
+                        });
+                    }
+                },
+            });
+        }
+
+        // 캘린더에 표시할 회의실 예약 리스트 불러오기
+        function getMtrResveList() {
+            return $.ajax({
+                url: "/api/reservation/mtrs",
+                type: "GET",
+                dataType: "json",
+            });
+        }
+        getMtrResveList().done(function (data) {
+            console.log(data);
+
+            let calendarEl = document.getElementById("calendar");
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                height: "700px",
+                slotMinTime: "08:00", // Day 캘린더에서 시작 시간
+                slotMaxTime: "22:00", // Day 캘린더에서 종료 시간
+                // 헤더에 표시할 툴바
+                headerToolbar: {
+                    left: "prev,next today",
+                    center: "title",
+                    right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
+                },
+                initialView: "timeGridWeek", // 초기 로드 될 때 보이는 캘린더 화면
+                navLinks: true, // 날짜를 선택하면 Day 캘린더나 Week 캘린더로 링크
+                editable: true, // 수정 가능
+                selectable: true, // 달력 일자 드래그 설정 가능
+                droppable: true, // 드래그 앤 드롭
+                events: data,
+                locale: "ko", // 한국어 설정
+
+                // 일정 클릭하면 예약 상세 모달 표시
+                eventClick: function (info) {
+                    showMtrRsvDetail(info);
+                },
+
+                // 캘린더에서 클릭 또는 드래그로 예약 등록 모달 표시
+                select: function (info) {
+                    console.log(info);
+                    // 초기화
+                    document.getElementById("selectRoom").value = "302";
+                    document.getElementById("rsvSTime").value = "08:00";
+                    document.getElementById("rsvETime").value = "08:00";
+                    document.getElementById("rsvDate").value = info.startStr;
+                    document.getElementById("rsvCont").value = "";
+                    document.getElementById("rsvModal").classList.add("open");
+                },
+            });
+            calendar.render();
+        });
+    });
+</script>
+
+<!--------------------------------- body 시작 --------------------------------->
+<div class="wf-tit-wrap">
+    <h1 class="page-tit">회의실 예약</h1>
+    <div class="side-util">
+        <button type="button" class="btn2" id="createBtn">회의실 예약</button>
+    </div>
+</div>
+<div class="tab-type tab-type2">
+    <div class="tab-menu">
+        <!-- "active"가 추가되면 메뉴가 활성화됩니다. -->
+        <button data-tab="tab1" type="button" class="tab-btn active">예약 현황</button>
+        <button data-tab="tab2" type="button" class="tab-btn">내 예약</button>
+        <div class="tab-indicator"></div>
+    </div>
+
+    <!-- tab1  -->
+    <div data-tab="tab1" class="tab-content active">
+        <div class="tab-board-lst">
+            <div class="wf-content-wrap">
+                <div class="wf-content-area" id="calbox">
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- tab2  -->
+    <div data-tab="tab2" class="tab-content">
+        <div class="tab-board-lst">
+            <div class="wf-content-area">
+                <table class="wf-table">
+                    <colgroup>
+                        <col style="width: 20%" />
+                        <col style="width: 20%" />
+                        <col style="width: 20%" />
+                        <col style="width: 20%" />
+                        <col style="width: 20%" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>종류</th>
+                            <th>위치</th>
+                            <th>예약일시</th>
+                            <th>사용목적</th>
+                            <th>상태변경</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <p>모든글은 p태그로 감싸주세요</p>
+                            </td>
+                            <td>
+                                <p>모든글은 p태그로 감싸주세요</p>
+                            </td>
+                            <td>
+                                <p>모든글은 p태그로 감싸주세요</p>
+                            </td>
+                            <td>
+                                <p>
+                                    길면 말줄임으로 표시됩니다. 길면 말줄임으로 표시됩니다.길면 말줄임으로
+                                    표시됩니다.길면 말줄임으로 표시됩니다.길면 말줄임으로 표시됩니다.길면 말줄임으로
+                                    표시됩니다.길면 말줄임으로 표시됩니다.길면 말줄임으로 표시됩니다.길면 말줄임으로
+                                    표시됩니다.길면 말줄임으로 표시됩니다.길면 말줄임으로 표시됩니다.길면 말줄임으로
+                                    표시됩니다.
+                                </p>
+                            </td>
+                            <td>
+                                <p>
+                                    <button type="button" class="btn4">예약 수정</button>
+                                    <button type="button" class="btn3">예약 취소</button>
+                                </p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!--------------------------------- body 끝 --------------------------------->
+
+<!--------------------------------- 예약 등록/수정 모달 시작 --------------------------------->
+<div class="modal" id="rsvModal">
+    <div class="modal-cont">
+        <h1 class="modal-tit" id="modalTit">회의실 예약</h1>
+        <div class="modal-content-area">
+            <ul class="wf-insert-form2 vertical">
+                <li>
+                    <label for="selectRoom">회의실 선택<i class="i">*</i></label>
+                    <div>
+                        <div class="wf-select-group">
+                            <select name="selectRoom" id="selectRoom">
+                                <option value="302">소회의실1(302호)</option>
+                                <option value="303">소회의실2(303호)</option>
+                                <option value="301">중회의실1(301호)</option>
+                                <option value="401">중회의실2(401호)</option>
+                                <option value="402">대회의실(402호)</option>
+                            </select>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <label for="cc">일시<i class="i">*</i></label>
+                    <div class="wf-flex-box">
+                        <input type="date" name="rsvDate" id="rsvDate" />
+                        <div class="wf-select-group">
+                            <select name="rsvSTime" id="rsvSTime">
+                                <option value="08:00">08:00</option>
+                                <option value="09:00">09:00</option>
+                                <option value="10:00">10:00</option>
+                                <option value="11:00">11:00</option>
+                                <option value="12:00">12:00</option>
+                                <option value="13:00">13:00</option>
+                                <option value="14:00">14:00</option>
+                                <option value="15:00">15:00</option>
+                                <option value="16:00">16:00</option>
+                                <option value="17:00">17:00</option>
+                                <option value="18:00">18:00</option>
+                                <option value="19:00">19:00</option>
+                                <option value="20:00">20:00</option>
+                                <option value="21:00">21:00</option>
+                                <option value="22:00">22:00</option>
+                            </select>
+                        </div>
+                        <span class="hyphen">-</span>
+                        <div class="wf-select-group">
+                            <select name="rsvETime" id="rsvETime">
+                                <option value="08:00">08:00</option>
+                                <option value="09:00">09:00</option>
+                                <option value="10:00">10:00</option>
+                                <option value="11:00">11:00</option>
+                                <option value="12:00">12:00</option>
+                                <option value="13:00">13:00</option>
+                                <option value="14:00">14:00</option>
+                                <option value="15:00">15:00</option>
+                                <option value="16:00">16:00</option>
+                                <option value="17:00">17:00</option>
+                                <option value="18:00">18:00</option>
+                                <option value="19:00">19:00</option>
+                                <option value="20:00">20:00</option>
+                                <option value="21:00">21:00</option>
+                                <option value="22:00">22:00</option>
+                            </select>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <label for="rsvCont">사용 목적<i class="i">*</i></label>
+                    <div>
+                        <textarea name="rsvCont" id="rsvCont" placeholder="사용목적"></textarea>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="modal-btn-wrap" id="createBtnGroup">
+            <button class="btn6">취소</button>
+            <button class="btn2" id="createConfBtn">예약</button>
+        </div>
+
+        <div class="modal-btn-wrap" id="updateBtnGroup">
+            <button class="btn6" id="deleteBtn">삭제</button>
+            <button class="btn2" id="updateConfbtn">수정</button>
+        </div>
+
+        <button class="close-btn" id="rsvModalCloseBtn"></button>
+    </div>
+</div>
+<!--------------------------------- 예약 등록/수정 모달 끝 --------------------------------->

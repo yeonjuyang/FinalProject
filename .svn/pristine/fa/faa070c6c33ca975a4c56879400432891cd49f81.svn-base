@@ -1,0 +1,66 @@
+package com.team1.workforest.schedule.service.impl;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import com.team1.workforest.employee.vo.EmployeeVO;
+import com.team1.workforest.schedule.mapper.ScheduleMapper;
+import com.team1.workforest.schedule.service.ScheduleService;
+import com.team1.workforest.schedule.vo.ScheduleVO;
+
+@Service
+public class ScheduleServiceImpl implements ScheduleService{
+
+	@Autowired
+	ScheduleMapper scheduleMapper;
+
+	@Override
+	public List<ScheduleVO> getMySchedules(String empNo) {
+		return scheduleMapper.getMySchedules(empNo);
+	}
+	
+	@Override
+	public List<ScheduleVO> getTeamSchedules(String empNo) {
+		return scheduleMapper.getTeamSchedules(empNo);
+	}
+	
+	@Override
+	public List<ScheduleVO> getDeptSchedules(String empNo) {
+		return scheduleMapper.getDeptSchedules(empNo);
+	}
+	
+	@Override
+	public List<ScheduleVO> getCompSchedules(String empNo) {
+		return scheduleMapper.getCompSchedules(empNo);
+	}
+	
+	@Override
+	public ScheduleVO getSchedule(String schdulNo) {
+		return scheduleMapper.getSchedule(schdulNo);
+	}
+	
+	@Override
+	public int createSchedule(ScheduleVO scheduleVO) {
+		return scheduleMapper.createSchedule(scheduleVO);
+	}
+
+	@Override
+	public int updateSchedule(ScheduleVO scheduleVO) {
+		return scheduleMapper.updateSchedule(scheduleVO);
+	}
+
+	@Override
+	public int deleteSchedule(String schdulNo) {
+		return scheduleMapper.deleteSchedule(schdulNo);
+	}
+
+	@Override
+	public List<ScheduleVO> getTodayScheduleList() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+}

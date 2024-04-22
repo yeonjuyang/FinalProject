@@ -1,0 +1,13 @@
+package com.team1.workforest.reservation.resources.vo;
+
+import lombok.Data;
+
+@Data
+public class ResourcesVO {
+	private String resrcesNo;		// 자원 번호
+	private String resrcesSe;		// 자원 구분
+	private String resrcesNm;		// 자원 명
+	private String resrcesSpec;		// 자원 스펙
+	private String photoUrl;		// 사진 URL
+	private String usePoslYnCd;		// 사용 가능 여부 코드
+}

@@ -1,0 +1,118 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<div class="wf-tit-wrap">
+    <h1 class="page-tit">차량 예약</h1>
+    <div class="side-util">
+        <button type="button" class="btn2" id="">차량 예약</button>
+    </div>
+</div>
+<div class="tab-type tab-type2">
+    <div class="tab-menu">
+        <!-- "active"가 추가되면 메뉴가 활성화됩니다. -->
+        <button data-tab="tab1" type="button" class="tab-btn active">예약 현황</button>
+        <button data-tab="tab2" type="button" class="tab-btn">내 예약</button>
+        <div class="tab-indicator"></div>
+    </div>
+
+    <!-- tab1  -->
+    <div data-tab="tab1" class="tab-content active">
+        <div class="tab-board-lst">
+            <div class="wf-content-wrap">
+                <div class="wf-content-area" id="calbox">
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- tab2  -->
+    <div data-tab="tab2" class="tab-content">
+        <div class="tab-board-lst">
+            <div class="wf-content-area">
+                <table class="wf-table">
+                    <colgroup>
+                        <col style="width: 20%" />
+                        <col style="width: 20%" />
+                        <col style="width: 20%" />
+                        <col style="width: 20%" />
+                        <col style="width: 20%" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>차량정보</th>
+                            <th>예약일시</th>
+                            <th>사용목적</th>
+                            <th>반납상태</th>
+                            <th>상태변경</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <p>25더 3544(소나타)</p>
+                            </td>
+                            <td>
+                                <p>모든글은 p태그로 감싸주세요</p>
+                            </td>
+                            <td>
+                                <p>모든글은 p태그로 감싸주세요</p>
+                            </td>
+                            <td>
+                                <p><span class="wf-badge5">미반납</span></p>
+                            </td>
+                            <td>
+                                <p>
+                                    <button type="button" class="btn5">반납</button>
+                                    <button type="button" class="btn4">예약 수정</button>
+                                    <button type="button" class="btn3">예약 취소</button>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p>25더 3544(소나타)</p>
+                            </td>
+                            <td>
+                                <p>모든글은 p태그로 감싸주세요</p>
+                            </td>
+                            <td>
+                                <p>모든글은 p태그로 감싸주세요</p>
+                            </td>
+                            <td>
+                                <p><span class="wf-badge3">정상 반납</span></p>
+                            </td>
+                            <td>
+                                <p>
+                                    <button type="button" class="btn5">반납</button>
+                                    <button type="button" class="btn4">예약 수정</button>
+                                    <button type="button" class="btn3">예약 취소</button>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p>25더 3544(소나타)</p>
+                            </td>
+                            <td>
+                                <p>모든글은 p태그로 감싸주세요</p>
+                            </td>
+                            <td>
+                                <p>모든글은 p태그로 감싸주세요</p>
+                            </td>
+                            <td>
+                                <p><span class="wf-badge4">반납 처리 중</span></p>
+                            </td>
+                            <td>
+                                <p>
+                                    <button type="button" class="btn5">반납</button>
+                                    <button type="button" class="btn4">예약 수정</button>
+                                    <button type="button" class="btn3">예약 취소</button>
+                                </p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

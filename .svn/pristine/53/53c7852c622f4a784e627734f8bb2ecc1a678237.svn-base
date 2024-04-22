@@ -1,0 +1,27 @@
+package com.team1.workforest.dashboard.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.team1.workforest.dashboard.service.DashboardService;
+import com.team1.workforest.dashboard.vo.DashboardVO;
+
+@RestController
+@RequestMapping("/dashboard")
+public class DashboardController {
+	
+	@Autowired
+	DashboardService dashboardService;
+	
+	@PutMapping("/setting")
+	public String updateDashboard(@RequestBody DashboardVO dashboardVO) {
+		int result = dashboardService.updateDashboard(dashboardVO);
+		if(result != 0) {
+			return "success";
+		}
+		return "fail";
+	}
+}

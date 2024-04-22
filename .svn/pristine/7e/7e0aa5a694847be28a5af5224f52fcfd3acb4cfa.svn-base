@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.team1.workforest.chat.mapper.ChattingMapper">
+	
+	<select id="getChatRoom" parameterType="hashMap" resultType="chatRoomEmployeeVO">
+		SELECT CE.CHAT_ROOM_NO, CR.CHAT_ROOM_NM, CE.EMP_NO
+		FROM  CHATROOM_EMPLOYEE CE, CHAT_ROOM CR
+		WHERE CE.CHAT_ROOM_NO = CR.CHAT_ROOM_NO
+		AND CE.EMP_NO = #{empNo}	
+	</select>
+	
+	<select id="getChat" parameterType="hashMap" resultType="messageVO">
+		SELECT M.CHAT_ROOM_NO, M.MSSAGE_NO, M.EMP_NO, M.MSSAGE_CN, M.ATCHMNFL_NO, M.MSSAGE_DATE, E.EMP_NM
+		FROM MESSAGE M, EMPLOYEE E
+		WHERE CHAT_ROOM_NO = #{chatRoomNo}
+		AND M.EMP_NO = E.EMP_NO
+	</select>
+	
+	<insert id="addChat" parameterType="hashMap">
+		INSERT INTO MESSAGE(MSSAGE_NO, CHAT_ROOM_NO, EMP_NO, MSSAGE_CN, ATCHMNFL_NO, MSSAGE_DATE)
+		VALUES(MSG_SEQ.NEXTVAL,#{chatRoomNo},#{empNo},#{content},null,sysdate)
+	</insert>
+	
+	<select id="getEmp" parameterType="hashMap" resultType="empVO">
+		SELECT EMP_NO, EMP_NM
+		FROM EMPLOYEE
+		WHERE EMP_NO = #{empNo}
+	</select>
+	
+</mapper>

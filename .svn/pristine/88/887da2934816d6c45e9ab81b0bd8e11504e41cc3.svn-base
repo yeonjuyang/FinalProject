@@ -1,0 +1,190 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!-- chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    let empNo = '<%=(String)session.getAttribute("empNo")%>';
+</script>
+
+<style>
+    #remainDispBox {
+        width: 150px;
+    }
+    #apvLevelBox {
+        width: 150px;
+    }
+    .disable {
+        pointer-events: none;
+        opacity: 0.5;
+    }
+</style>
+
+<script>
+    $(function () {
+        getVacationList(empNo);
+
+        const ctx = document.querySelector("#vacationChart").getContext("2d");
+
+        const DATA_COUNT = 7;
+        const NUMBER_CFG = { count: DATA_COUNT, min: 0, max: 100 };
+
+        const data = {
+            labels: "v",
+            datasets: [
+                {
+                    label: "v",
+                    data: [15],
+                },
+            ],
+        };
+
+        new Chart(ctx, {
+            type: "bar",
+            data: data,
+            options: {
+                indexAxis: "y",
+                elements: {
+                    bar: {
+                        borderWidth: 2,
+                    },
+                },
+            },
+        });
+    });
+
+    function getVacationList(empNo) {
+        $.ajax({
+            url: `/api/vacations/\${empNo}`,
+            type: "GET",
+            dataType: "json",
+            success: function (vacations) {
+                console.log("vacations : ", vacations);
+                let vcatnStr = "";
+                vacations.forEach(function (vacation, index) {
+                    let vcatnCtgr = vacation.vcatnCtgryNo;
+                    if (vcatnCtgr == "1") {
+                        vcatnStr += `<div class="wf-content-box createBtn" data-id="\${vacation.vcatnCtgryNo}">
+                                        <p class="box-heading1">\${vacation.vcatnCtgrySj}</p>
+                                        <p>\${vacation.remainCnt}일</p>
+                                    </div>`;
+                    } else if (vcatnCtgr == "2" || vcatnCtgr == "3") {
+                        if (!vacation.remainCnt) {
+                            vcatnStr += `<div class="wf-content-box disable createBtn" data-id="\${vacation.vcatnCtgryNo}">
+                                            <p class="box-heading1">\${vacation.vcatnCtgrySj}</p>
+                                            <p>0일</p>
+                                        </div>`;
+                        } else {
+                            vcatnStr += `<div class="wf-content-box createBtn" data-id="\${vacation.vcatnCtgryNo}">
+                                            <p class="box-heading1">\${vacation.vcatnCtgrySj}</p>
+                                            <p>\${vacation.vcatnCtgryCn}</p>
+                                        </div>`;
+                        }
+                    } else {
+                        vcatnStr += `   <div class="wf-content-box createBtn" data-id="\${vacation.vcatnCtgryNo}">
+                                            <p class="box-heading1">\${vacation.vcatnCtgrySj}</p>
+                                            <p>\${vacation.vcatnCtgryCn}</p>
+                                        </div>`;
+                    }
+                });
+                $("#vacationBox").append(vcatnStr);
+
+                $(".createBtn").on("click", function (e) {
+                    console.log(e);
+                    console.log(e.target.dataset.id);
+                    $("#vacationModal").addClass("open");
+                });
+            },
+        });
+    }
+</script>
+
+<!--------------------------------- body 시작 --------------------------------->
+<div class="wf-tit-wrap">
+    <h1 class="page-tit">휴가</h1>
+</div>
+<div class="wf-content-wrap">
+    <div class="wf-content-area">
+        <p class="heading1">휴가 등록</p>
+        <div class="wf-flex-box" id="vacationBox"></div>
+    </div>
+    <div class="wf-content-area">
+        <p class="heading1">휴가 상세 현황</p>
+        <div>
+            <canvas id="vacationChart"></canvas>
+        </div>
+        <div class="wf-flex-box">
+            <ul class="wf-list-style">
+                <li class="style1">자동 지급</li>
+                <li id="">지급 휴가</li>
+            </ul>
+            <ul class="wf-list-style">
+                <li class="style2">소멸</li>
+                <li id="">소멸 휴가</li>
+            </ul>
+            <ul class="wf-list-style">
+                <li class="style4">사용</li>
+                <li id="">사용 휴가</li>
+            </ul>
+            <ul class="wf-list-style">
+                <li class="style5">조정</li>
+                <li id="">조정 휴가</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="wf-content-area">
+        <p class="heading1">지난 휴가</p>
+        <div class="wf-flex-box">
+            <div class="wf-content-box">
+                <p class="box-heading1">연차</p>
+                <p>남은 휴가 표시</p>
+            </div>
+        </div>
+    </div>
+</div>
+<!--------------------------------- body 끝 --------------------------------->
+
+<!--------------------------------- 예약 등록/수정 모달 시작 --------------------------------->
+<div class="modal" id="vacationModal">
+    <div class="modal-cont">
+        <h1 class="modal-tit" id="modalTit">차량 예약</h1>
+        <div class="modal-content-area">
+            <form id="vacationForm">
+                <ul class="wf-insert-form2 vertical">
+                    <span class="wf-badge1" id="remainDispBox"></span>
+                    <span class="wf-badge2" id="apvLevelBox"></span>
+                    <li id="rsvEmpNameBox">
+                        <label for="rsvEmpName">승인</label>
+                        <div>
+                            <input type="text" name="rsvEmpName" id="rsvEmpName" />
+                        </div>
+                    </li>
+                    <li>
+                        <label for="cc">일시<i class="i">*</i></label>
+                        <div class="wf-flex-box">
+                            <input type="date" name="rsvSDate" id="rsvSDate" min="" max="" required />
+                            <span class="hyphen">-</span>
+                            <input type="date" name="rsvEDate" id="rsvEDate" min="" max="" required />
+                        </div>
+                    </li>
+                    <li>
+                        <label for="rsvCont">휴가 신청 메시지<i class="i">*</i></label>
+                        <div>
+                            <textarea name="resveCn" id="rsvCont" placeholder="휴가 신청 메시지 입력" required></textarea>
+                        </div>
+                    </li>
+                    <li id="rturnSttsBox">
+                        <label for="rturnStts">휴가 상세 편집<i class="i">*</i></label>
+                        <div name="rturnCd" id="rturnStts"></div>
+                    </li>
+                </ul>
+            </form>
+        </div>
+
+        <div class="modal-btn-wrap" id="createBtnGroup">
+            <button class="btn6">취소</button>
+            <button type="submit" form="carRsvForm" class="btn2" id="createConfBtn">승인요청</button>
+        </div>
+        <button class="close-btn" id="rsvModalCloseBtn"></button>
+    </div>
+</div>
+<!--------------------------------- 예약 등록/수정 모달 끝 --------------------------------->

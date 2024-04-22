@@ -1,0 +1,411 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" %>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.15/jstree.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.15/themes/default/style.min.css" />
+
+<script src="/resources/script/approval/approval.js"></script>
+<script src="/resources/script/approval/approvalLine.js"></script>
+
+<!-- =============== 상단타이틀영역 시작 =============== -->
+<div class="wf-tit-wrap">
+    <h1 class="page-tit">결재 작성</h1>
+    <div class="wf-util">
+        <button type="button" class="btn1">취소</button>
+        <button type="button" class="btn4" id="preview_btn">미리보기</button>
+        <button type="button" class="btn3">임시저장</button>
+        <button type="button" class="btn2" id="save_btn">결재상신</button>
+    </div>
+</div>
+<!-- =============== 상단타이틀영역 끝 =============== -->
+<!-- =============== 컨텐츠 영역 시작 =============== -->
+<div class="wf-content-wrap">
+
+    <div class="approval-create-wrap wf-flex-box">
+
+        <div class="wf-content-area left">
+
+            <!-- 서버 측 데이터를 HTML 속성에 저장 -->
+       <input type="hidden" id="empNo" value="<%= session.getAttribute("empNo") %>">
+
+       <ul class="wf-insert-form3">
+           <li>
+               <div class="wf-insert-tit">
+                   <div class="wf-select-group">
+                       <select name="docFormNo" id="docFormNo">
+                           <option disabled selected>양식선택</option>
+                           <option value="1">품의서</option>
+                           <option value="2">출장복명서</option>
+                           <option value="3">도서구입신청서</option>
+                       </select>
+                   </div>
+                   <input type="text" id="tit" placeholder="제목을 입력해주세요">
+               </div>
+           </li>
+           <li>
+               <!-- <textarea name="editor" class="editor" id="cont"
+   placeholder="내용을 입력해주세요"></textarea> -->
+               <textarea id="cont" style="height: 547px;">
+                        신규브랜드 마케팅 진행에 따라 원활한 정산을 위한 운영인력 채용 또는 내부인력 배정을 받고자 하오니 검토 후 재가하여 주시기 바랍니다.
+
+
+                        - 아 래 -
+
+                        1. 충원목적 : 마케터 요청에 따른 파트너 실시간 업무지원
+                        2. 업무 내용
+                        (1) 파트너 실시간 정산업무
+                        (2) 마케팅 진행에 따른 가입자 분석 및 결제자 분석리포트
+                        (3) 서비스 운영 이슈 서포팅 마케팅 활동 지원
+                        3. 충원 인력 : 1명
+                        4. 충원 기간 : 2024.03.12부터~(마케팅 시점)
+                        5. 요구사항
+                        가) 오피스(엑셀) 프로그램 능숙자
+                        나) 웹/모바일 서비스 운영 경험자
+                        6. 협조사항 : 개인노트북 지급(보안이슈)
+                    </textarea>
+                </li>
+            </ul>
+        </div>
+        <div class="wf-content-area right">
+            <div class="approval-write-box">
+                <div class="tit-wrap">
+                    <p class="heading2">결재라인</p>
+                    <button type="button" class="add-btn" id="apv_modal_btn">
+                        <i class="xi-users-plus"></i>
+                    </button>
+                </div>
+                <ul class="approval-add-user bul-lst01 no-data" id="apv_line1">
+                 <!--    <li>
+                        <div class="user">
+                            <span class="dept">개발팀</span>
+                            <span>이소망</span>
+                            <span>사원</span>
+                        </div>
+                        <span class="approval-status1">기안</span>
+                    </li>
+                    <li>
+                        <div class="user">
+                            <span class="dept">개발팀</span>
+                            <span>이소망</span>
+                            <span>사원</span>
+                        </div>
+                        <span class="approval-status2">검토</span>
+                    </li>
+                    <li>
+                        <div class="user">
+                            <span class="dept">개발팀</span>
+                            <span>이소망</span>
+                            <span>사원</span>
+                        </div>
+                        <span class="approval-status3">결재</span>
+                    </li> -->
+                </ul>
+            </div>
+            <div class="approval-write-box">
+                <div class="tit-wrap">
+                    <p class="heading2">참조인</p>
+                    <button type="button" class="add-btn" id="refer_modal_btn">
+                        <i class="xi-users-plus"></i>
+                    </button>
+                </div>
+                <ul class="approval-add-user bul-lst01 no-data" id="apv_line2">
+                <!--     <li>
+                        <div class="user">
+                            <span class="dept">개발팀</span>
+                            <span>이소망</span>
+                            <span>사원</span>
+                        </div>
+                    </li> -->
+                </ul>
+            </div>
+            <div class="approval-write-box">
+                <div class="tit-wrap">
+                    <p class="heading2">첨부파일</p>
+                    <label for="file-custom" class="file-btn">
+                        <input type="file" id="file-custom">
+                    </label>
+                </div>
+                <ul class="file-lst">
+                    <li class="all-remove">
+                        <span class="checkbox-radio-custom">
+                            <input type="checkbox" name="chck" id="all-check">
+                            <label for="all-check"></label>
+                        </span>
+                        <span class="file-name">전체 삭제</span>
+                        <button type="button" class="file-all-remove">
+                        </button>
+                    </li>
+                    <li>
+                        <span class="checkbox-radio-custom">
+                            <input type="checkbox" name="chck" id="chck">
+                            <label for="chck"></label>
+                        </span>
+                        <span class="file-name">파일 이름</span>
+                        <span class="file-size">512KB</span>
+                        <button type="button" class="file-remove">
+                        </button>
+                    </li>
+                    <li>
+                        <span class="checkbox-radio-custom">
+                            <input type="checkbox" name="chck" id="chck">
+                            <label for="chck"></label>
+                        </span>
+                        <span class="file-name">파일 이름</span>
+                        <span class="file-size">512KB</span>
+                        <button type="button" class="file-remove">
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- =============== 컨텐츠 영역 끝 =============== -->
+
+<!-- =============== 결재라인 선택 모달 시작 =============== -->
+<div class="modal" id="apvLine_modal">
+    <div class="modal-cont" style="min-width:840px;">
+        <h1 class="modal-tit">결재라인</h1>
+        <div class="modal-content-area">
+
+       <!-- modal-approval-cont -->
+       <div class="modal-approval-cont">
+           <div class="left">
+               <div class="tab-type tab-type1">
+                   <div class="tab-menu">
+                       <button data-tab="tab1" type="button" class="tab-btn active">즐겨찾기</button>
+                       <button data-tab="tab2" type="button" class="tab-btn">부서</button>
+                       <div class="tab-indicator"></div>
+                   </div>
+
+                   <!-- tab1  -->
+                   <div data-tab="tab1" class="tab-content active">
+                       <div class="tab-board-lst">
+                           <ul class="bookmark-list bul-lst01">
+                           </ul>
+                       </div>
+                   </div>
+
+                   <!-- tab2  -->
+                        <div data-tab="tab2" class="tab-content">
+                            <div class="tab-board-lst">
+                            	<div id="jstree"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="right">
+                    <ul class="approval-add-user line bul-lst01">
+                        <li>
+                            <div class="user">
+                                <span class="dept">개발팀</span>
+                                <span>이소망</span>
+                                <span>사원</span>
+                            </div>
+                            <div class="wf-select-group">
+                                <select name="apvSeCd1" id="apvSeCd">
+                                    <option value="0" selected>기안</option>
+                                    <option value="1">검토</option>
+                                    <option value="2">결재</option>
+                                </select>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="user">
+                                <span class="dept">개발팀</span>
+                                <span>이소망</span>
+                                <span>사원</span>
+                            </div>
+                            <div class="wf-select-group">
+                                <select name="apvSeCd2" id="apvSeCd">
+                                    <option value="0">기안</option>
+                                    <option value="1" selected>검토</option>
+                                    <option value="2">결재</option>
+                                </select>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="user">
+                                <span class="dept">개발팀</span>
+                                <span>이소망</span>
+                                <span>사원</span>
+                            </div>
+                            <div class="wf-select-group">
+                                <select name="apvSeCd3" id="apvSeCd">
+                                    <option value="0">기안</option>
+                                    <option value="1">검토</option>
+                                    <option value="2" selected>결재</option>
+                                </select>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-btn-wrap">
+            <button class="btn5" id="create_bkmk_btn">즐겨찾기 저장</button>
+            <button class="btn2" id="apvline_save_btn">확인</button>
+        </div>
+
+        <button class="close-btn"></button>
+    </div>
+</div>
+<!-- =============== 결재라인 선택 모달 끝 =============== -->
+
+<!-- =============== 참조인 선택 모달 시작 =============== -->
+<div class="modal" id="refer_modal">
+    <div class="modal-cont" style="min-width:840px;">
+        <h1 class="modal-tit">참조인 선택</h1>
+        <div class="modal-content-area">
+
+       <!-- modal-approval-cont -->
+       <div class="modal-approval-cont">
+           <div class="left">
+               <div class="tab-type tab-type1">
+                   <div class="tab-menu" style="width: 328px;">
+                       <button data-tab="tab1" type="button" class="tab-btn active">부서</button>
+                       <div class="tab-indicator" style="width:100%;"></div>
+                   </div>
+
+                   <div data-tab="tab1" class="tab-content active">
+                       <div class="tab-board-lst">
+                       		<div id="jstree"></div>
+                       		조직도가 들어감
+                       </div>
+                   </div>
+                </div>
+                </div>
+                <div class="right">
+                    <ul class="approval-add-user line bul-lst01">
+                        <li>
+                            <div class="user">
+                                <span class="dept">개발팀</span>
+                                <span>이소망</span>
+                                <span>사원</span>
+                                <button type="button" class="delete-btn"></button>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="user">
+                                <span class="dept">개발팀</span>
+                                <span>이소망</span>
+                                <span>사원</span>
+                                <button type="button" class="delete-btn"></button>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="user">
+                                <span class="dept">개발팀</span>
+                                <span>이소망</span>
+                                <span>사원</span>
+                                <button type="button" class="delete-btn"></button>
+                            </div>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-btn-wrap">
+            <button class="btn2" id="apvline2_save_btn">확인</button>
+        </div>
+
+        <button class="close-btn"></button>
+    </div>
+</div>
+<!-- =============== 참조인 선택 모달 끝 =============== -->
+
+<!-- =============== 미리보기 모달 시작 =============== -->
+<div class="modal" id="preview-modal">
+    <div class="modal-cont" style="min-width:900px;">
+   <h1 class="modal-tit">결재 미리보기</h1>
+   <div class="modal-content-area">
+       <!-- 품의서 -->
+       <div class="apv-doc-form-wrap">
+           <div class="apv-doc-form">
+               <table>
+                   <colgroup>
+                       <col style="width: 10%;">
+                       <col style="width: 25%;">
+                       <col style="width: 10%;">
+                       <col style="width: auto;">
+                       <col style="width: 7%;">
+                       <col style="width: auto;">
+                   </colgroup>
+                   <tbody>
+                       <tr>
+                           <td colspan="2"><span class="form-tit">품의서</span></td>
+                           <td colspan="4">
+                               <!-- 결재라인 사인 -->
+                               <table class="apv-sign-table">
+                                   <colgroup>
+                                       <col style="width: 5%;">
+                                       <col style="width: 20%;">
+                                       <col style="width: 20%;">
+                                       <col style="width: 20%;">
+                                   </colgroup>
+                                   <tbody>
+                                       <tr>
+                                           <th rowspan="4">결재</th>
+                                           <td></td>
+                                           <td></td>
+                                           <td></td>
+                                       </tr>
+                                       <tr>
+                                           <td></td>
+                                           <td></td>
+                                           <td></td>
+                                       </tr>
+                                       <tr>
+                                           <td></td>
+                                           <td></td>
+                                           <td></td>
+                                       </tr>
+                                   </tbody>
+                               </table>
+                           </td>
+                       </tr>
+                       <tr>
+                           <th>기안부서</th>
+                           <td>
+                               <%= session.getAttribute("deptNm") %>
+                           </td>
+                           <th>기 안 일</th>
+                           <td colspan="4">
+                               <span id="apv_date"></span>
+                           </td>
+                           <!-- <th>문서번호</th>
+							<td><span class="data"></span></td> -->
+                       </tr>
+                       <tr>
+                           <th>기안자</th>
+                           <td>
+                               <%= session.getAttribute("empNm") %>
+                           </td>
+                           <th>보존년한</th>
+                           <td colspan="4">3년</td>
+                           <!-- <th>비밀등급</th>
+						<td><span class="data"></span></td> -->
+                       </tr>
+                       <tr>
+                           <th>제목</th>
+                           <td colspan="5">
+                               <span class="data" id="apv_tit"></span>
+                           </td>
+                       </tr>
+                       <tr>
+                           <td colspan="6">
+                               <!-- <div class="data" id="apv_cont"></div> -->
+                               <textarea id="apv_cont" style="min-height: 300px;"></textarea>
+                           </td>
+                       </tr>
+                   </tbody>
+               </table>
+           </div>
+        </div>
+	</div>
+    <button class="close-btn"></button>
+    </div>
+</div>
+<!-- =============== 미리보기 모달 끝 =============== -->

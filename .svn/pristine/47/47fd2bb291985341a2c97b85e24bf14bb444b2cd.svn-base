@@ -1,0 +1,126 @@
+$(function () {
+
+    // 문서별 갯수
+    getTotalCntAjax();
+
+    // 결재완료 목록
+    //getCompleted();
+    getCompletedAjax();
+
+    // 임시보관함
+    //getTempList();
+
+    // 결재 진행 현황
+    getProgressOfMainAjax();
+});
+
+// 날짜 변환
+function dateConverter(date) {
+    return date.substring(0, 10);
+}
+
+// 문서별 갯수 조회
+function getTotalCntAjax() {
+	$.ajax({
+		url: `${_ctx}/approval/mainView/totalCnt`,
+		type: "GET",
+		dataType: "json",
+		success: function(data) {
+			$('#pendingCnt').countNumber(0, data.pendingCnt);
+			$('#progressCnt').countNumber(0, data.progressCnt);
+			$('#completedCnt').countNumber(0, data.completedCnt);
+			$('#rejectedCnt').countNumber(0, data.rejectedCnt);
+		}
+	});
+}
+
+// 결재 완료 목록 조회
+function getCompletedAjax(){
+	$.ajax({
+		url: `${_ctx}/approval/mainView/getCompleted`,
+		type: "GET",
+		dataType: "json",
+		success: function(data) {
+			data.forEach((e) => {
+		        let HTML = `
+		            <li>
+		                <a href="/approval/approvalDetailView?apvNo=${e.apvNo}">
+		                    <i class="xi-document"></i>
+		                    <div class="tit">${e.apvSj}</div>
+		                    <div class="date">${dateConverter(`${e.drftDate}`)}</div>
+		                </a>
+		            </li>
+		        `;
+	        	$('#completed .form-list').append(HTML);
+	    	});
+		}
+	});
+}
+
+// 결재 진행 현황
+function getProgressOfMainAjax(){
+	$.ajax({
+		url: `${_ctx}/approval/mainView/getProgressOfMain`,
+		type: "GET",
+		dataType: "json",
+		success: function(data) {
+			data = Object.values(data.reduce((acc, e) => {
+			    if(acc[e.apvNo] == undefined) {
+			        acc[e.apvNo] = {
+			            apvNo: e.apvNo,
+			            apvSj: e.apvSj,
+			            docFormNm: _HTML.msg.docNm[e.docFormNo],
+			            drftDate: e.drftDate.split(' ')[0],
+			            apvLine: [],
+			        };
+			    }
+			    acc[e.apvNo].apvLine.push({
+			        empNm: e.empNm,
+			        apvPosition: e.apvPosition,
+			        apvRspnsbl: e.apvRspnsbl,
+			        deptNm: e.deptNm,
+			        apvSttusCd: e.apvSttusCd,
+			        apvSeCd: e.apvSeCd,
+			    });
+				return acc;
+			}, {}));
+			
+			
+			data.forEach((e, i, arr) => {
+				$('.process-cont').append(_HTML.main.progress_ul(e));
+			});
+			
+			
+		}
+	});
+}
+
+// 임시보관함 목록 조회
+function getTempList() {
+
+    // let HTML = `
+    //     <li class="no-data">
+    //         문서가 없습니다.
+    //     </li>
+    // `;
+
+
+    // let HTML = `
+    //         <li>
+    //             <a href="/approval/approvalDetailView?apvNo=${e.apvNo}">
+    //                 <i class="xi-library-books"></i>
+    //                 <div class="tit">${e.apvSj}</div>
+    //                 <div class="date">${dateConverter(`${e.drftDate}`)}</div>
+    //             </a>
+    //         </li>
+    //     `;
+
+    $('#temp .form-list').append(HTML);
+}
+
+
+
+
+
+
+

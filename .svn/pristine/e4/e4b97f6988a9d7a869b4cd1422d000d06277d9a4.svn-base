@@ -1,0 +1,28 @@
+package com.team1.workforest.approval.mapper;
+
+import java.util.List;
+import java.util.Map;
+
+import com.team1.workforest.approval.vo.ApvBkmkVO;
+
+public interface ApprovalMapper {
+
+	// 결재 등록
+	public int create(Map<String, Object> map);
+
+	// 즐겨찾기 저장
+	public int createBkmk(Map<String, Object> bkmkMap);
+	
+	// 즐겨찾기 상세 저장
+	public int createBkmkDetail(Map<String, Object> bkmkMap);
+
+	// 즐겨찾기 목록 조회
+	public List<ApvBkmkVO> getBkmkList();
+
+	// 즐겨찾기 상세 조회
+	public List<ApvBkmkVO> getBkmkDetail(int bkmkNo);
+
+	// 즐겨찾기 삭제
+	public int deleteBkmk(int bkmkNo);
+
+}

@@ -1,0 +1,645 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!-- fullcalendar -->
+<link href="${pageContext.request.contextPath}/resources/css/fullcalendar.css" rel="stylesheet" />
+<script src="${pageContext.request.contextPath}/resources/js/fullcalendar.js"></script>
+<script src="${pageContext.request.contextPath}/resources/js/fullcalendar-ko.js"></script>
+<!-- message -->
+<script src="${pageContext.request.contextPath}/resources/js/message.js"></script>
+<!-- CSS -->
+<link href="${pageContext.request.contextPath}/resources/css/reservation/style.css" rel="stylesheet" />
+<script>
+    let empNo = '<%=(String)session.getAttribute("empNo")%>';
+</script>
+<!-- Javascript -->
+<!--  -->
+<script>
+    $(document).ready(function () {
+        // 회의실 종류에 따른 색상
+        const room1Color = "#40AEB6";
+        const room2Color = "#5CB164";
+        const room3Color = "#BF7FD2";
+        const room4Color = "#3CA8E4";
+        const room5Color = "#ED855A";
+
+        // sweetalert toast 알림
+        const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 3000,
+            didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+            },
+        });
+
+        // modal 달력 최소값 설정
+        let today = new Date().toISOString().split("T")[0];
+        document.querySelector("#rsvDate").min = today;
+
+        // 예약 리스트 불러오고 캘린더 랜더링
+        getMtrResveList().done(function (data) {
+            initializeFullCalendarWithData(data);
+        });
+
+        // 모달 닫으면 모달 제목 바꾸고, 수정삭제버튼 안보이게 하기
+        $("#rsvModalCloseBtn").on("click", function () {
+            $("#modalTit").text("회의실 예약");
+            /* $("#updateConfbtn").prop("disabled", false);
+                $("#deleteBtn").prop("disabled", false); */
+            $("#updateBtnGroup").css("display", "none");
+            $("#createBtnGroup").css("display", "block");
+        });
+
+        // 예약 상세 모달 불러오기
+        function showMtrRsvDetail(info) {
+            console.log("Event clicked:", info);
+            let mtrResveNo = info.event._def.extendedProps.mtrResveNo;
+
+            // 데이터 불러오기
+            $.ajax({
+                url: `/api/reservation/mtr/\${mtrResveNo}`,
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    console.log(data);
+                    let mtrNo = data.mtrNo;
+                    $("#selectRoom").val(mtrNo);
+                    $("#rsvDate").val(data.resveBeginDate.substr(0, 10));
+                    $("#rsvSTime").val(data.resveBeginDate.substr(11, 5));
+                    $("#rsvETime").val(data.resveEndDate.substr(11, 5));
+                    $("#rsvCont").val(data.resveCn);
+
+                    getMtrInfo(mtrNo);
+                },
+            });
+
+            // 예약 상세 모달로 바꾸기
+            $("#modalTit").text("예약 상세");
+            $("#createBtnGroup").css("display", "none");
+            $("#updateBtnGroup").css("display", "block");
+            // 모달 열기
+            $("#rsvModal").addClass("open");
+
+            $("#updateBtn").on("click", function () {
+                console.log("update mtrResveNo : ", mtrResveNo);
+                let mtrNo = $("#selectRoom").val();
+                let rsvDate = $("#rsvDate").val();
+                let rsvSTime = $("#rsvSTime").val();
+                let rsvETime = $("#rsvETime").val();
+                let rsvStart = rsvDate + " " + rsvSTime;
+                let rsvEnd = rsvDate + " " + rsvETime;
+                let rsvCont = $("#rsvCont").val().trim();
+
+                // validation
+                if (rsvDate == "") {
+                    alert(_mgs.reservation.formDateEmptyAlert);
+                    return false;
+                }
+
+                if (rsvETime <= rsvSTime) {
+                    alert(_msg.reservation.formTimeErrorAlert);
+                    return false;
+                }
+
+                if (rsvCont == "") {
+                    alert(_msg.reservation.formContEmptyAlert);
+                    return false;
+                }
+
+                let data = {
+                    mtrNo: mtrNo,
+                    empNo: empNo,
+                    resveBeginDate: rsvStart,
+                    resveEndDate: rsvEnd,
+                    resveCn: rsvCont,
+                };
+
+                $("#rsvModal").removeClass("open");
+                return updateMtrResve(data, mtrResveNo);
+            });
+
+            // 예약 취소 버튼 누르면 모달 닫고 예약 삭제 진행
+            $("#deleteBtn").on("click", function () {
+                console.log("del mtrResveNo : ", mtrResveNo);
+
+                $("#rsvModal").removeClass("open");
+                deleteMtrResve(mtrResveNo);
+            });
+        } // 예약 상세 모달 불러오기 끝
+
+        // 내 예약 탭 누르면 예약 불러오기
+        $("#myRsvBtn").on("click", function () {
+            getMyMtrResveList();
+        });
+
+        // 예약 현황 탭 누르면 예약 불러오기
+        $("#rsvListBtn").on("click", function () {
+            getMtrResveList().done(function (data) {
+                initializeFullCalendarWithData(data);
+            });
+        });
+
+        // 회의실 바꿈에 따라 회의실 정보 출력
+        $("#selectRoom").on("change", function () {
+            let mtrNo = $("#selectRoom").val();
+            // 회의실 정보 불러오기
+            getMtrInfo(mtrNo);
+        });
+
+        // 예약 등록(추가) 버튼 클릭하면 모달 표시
+        $("#createBtn").on("click", function () {
+            // 초기화
+            document.getElementById("selectRoom").value = "ROOM2";
+            document.getElementById("rsvDate").value = "";
+            document.getElementById("rsvSTime").value = "08:00";
+            document.getElementById("rsvETime").value = "08:00";
+            document.getElementById("rsvCont").value = "";
+            document.getElementById("rsvModal").classList.add("open");
+
+            getMtrInfo("ROOM2");
+        });
+
+        // 예약 등록(확인) 버튼 누르면 예약 등록 실행
+        $("#createConfBtn").on("click", function () {
+            let mtrNo = $("#selectRoom").val();
+            let rsvDate = $("#rsvDate").val();
+            let rsvSTime = $("#rsvSTime").val();
+            let rsvETime = $("#rsvETime").val();
+            let rsvStart = rsvDate + " " + rsvSTime;
+            let rsvEnd = rsvDate + " " + rsvETime;
+            let rsvCont = $("#rsvCont").val().trim();
+
+            // validation
+            if (rsvDate == "") {
+                alert(_mgs.reservation.formDateEmptyAlert);
+                return false;
+            }
+
+            if (rsvETime <= rsvSTime) {
+                alert(_msg.reservation.formTimeErrorAlert);
+                return false;
+            }
+
+            if (rsvCont == "") {
+                alert(_msg.reservation.formContEmptyAlert);
+                return false;
+            }
+
+            let data = {
+                mtrNo: mtrNo,
+                empNo: empNo,
+                resveBeginDate: rsvStart,
+                resveEndDate: rsvEnd,
+                resveCn: rsvCont,
+            };
+
+            console.log("data : ", data);
+            createMtrResve(data);
+        });
+
+        // 회의실 예약 리스트 불러오기
+        function getMtrResveList() {
+            return $.ajax({
+                url: "/api/reservations/mtr",
+                type: "GET",
+                dataType: "json",
+            }).done(function (data) {
+                data.forEach(function (item) {
+                    let mtrNo = item.mtrNo;
+                    // 회의실 종류에 따라 색상 설정
+                    if (mtrNo == "ROOM1") {
+                        item.backgroundColor = room1Color;
+                    } else if (mtrNo == "ROOM2") {
+                        item.backgroundColor = room2Color;
+                    } else if (mtrNo == "ROOM3") {
+                        item.backgroundColor = room3Color;
+                    } else if (mtrNo == "ROOM4") {
+                        item.backgroundColor = room4Color;
+                    } else {
+                        item.backgroundColor = room5Color;
+                    }
+                });
+            });
+        } // 회의실 예약 리스트 불러오기 끝
+
+        // 캘린더 랜더링
+        function initializeFullCalendarWithData(data) {
+            console.log(data);
+
+            let calendarEl = document.getElementById("calendar");
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                height: "700px",
+                slotMinTime: "08:00", // Day 캘린더에서 시작 시간
+                slotMaxTime: "22:00", // Day 캘린더에서 종료 시간
+                // 헤더에 표시할 툴바
+                headerToolbar: {
+                    left: "prev,next today",
+                    center: "title",
+                    right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
+                },
+                initialView: "timeGridWeek", // 초기 로드 될 때 보이는 캘린더 화면
+                navLinks: true, // 날짜를 선택하면 Day 캘린더나 Week 캘린더로 링크
+                editable: true, // 수정 가능
+                selectable: true, // 달력 일자 드래그 설정 가능
+                droppable: true, // 드래그 앤 드롭
+                events: data,
+                locale: "ko", // 한국어 설정
+
+                // 예약 클릭하면 예약 상세 모달 표시
+                eventClick: function (info) {
+                    showMtrRsvDetail(info);
+                },
+
+                // 캘린더에서 클릭 또는 드래그로 예약 등록 모달 표시
+                select: function (info) {
+                    console.log(info);
+
+                    // 초기화
+                    document.getElementById("selectRoom").value = "ROOM2";
+                    document.getElementById("rsvSTime").value = "08:00";
+                    document.getElementById("rsvETime").value = "08:00";
+                    document.getElementById("rsvDate").value = info.startStr;
+                    document.getElementById("rsvCont").value = "";
+                    document.getElementById("rsvModal").classList.add("open");
+
+                    getMtrInfo("ROOM2");
+                },
+            });
+            calendar.render();
+        } // 캘린더 랜더링 끝
+
+        // 예약 등록
+        function createMtrResve(data) {
+            $.ajax({
+                url: "/api/reservation/mtr",
+                type: "POST",
+                data: JSON.stringify(data),
+                contentType: "application/json;charset=utf-8",
+                dataType: "text",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("${_csrf.headerName}", "${_csrf.token}");
+                },
+                success: function (rslt) {
+                    console.log("create : ", rslt);
+
+                    if (rslt == "success") {
+                        $("#rsvModal").removeClass("open");
+                        // 알림 출력
+                        Toast.fire({
+                            icon: "success",
+                            title: _msg.reservation.insertSuccessAlert,
+                        });
+
+                        getMtrResveList().done(function (data) {
+                            initializeFullCalendarWithData(data);
+                        });
+                    } else {
+                        Toast.fire({
+                            icon: "success",
+                            title: _msg.reservation.insertFailAlert,
+                        });
+                    }
+                },
+            });
+        } // 예약 등록 끝
+
+        // 예약 수정
+        function updateMtrResve(data, mtrResveNo) {
+            $.ajax({
+                url: `/api/reservation/mtr/\${mtrResveNo}`,
+                type: "PUT",
+                data: JSON.stringify(data),
+                contentType: "application/json;charset=utf-8",
+                dataType: "text",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("${_csrf.headerName}", "${_csrf.token}");
+                },
+                success: function (rslt) {
+                    console.log(rslt);
+
+                    if (rslt == "success") {
+                        // 알림 출력
+                        Toast.fire({
+                            icon: "success",
+                            title: _msg.reservation.updateSuccessAlert,
+                        });
+                        // 데이터, 캘린더 로드
+                        getMtrResveList().done(function (data) {
+                            initializeFullCalendarWithData(data);
+                        });
+                    } else {
+                        Toast.fire({
+                            icon: "success",
+                            title: _msg.reservation.updateFailAlert,
+                        });
+                    }
+                },
+            });
+        } // 예약 수정 끝
+
+        // 예약 삭제
+        function deleteMtrResve(mtrResveNo) {
+            // 삭제 확인창 표시
+            Swal.fire({
+                title: _msg.reservation.deleteConfirm,
+                showDenyButton: true,
+                denyButtonText: `취소`,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/api/reservation/mtr/\${mtrResveNo}`,
+                        type: "DELETE",
+                        dataType: "text",
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader("${_csrf.headerName}", "${_csrf.token}");
+                        },
+                        success: function (rslt) {
+                            console.log("delete rslt : ", rslt);
+
+                            if (rslt == "success") {
+                                Toast.fire({
+                                    icon: "success",
+                                    title: _msg.reservation.deleteSuccessAlert,
+                                });
+                                getMtrResveList().done(function (data) {
+                                    initializeFullCalendarWithData(data);
+                                });
+                            } else {
+                                Toast.fire({
+                                    icon: "info",
+                                    title: _msg.reservation.deleteFailAlert,
+                                });
+                            }
+                        },
+                    });
+                } else if (result.isDenied) {
+                    Toast.fire({
+                        icon: "info",
+                        title: _msg.reservation.deleteFailAlert,
+                    });
+                }
+            });
+        } // 예약 삭제 끝
+
+        // 내 예약 리스트 불러오기
+        function getMyMtrResveList() {
+            $.ajax({
+                url: `/api/reservations/mtr/\${empNo}`,
+                type: "GET",
+                dataType: "json",
+                success: function (mtrResves) {
+                    console.log("mtrResves:", mtrResves);
+                    $("#mtrRsvBody").empty();
+                    if (mtrResves == null) {
+                        let rowStr = `<tr>
+                                    <td>
+                                        <p>저장된 회의실 예약이 없습니다.</p>
+                                    </td>
+                                </tr>`;
+                        $("#mtrRsvBody").append(rowStr);
+                    } else {
+                        $.each(mtrResves, function (index, mtrResve) {
+                            console.log("mtrResve:");
+                            let rowStr = `<tr>
+                                        <td>
+                                            <p>\${index+1}</p>
+                                        </td>
+                                        <td>
+                                            <p>\${mtrResve.mtrNm}</p>
+                                        </td>
+                                        <td>
+                                            <p>\${mtrResve.mtrLoc}</p>
+                                        </td>
+                                        <td>
+                                            <p>\${mtrResve.resveBeginDate.substr(0,16)}-\${mtrResve.resveEndDate.substr(11,5)}</p>
+                                        </td>
+                                        <td>
+                                            <p>\${mtrResve.resveCn}</p>
+                                        </td>
+                                        <td>
+                                            <p>
+                                                <button type="button" class="btn4 listUdtBtn" data-id="\${mtrResve.mtrResveNo}">예약 수정</button>
+                                                <button type="button" class="btn3 listDelBtn" data-id="\${mtrResve.mtrResveNo}">예약 취소</button>
+                                            </p>
+                                        </td>
+                                    </tr>`;
+                            $("#mtrRsvBody").append(rowStr);
+                        });
+
+                        $(".listUdtBtn").on("click", function (e) {
+                            console.log(e.target.dataset.id);
+                            alert("클릭");
+                        });
+
+                        $(".listDelBtn").on("click", function () {
+                            alert("삭제 클릭");
+                        });
+                    }
+                },
+            });
+        } // 내 예약 리스트 불러오기 끝
+
+        // 회의실 정보 가져와서 표시
+        function getMtrInfo(mtrNo) {
+            // 초기화
+            $("#mtrInfoBox").empty();
+            $("#mtrImgBox").empty();
+
+            $.ajax({
+                url: `/api/mtr/\${mtrNo}`,
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    console.log("mtrInfo : ", data);
+
+                    let infoStr = ` <p>\${data.mtrNm}(\${data.mtrLoc})</p>
+                                        <p>수용 가능 인원 : \${data.aceptblNmpr}명</p>
+                                        `;
+
+                    data.mtrEquipedList.forEach(function (item) {
+                        console.log("item :", item);
+                        let itemType = item.eqpmnNo;
+                        let iconStyle = "font-size: 30px;";
+
+                        if (itemType == 1) {
+                            infoStr += "<i class='xi-projector' style='" + iconStyle;
+                        } else if (itemType == 2) {
+                            infoStr += "<i class='xi-laptop' style='" + iconStyle;
+                        } else if (itemType == 3) {
+                            infoStr += "<i class='xi-microphone' style='" + iconStyle;
+                        } else {
+                            infoStr += "<i class='xi-keyboard-o' style='" + iconStyle;
+                        }
+
+                        if (item.equipYnCd == 0) {
+                            infoStr += " color: gray;";
+                        }
+
+                        infoStr += "'></i>";
+                    });
+
+                    let imgStr = `<img src='/resources/img/reservation/\${data.photoUrl}' style='width:400px'/>`;
+
+                    $("#mtrInfoBox").append(infoStr);
+                    $("#mtrImgBox").append(imgStr);
+                },
+            });
+        } // 회의실 정보 가져와서 표시 끝
+    });
+</script>
+
+<!--------------------------------- body 시작 --------------------------------->
+<div class="wf-tit-wrap">
+    <h1 class="page-tit">회의실 예약</h1>
+    <div class="side-util">
+        <button type="button" class="btn2" id="createBtn">회의실 예약</button>
+    </div>
+</div>
+<div class="tab-type tab-type2">
+    <div class="tab-menu">
+        <!-- "active"가 추가되면 메뉴가 활성화됩니다. -->
+        <button data-tab="tab1" type="button" class="tab-btn active" id="rsvListBtn">예약 현황</button>
+        <button data-tab="tab2" type="button" class="tab-btn" id="myRsvBtn">내 예약</button>
+        <div class="tab-indicator"></div>
+    </div>
+
+    <!-- tab1  -->
+    <div data-tab="tab1" class="tab-content active">
+        <div class="tab-board-lst">
+            <div class="wf-content-wrap">
+                <div class="wf-content-area" id="calbox">
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- tab2  -->
+    <div data-tab="tab2" class="tab-content">
+        <div class="tab-board-lst">
+            <div class="wf-content-area">
+                <table class="wf-table">
+                    <colgroup>
+                        <col style="width: 10%" />
+                        <col style="width: 15%" />
+                        <col style="width: 15%" />
+                        <col style="width: 20%" />
+                        <col style="width: 20%" />
+                        <col style="width: 20%" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>번호</th>
+                            <th>종류</th>
+                            <th>위치</th>
+                            <th>예약일시</th>
+                            <th>사용목적</th>
+                            <th>상태변경</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mtrRsvBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!--------------------------------- body 끝 --------------------------------->
+
+<!--------------------------------- 예약 등록/수정 모달 시작 --------------------------------->
+<div class="modal" id="rsvModal">
+    <div class="modal-cont">
+        <h1 class="modal-tit" id="modalTit">회의실 예약</h1>
+        <div class="modal-content-area">
+            <div class="wf-flex-box">
+                <ul class="wf-insert-form2 vertical">
+                    <li>
+                        <label for="selectRoom">회의실 선택<i class="i">*</i></label>
+                        <div>
+                            <div class="wf-select-group">
+                                <select name="selectRoom" id="selectRoom">
+                                    <option value="ROOM2">소회의실1</option>
+                                    <option value="ROOM3">소회의실2</option>
+                                    <option value="ROOM1">중회의실1</option>
+                                    <option value="ROOM4">중회의실2</option>
+                                    <option value="ROOM5">대회의실</option>
+                                </select>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <label for="cc">일시<i class="i">*</i></label>
+                        <div class="wf-flex-box">
+                            <input type="date" name="rsvDate" id="rsvDate" min="" max="" />
+                            <div class="wf-select-group">
+                                <select name="rsvSTime" id="rsvSTime">
+                                    <option value="08:00">08:00</option>
+                                    <option value="09:00">09:00</option>
+                                    <option value="10:00">10:00</option>
+                                    <option value="11:00">11:00</option>
+                                    <option value="12:00">12:00</option>
+                                    <option value="13:00">13:00</option>
+                                    <option value="14:00">14:00</option>
+                                    <option value="15:00">15:00</option>
+                                    <option value="16:00">16:00</option>
+                                    <option value="17:00">17:00</option>
+                                    <option value="18:00">18:00</option>
+                                    <option value="19:00">19:00</option>
+                                    <option value="20:00">20:00</option>
+                                    <option value="21:00">21:00</option>
+                                    <option value="22:00">22:00</option>
+                                </select>
+                            </div>
+                            <span class="hyphen">-</span>
+                            <div class="wf-select-group">
+                                <select name="rsvETime" id="rsvETime">
+                                    <option value="08:00">08:00</option>
+                                    <option value="09:00">09:00</option>
+                                    <option value="10:00">10:00</option>
+                                    <option value="11:00">11:00</option>
+                                    <option value="12:00">12:00</option>
+                                    <option value="13:00">13:00</option>
+                                    <option value="14:00">14:00</option>
+                                    <option value="15:00">15:00</option>
+                                    <option value="16:00">16:00</option>
+                                    <option value="17:00">17:00</option>
+                                    <option value="18:00">18:00</option>
+                                    <option value="19:00">19:00</option>
+                                    <option value="20:00">20:00</option>
+                                    <option value="21:00">21:00</option>
+                                    <option value="22:00">22:00</option>
+                                </select>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <label for="rsvCont">사용 목적<i class="i">*</i></label>
+                        <div>
+                            <textarea name="rsvCont" id="rsvCont" placeholder="사용목적"></textarea>
+                        </div>
+                    </li>
+                </ul>
+                <ul class="wf-insert-form2 vertical">
+                    <li>
+                        <label for="rsvCont">회의실 정보</label>
+                        <div id="mtrImgBox"></div>
+                        <div id="mtrInfoBox"></div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="modal-btn-wrap" id="createBtnGroup">
+            <button class="btn6">취소</button>
+            <button class="btn2" id="createConfBtn">예약</button>
+        </div>
+
+        <div class="modal-btn-wrap" id="updateBtnGroup">
+            <button class="btn3" id="deleteBtn">예약취소</button>
+            <button class="btn4" id="updateBtn">예약수정</button>
+        </div>
+
+        <button class="close-btn" id="rsvModalCloseBtn"></button>
+    </div>
+</div>
+<!--------------------------------- 예약 등록/수정 모달 끝 --------------------------------->

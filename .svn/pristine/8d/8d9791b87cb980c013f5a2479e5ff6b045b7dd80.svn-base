@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.team1.workforest.admin.reservation.mapper.AdminMtrResveMapper">
+	
+	<sql id="where">
+		<if test="keyword!=null and keyword!=''">
+			<if test="searchOption=='empNm'"> 
+			AND 	
+				E.EMP_NM LIKE '%' || #{keyword} || '%'
+			</if>
+			<if test="searchOption=='resveCn'">
+			AND
+				R.RESVE_CN LIKE '%' || #{keyword} || '%'		
+		   </if>
+		</if>	
+	</sql>
+	
+	<!-- 회의실 예약 목록 불러오기 -->
+	<select id="adminGetMtrResveList" parameterType="map" resultType="mtrReservationVO">
+		WITH T AS (    
+				SELECT 
+					ROW_NUMBER() OVER(ORDER BY F.RESVE_BEGIN_DATE ASC) RNUM
+				    , COUNT(1) OVER() AS TOTAL
+					, F.* 
+				FROM (
+						SELECT 
+			    				  R.MTR_RESVE_NO	
+				    			, M.MTR_LOC				
+				   				, M.MTR_NM				
+				   				, E.EMP_NM			
+				   				, E.EMP_NO
+				    			, R.RESVE_BEGIN_DATE	
+				    			, R.RESVE_END_DATE		
+				    			, R.RESVE_CN 		
+						FROM 
+				    			MEETINGROOM_RESERVATION R 
+				    	JOIN 
+				    			MEETINGROOM M ON R.MTR_NO = M.MTR_NO
+				    	JOIN 
+				    			EMPLOYEE E ON R.EMP_NO = E.EMP_NO  			
+				    	WHERE
+								R.RESVE_END_DATE>= SYSDATE
+						<include refid="where"></include>
+					) F
+				)
+		SELECT 
+				  T.*
+		FROM T 
+		WHERE 
+				T.RNUM BETWEEN  (#{currentPage}*10) - (10-1) AND (#{currentPage}*10)
+	</select>
+	
+	<!-- 지난 회의실 예약 목록 불러오기 -->
+	<select id="adminGetPastMtrResveList" parameterType="map" resultType="mtrReservationVO">
+		WITH T AS (    
+				SELECT 
+					ROW_NUMBER() OVER(ORDER BY F.RESVE_BEGIN_DATE DESC) RNUM
+				    , COUNT(1) OVER() AS TOTAL
+					, F.* 
+				FROM (
+						SELECT 
+			    				  R.MTR_RESVE_NO	
+				    			, M.MTR_LOC				
+				   				, M.MTR_NM				
+				   				, E.EMP_NM			
+				   				, E.EMP_NO
+				    			, R.RESVE_BEGIN_DATE	
+				    			, R.RESVE_END_DATE		
+				    			, R.RESVE_CN 		
+						FROM 
+				    			MEETINGROOM_RESERVATION R 
+				    	JOIN 
+				    			MEETINGROOM M ON R.MTR_NO = M.MTR_NO
+				    	JOIN 
+				    			EMPLOYEE E ON R.EMP_NO = E.EMP_NO  			
+				    	WHERE
+								R.RESVE_BEGIN_DATE >= SYSDATE - 14 
+						<include refid="where"></include>
+					) F
+				)
+		SELECT 
+				  T.*
+		FROM T 
+		WHERE 
+				T.RNUM BETWEEN  (#{currentPage}*10) - (10-1) AND (#{currentPage}*10)
+	</select>
+</mapper>

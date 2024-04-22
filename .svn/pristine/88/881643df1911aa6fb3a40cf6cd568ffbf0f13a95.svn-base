@@ -1,0 +1,39 @@
+$(function () {
+
+    // 세션 저장
+    function saveSession() {
+        let tit = $('#tit').val();
+        let cont = $('#cont').val();
+
+        console.log(tit, cont);
+
+        sessionStorage.setItem('tit', tit);
+        sessionStorage.setItem('cont', cont);
+    }
+
+    // 세션 삭제
+    function removeSession() {
+        sessionStorage.removeItem('tit');
+        sessionStorage.removeItem('cont');
+    }
+
+    // 미리보기 이벤트
+    $('#preview_btn').on('click', function () {
+        saveSession();
+
+        $('#preview-modal').addClass('open');
+
+        // 기안날짜
+        let today = new Date();
+        $('#preview-modal #apv_date').text(today.toLocaleString());
+
+        // 제목, 내용
+        $('#preview-modal #apv_tit').text(sessionStorage.getItem('tit'));
+        $('#preview-modal #apv_cont').text(sessionStorage.getItem('cont'));
+
+        removeSession();
+    });
+     
+
+
+});

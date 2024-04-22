@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.team1.workforest.mail.mapper.EmailMapper">
+    
+    <sql id="currentPageList">
+	    WITH T AS (
+	    SELECT
+	        ROWNUM RNUM,
+	        E.EMAIL_NO,
+	        E.SENDER_EMPL_NO,
+	        EM.EMP_NM,
+	        E.EMAIL_SJ,
+	        E.SEND_DATE,
+	        ER.CNFIRM_DATE,
+	        E.ATCHMNFL_NO,
+	        EM.EMAIL AS SENDER_EMAIL
+	    FROM
+	        EMAIL E
+	    JOIN
+	        EMAIL_RECIPIENT ER ON E.EMAIL_NO = ER.EMAIL_NO
+	    JOIN
+	        EMPLOYEE EM ON E.SENDER_EMPL_NO = EM.EMP_NO
+	    WHERE
+	        ER.EMP_NO = #{empNo}
+		)
+		SELECT * FROM T
+		WHERE T.RNUM BETWEEN (#{currentPage} * 10) - (10 - 1) AND (#{currentPage} * 10)
+		ORDER BY RNUM
+    </sql>
+    
+    <sql id="list">
+        SELECT 
+            E.SENDER_EMPL_NO,
+            E.EMAIL_SJ,
+            E.SEND_DATE,
+            ER.CNFIRM_DATE,
+            E.ATCHMNFL_NO,
+            EM.EMP_NM,
+            EM.EMAIL AS SENDER_EMAIL
+        FROM 
+            EMAIL E
+        JOIN 
+            EMAIL_RECIPIENT ER ON E.EMAIL_NO = ER.EMAIL_NO
+        JOIN 
+            EMPLOYEE EM ON E.SENDER_EMPL_NO = EM.EMP_NO
+        WHERE 
+            ER.EMP_NO = #{empNo}
+        ORDER BY SEND_DATE DESC
+    </sql>
+
+	<!-- resultmap -->
+	<resultMap type="emailVO" id="emailMap">
+		<result property="emailNo" column="EMAIL_NO"/>
+		<result property="senderEmplNo" column="SENDER_EMPL_NO"/>
+		<result property="emailSj" column="EMAIL_SJ"/>
+		<result property="emailCn" column="EMAIL_CN"/>
+		<result property="sendDate" column="SEND_DATE"/>
+		<result property="tmprStre" column="TMPR_STRE"/>
+		<result property="atchmnflNo" column="ATCHMNFL_NO"/>
+		<result property="delDate" column="DEL_DATE"/>
+		<collection property="emailRVOList" resultMap="emailRecipientMap"></collection>
+	</resultMap>
+	
+	<resultMap type="emailRecipientVO" id="emailRecipientMap">
+		<result property="emailNo" column="EMAIL_NO"/>
+		<result property="empNo" column="EMP_NO"/>
+		<result property="cnfirmDate" column="CNFIRM_DATE"/>
+		<result property="delDate" column="DEL_DATE"/>
+	</resultMap>
+	
+	<!-- 페이지 관련 시작 -->
+	<select id="getTotal" parameterType="hashMap" resultType="int">
+		SELECT COUNT(*)
+		FROM(
+        SELECT 
+            E.SENDER_EMPL_NO,
+            E.EMAIL_SJ,
+            E.SEND_DATE,
+            ER.CNFIRM_DATE,
+            E.ATCHMNFL_NO,
+            EM.EMP_NM,
+            EM.EMAIL AS SENDER_EMAIL
+        FROM 
+            EMAIL E
+        JOIN 
+            EMAIL_RECIPIENT ER ON E.EMAIL_NO = ER.EMAIL_NO
+        JOIN 
+            EMPLOYEE EM ON E.SENDER_EMPL_NO = EM.EMP_NO
+        WHERE 
+            ER.EMP_NO = #{empNo}
+        ORDER BY SEND_DATE DESC
+		)
+	</select>
+	
+
+	<!-- 페이지 관련 끝 -->
+	
+	
+	<!-- 메일 쓰기 관련 시작 -->
+	<!-- 메일 쓰기 -->
+	<insert id="insertMail" parameterType="emailVO">
+	    <selectKey keyProperty="emailNo" resultType="String" order="BEFORE">
+	        SELECT SEQ_EMAIL.NEXTVAL AS EMAIL_NO FROM DUAL
+	    </selectKey>
+	    INSERT INTO EMAIL (EMAIL_NO, SENDER_EMPL_NO, EMAIL_SJ, EMAIL_CN, ATCHMNFL_NO)
+	    VALUES (#{emailNo}, #{empNo}, #{emailSj}, #{emailCn}, NULL)
+	    </insert>
+<!-- 	    수신자 정보를 삽입합니다 -->
+<!-- 	    INSERT INTO EMAIL_RECIPIENT (EMAIL_NO, EMP_NO) -->
+<!-- 	    SELECT #{emailNo}, empNo -->
+<!-- 	    FROM ( -->
+<!-- 	        SELECT empNo -->
+<!-- 	        FROM #{emailRVOList} -->
+<!-- 	    ) subquery -->
+<!-- 	</insert> -->
+	<insert id="insertRMail" parameterType="emailRecipientVO">
+		<selectKey keyProperty="emailNo" resultType="String" order="BEFORE">
+	        SELECT MAX(TO_NUMBER(EMAIL_NO)) AS EMAIL_NO FROM EMAIL
+	    </selectKey>
+		INSERT INTO EMAIL_RECIPIENT(EMAIL_NO, EMP_NO)
+		VALUES (#{emailNo}, #{empNo})
+	</insert>
+	<!-- 메일 임시 보관 -->
+<!-- 	<insert id="temporaryMail" parameterType=""> -->
+<!-- 		INSERT INTO EMAIL (EMAIL_NO, SENDER_EMPL_NO, EMAIL_SJ, EMAIL_CN, TMPR_STRE, ATCHMNFL_NO) -->
+<!-- 		VALUES (#{emailNo}, #{senderEmplNo}, #{emailSj}, #{emailCn}, '1', #{atchmnflNo}) -->
+<!-- 	</insert> -->
+	<!-- 메일 쓰기 관련 끝 -->
+	
+	<!-- 상세보기 관련 시작 -->
+	<select id="getMailDetail" parameterType="String" resultType="emailVO">
+		SELECT
+		    E.EMAIL_NO,
+		    E.SENDER_EMPL_NO,
+		    EM1.EMP_NM AS SENDER_NAME,
+		    EM1.EMAIL AS SENDER_EMAIL,
+		    EM1.POSITION_CD AS SENDER_POSITION,
+		    E.EMAIL_SJ,
+		    E.EMAIL_CN,
+		    E.SEND_DATE,
+		    E.TMPR_STRE,
+		    E.ATCHMNFL_NO,
+		    ER.CNFIRM_DATE,
+		    ER.DEL_DATE AS RECIPIENT_DEL_DATE,
+		    EM2.EMP_NM AS RECIPIENT_NAME,
+		    EM2.EMAIL AS RECIPIENT_EMAIL,
+		    EM2.DEPT_NO AS RECIPIENT_DEPT_NO 
+		FROM
+		    EMAIL E
+		JOIN
+		    EMAIL_RECIPIENT ER ON E.EMAIL_NO = ER.EMAIL_NO
+		JOIN
+		    EMPLOYEE EM1 ON E.SENDER_EMPL_NO = EM1.EMP_NO
+		JOIN
+		    EMPLOYEE EM2 ON ER.EMP_NO = EM2.EMP_NO
+		WHERE
+		    E.EMAIL_NO = #{emailNo}
+	</select>	
+	<!-- 상세보기 관련 끝 -->
+	
+	<!-- 받은메일함(메인) 관련 시작 -->
+	<select id="getMailList" parameterType="hashMap" resultType="emailVO">
+	    WITH T AS (
+	    SELECT
+	        ROWNUM RNUM,
+	        E.EMAIL_NO,
+	        E.SENDER_EMPL_NO,
+	        EM.EMP_NM AS SENDER_NAME,
+	        E.EMAIL_SJ,
+	        E.SEND_DATE,
+	        ER.CNFIRM_DATE,
+	        E.ATCHMNFL_NO,
+	        EM.EMAIL AS SENDER_EMAIL
+	    FROM
+	        EMAIL E
+	    JOIN
+	        EMAIL_RECIPIENT ER ON E.EMAIL_NO = ER.EMAIL_NO
+	    JOIN
+	        EMPLOYEE EM ON E.SENDER_EMPL_NO = EM.EMP_NO
+	    WHERE
+	        ER.EMP_NO = #{empNo}
+		)
+		SELECT * FROM T
+		WHERE T.RNUM BETWEEN (#{currentPage} * 10) - (10 - 1) AND (#{currentPage} * 10)
+		ORDER BY RNUM
+	</select>	
+	
+	<!-- 받은 이메일 총 개수 -->
+	<select id="getMailCount" parameterType="hashMap" resultType="int">
+		SELECT COUNT(*) AS total_mail_count
+		FROM EMAIL E
+		INNER JOIN EMAIL_RECIPIENT ER ON E.EMAIL_NO = ER.EMAIL_NO
+		WHERE ER.EMP_NO = #{empNo}
+		AND ER.DEL_DATE IS NULL
+	</select>
+	
+	<!-- 아직 읽지 않은 이메일 개수 -->
+	<select id="getNoreadCount" parameterType="hashMap" resultType="int">
+		SELECT COUNT(*) AS unread_mail_count
+		FROM EMAIL E
+		INNER JOIN EMAIL_RECIPIENT ER ON E.EMAIL_NO = ER.EMAIL_NO
+		WHERE ER.EMP_NO = #{empNo}
+		AND ER.DEL_DATE IS NULL
+		AND ER.CNFIRM_DATE IS NULL
+	</select>
+
+	<!-- 받은메일함(메인) 관련 끝 -->
+	
+	<!-- 보낸메일함 관련 시작 -->
+	<select id="getSendList" parameterType="hashMap" resultType="emailVO">
+		WITH T AS (
+		    SELECT
+		        E.EMAIL_NO,
+		        E.SENDER_EMPL_NO,
+		        EM.EMP_NM AS SENDER_NAME,
+		        E.EMAIL_SJ,
+		        E.SEND_DATE,
+		        ER.CNFIRM_DATE,
+		        E.ATCHMNFL_NO,
+		        EM.EMAIL AS SENDER_EMAIL
+		    FROM
+		        EMAIL E
+		    JOIN
+		        EMAIL_RECIPIENT ER ON E.EMAIL_NO = ER.EMAIL_NO
+		    JOIN
+		        EMPLOYEE EM ON E.SENDER_EMPL_NO = EM.EMP_NO
+		    WHERE
+		        E.SENDER_EMPL_NO = #{empNo}
+		        AND E.DEL_DATE IS NULL
+		    ORDER BY E.SEND_DATE DESC
+		    )
+		SELECT 
+		    ROWNUM AS RNUM,
+		    T.*
+		FROM 
+		    T
+		WHERE 
+		    ROWNUM BETWEEN (#{currentPage} * 10) - (10 - 1) AND (#{currentPage} * 10)
+	</select>
+	
+	<select id="getSendMailCount" parameterType="hashMap" resultType="int">
+		SELECT COUNT(*) AS total_mail_count
+		FROM EMAIL
+		WHERE SENDER_EMPL_NO = #{empNo}
+		AND DEL_DATE IS NULL	
+	</select>
+	<!-- 보낸메일함 관련 끝 -->
+	
+	<!-- 첨부파일메일함 관련 시작 -->
+	
+	<!-- 첨부파일메일함 관련 끝 -->
+	
+	<!-- 휴지통 관련 시작 -->
+	
+	<!-- 휴지통 관련 끝 -->
+	
+	<!-- 안읽은메일함 관련 시작 -->
+	
+	<!-- 안읽은메일함 관련 끝 -->
+	
+	<!-- 임시저장메일함 관련 시작 -->
+	
+	<!-- 임시저장메일함 관련 끝 -->
+</mapper>

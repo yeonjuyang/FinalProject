@@ -1,0 +1,26 @@
+package com.team1.workforest.schedulerUtil.service;
+
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.team1.workforest.schedulerUtil.mapper.ChatMapper;
+
+@Service
+public class ChatServiceImpl {
+	
+	@Autowired
+	ChatMapper chatMapper;
+
+	public String alram(Map<String, String> map) {
+		return this.chatMapper.alram(map);
+	}
+
+	public int addAlram(Map<String, String> map) {
+		return this.chatMapper.addAlram(map);
+	}
+	
+	
+	
+}

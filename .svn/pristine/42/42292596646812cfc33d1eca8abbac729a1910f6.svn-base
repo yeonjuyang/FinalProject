@@ -1,0 +1,50 @@
+package com.team1.workforest.employee.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+@Controller
+public class LoginController {
+
+	//비밀번호 암호화 의존성 주입
+	@Autowired
+	PasswordEncoder passwordEncoder;
+
+
+	// 로그인 페이지
+	@GetMapping("/login")
+	public String login() {
+		String pwd= "java";
+
+		String encodedPwd= this.passwordEncoder.encode(pwd);
+
+		return "emp/login";
+
+	}
+	
+	
+	@PostMapping("/login")
+    @ResponseBody
+    public String login(@RequestParam("username") String username, @RequestParam("password") String password) {
+        // 사용자가 제출한 로그인 정보 가져오기
+        
+        if (username.equals("user") && password.equals("password")) {
+            // 사용자 인증 성공 시 세션에 사용자 정보 저장
+            // 세션 관리는 Spring Security 등을 통해 보다 효과적으로 처리할 수 있음
+            // 여기서는 간단하게 문자열로 세션에 저장하는 예시를 보여줌
+            // HttpSession session = request.getSession();
+            // session.setAttribute("username", username);
+            
+            return "loginSuccess";
+        } else {
+            return "loginFailure";
+        }
+    }
+
+
+}

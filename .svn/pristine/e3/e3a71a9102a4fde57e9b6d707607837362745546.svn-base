@@ -1,0 +1,17 @@
+package com.team1.workforest.admin.reservation.mapper;
+
+import java.util.List;
+import java.util.Map;
+
+import com.team1.workforest.reservation.car.vo.CarReservationVO;
+import com.team1.workforest.reservation.meetingroom.vo.MtrReservationVO;
+
+public interface AdminCarResveMapper {
+
+	List<CarReservationVO> adminGetCarResveList(Map<String, Object> map);
+
+	List<CarReservationVO> adminGetWaitReturnCarResveList(Map<String, Object> map);
+
+	List<CarReservationVO> adminGetPastCarResveList(Map<String, Object> map);
+
+}

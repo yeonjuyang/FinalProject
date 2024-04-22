@@ -1,0 +1,18 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<script>
+$.ajax({
+	url:"/attendance/insertAttend",
+	type:"post",
+	async:false,
+	data:{"empNo":${empNo}},
+	contentType:"application/x-www-form-urlencoded; charset=UTF-8",
+	success:function(res){
+		console.log(res)
+		if(res == 1){
+			alert("출근 처리가 완료되었습니다.")
+		}
+		body.html("")
+	}
+})
+</script>

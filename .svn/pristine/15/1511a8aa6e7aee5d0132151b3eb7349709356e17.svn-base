@@ -1,0 +1,118 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+<script type="text/javascript" src="/resources/js/jquery.min.js"></script>
+<script type="text/javascript" src="/resources/ckeditor5/ckeditor.js"></script>
+
+<script>
+ $(()=>{
+	 	
+	 
+	 
+	 $('.ck-blurred').keydown(function(){
+	        console.log("str : " + window.editor.getData());
+	        $("#sugestBrdCn").val(window.editor.getData());
+	    });
+	    
+	    $('.ck-blurred').on("focusout", function(){
+	        $("#sugestBrdCn").val(window.editor.getData());
+	    });
+	 
+	    
+// 	    CKEDITOR.replace('editor');
+// 		//html 태그 사라지는 오류 해결
+// 		CKEDITOR.config.allowedContent = true;
+// 		//내용 미리 넣기
+// 		CKEDITOR.instances.editor.setData('<p>aaa</p>'); 
+// 		//ckeditor 안에 있는 내용을 태그 포함해서 다 가져오기
+// 		CKEDITOR.instances.editor.getData();
+// 		//입력란 활성화
+// 		CKEDITOR.instances['editor'].setReadOnly(false);
+	 
+	    
+	 
+		
+	$("#suggestionSubmit").on("click",function(){
+		let sugestBrdSj = $("#sugestBrdSj").val();
+		let editorContent = $("#sugestBrdCn").val();
+		
+		console.log("제목 : "+sugestBrdSj);
+		console.log("내용 : "+editorContent);
+		
+	
+		
+	});
+
+
+
+
+
+
+
+ });
+
+
+</script>
+
+		<!DOCTYPE html>
+		<html lang="en">
+		<body>
+			<canvas id="gradient"></canvas>
+			<div class="main-container">
+				<div class="content-wrap">
+					<main class="custom">
+						<div class="wf-main-container" ">
+							<!-- =============== body 시작 =============== -->
+							<!-- =============== 상단타이틀영역 시작 =============== -->
+							<div class="wf-tit-wrap">
+								<h1 class="page-tit">건의 게시판</h1>
+								<div class="wf-util">
+									<button type="button" class="btn1"
+										onclick="location.href='http://localhost/suggestion/list'">취소</button>
+								<!-- 등록폼 시작 -->
+								<form action="/suggestion/creatSuggest?${_csrf.parameterName}=${_csrf.token}" method="post" enctype="multipart/form-data" >
+										<button id="suggestionSubmit" type="submit" class="btn2">등록</button>
+								</div>
+							</div>
+							<!-- =============== 상단타이틀영역 끝 =============== -->
+							<!-- =============== 컨텐츠 영역 시작 =============== -->
+							<div class="wf-content-wrap">
+								<div class="wf-content-area">
+
+									<ul class="wf-insert-form3">
+										<li>
+											<div class="wf-insert-tit">
+												<input type="text" id="sugestBrdSj" name="sugestBrdSj"
+													placeholder="제목을 입력해주세요">
+											</div>
+										</li>
+										<li>
+											<div id="ckExam"></div>
+											<textarea name="sugestBrdCn" id="sugestBrdCn" name="sugestBrdCn" placeholder="내용을 입력해주세요." style="display:none;"></textarea>
+										</li>
+										<li><input type="file" name="uploadfile" id="atchmnflNo"></li>
+
+									</ul>
+								</form>
+									<!-- 등록폼 끝 -->
+								</div>
+
+							</div>
+							<!-- =============== 컨텐츠 영역 끝 =============== -->
+							<!-- =============== body 끝 =============== -->
+						</div>
+					</main>
+				</div>
+			</div>
+		</body>
+
+		</html>
+		
+		<script type="text/javascript">
+				ClassicEditor
+				.create( document.querySelector('#ckExam'),{ckfinder:{uploadUrl:'/upload/uploads?${_csrf.parameterName}=${_csrf.token}'}})
+				 .then(editor=>{window.editor=editor;})
+				 .catch(err=>{console.error(err.stack);});
+		</script>
+		<script type="text/javascript">
+				window.editor.setData("내용을 입력해주세요");
+		</script>

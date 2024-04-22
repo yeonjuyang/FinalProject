@@ -1,0 +1,55 @@
+package com.team1.workforest.admin.reservation.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.team1.workforest.admin.reservation.service.AdminResveService;
+import com.team1.workforest.reservation.car.service.CarResveService;
+import com.team1.workforest.reservation.car.vo.CarReservationVO;
+import com.team1.workforest.reservation.car.vo.CarVO;
+import com.team1.workforest.reservation.meetingroom.service.MtrResveService;
+import com.team1.workforest.reservation.meetingroom.vo.MtrReservationVO;
+import com.team1.workforest.reservation.meetingroom.vo.MtrVO;
+
+@RestController
+@RequestMapping("/admin")
+public class AdminResveController {
+	
+	@Autowired
+	AdminResveService adminResveService;
+	
+	@Autowired
+	MtrResveService mtrResveService;
+	
+	@Autowired
+	CarResveService carResveService;
+	
+	// 회의실 목록 불러오기
+	@GetMapping("/mtrs")
+	public List<MtrVO> getMtrList() {
+		return adminResveService.getMtrList();
+	}
+	
+	// 차량 목록 불러오기
+	@GetMapping("/cars")
+	public List<CarVO> getCarList() {
+		return adminResveService.getCarList();
+	}
+	
+	// 회의실 예약 불러오기
+	@GetMapping("/reservations/mtr")
+	public List<MtrReservationVO> adminGetMtrResveList() {
+		return mtrResveService.getMtrResveList();
+	}
+	
+	// 차량 에약 불러오기
+	@GetMapping("/reservations/car")
+	public List<CarReservationVO> adminGetCarResveList() {
+		return carResveService.getCarResveList();
+	}
+	
+}

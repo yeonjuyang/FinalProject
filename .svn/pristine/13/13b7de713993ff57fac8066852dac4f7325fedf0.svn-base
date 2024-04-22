@@ -1,0 +1,259 @@
+package com.team1.workforest.survey.service.impl;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.team1.workforest.employee.vo.EmployeeVO;
+import com.team1.workforest.survey.mapper.SurveyMapper;
+import com.team1.workforest.survey.service.SurveyService;
+import com.team1.workforest.survey.vo.SurveyChoiceVO;
+import com.team1.workforest.survey.vo.SurveyParticVO;
+import com.team1.workforest.survey.vo.SurveyQuestionVO;
+import com.team1.workforest.survey.vo.SurveyVO;
+import com.team1.workforest.vo.DepartmentVO;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+public class SurveyServiceImpl implements SurveyService {
+
+	@Autowired
+	SurveyMapper surveyMapper;
+
+	@Override
+	public List<SurveyVO> getSurveyList(Map<String, Object> map) {
+		return this.surveyMapper.getSurveyList(map);
+	}
+
+	@Override
+	public int getkeywordTotal(Map<String, Object> map) {
+		return this.surveyMapper.getkeywordTotal(map);
+	}
+
+	@Override
+	public List<EmployeeVO> empSearch(SurveyVO vo) {
+		return this.surveyMapper.empSearch(vo);
+	}
+
+	@Override
+	public EmployeeVO empImpomation(SurveyVO vo) {
+		return this.surveyMapper.empImpomation(vo);
+	}
+
+	@Override
+	public List<DepartmentVO> deptSearch(DepartmentVO vo) {
+		return this.surveyMapper.deptSearch(vo);
+	}
+
+	@Override
+	public DepartmentVO deptImpomation(DepartmentVO vo) {
+		return this.surveyMapper.deptImpomation(vo);
+	}
+
+	/*
+	 * 
+	 * SurveyVO(surveyNo=null, surveyEmpNo=null, surveyCompleteCd=null,
+	 * surveyOpenDate=null, surveyTitle=ㅂㅈㄷㅂㅈㄷㅂㅈㄷ, surveyEndDate=2024-04-24,
+	 * surveyAnonyCd=Y, empNo=null, empNm=null, rnum=null, deptNo=DEPT0101,
+	 * surveyParticEmpNo=2019006, abc=null,
+	 * 
+	 * surveyChoiceList=[ SurveyChoiceVO(surveyNo=null, surveyQuestionId=1,
+	 * surveyChoiceNo=null, surveyChoiceSj=[11111111ㅂㅂㅂㅂㅂ]),
+	 * SurveyChoiceVO(surveyNo=null, surveyQuestionId=2, surveyChoiceNo=null,
+	 * surveyChoiceSj=[222222ㅈㅈㅈㅈㅈ, 222222222ㄷㄷㄷㄷㄷㄷㄷ]),
+	 * SurveyChoiceVO(surveyNo=null, surveyQuestionId=3, surveyChoiceNo=null,
+	 * surveyChoiceSj=[333333ㅂㅂㅂㅂ]), SurveyChoiceVO(surveyNo=null,
+	 * surveyQuestionId=4, surveyChoiceNo=null, surveyChoiceSj=[4444ㅁㅁㅁㅁ,
+	 * 44444ㄴㄴㄴㄴㄴ, 4444444ㅊㅊㅊㅊㅊ]) ],
+	 * 
+	 * 
+	 * surveyQuestionList=[ SurveyQuestionVO(surveyNo=null, surveyQuestionNo=null,
+	 * surveyQuestionTypeCd=1, surveyQuestionSj=11111111111111, surveyQuestionId=1),
+	 * SurveyQuestionVO(surveyNo=null, surveyQuestionNo=null,
+	 * surveyQuestionTypeCd=1, surveyQuestionSj=2222222222222, surveyQuestionId=2),
+	 * SurveyQuestionVO(surveyNo=null, surveyQuestionNo=null,
+	 * surveyQuestionTypeCd=1, surveyQuestionSj=333333333333, surveyQuestionId=3),
+	 * SurveyQuestionVO(surveyNo=null, surveyQuestionNo=null,
+	 * surveyQuestionTypeCd=1, surveyQuestionSj=444444444, surveyQuestionId=4) ],
+	 * 
+	 * surveyParticList=null)
+	 * 
+	 */
+	// 설문조사 생성
+	@Override
+	public int createSurvey(SurveyVO vo) {
+		log.info("vo----> " + vo);
+		return this.surveyMapper.createSurvey(vo);
+	}
+
+	// 자식 생성
+	@Override
+	public int createChild(SurveyVO vo) {
+		// 최댓값(공통 외래키)
+		int MaxSurveyNo = this.surveyMapper.maxsurveyNo();
+
+		log.info("surveyNo 최댓값---->" + MaxSurveyNo);
+
+		// 직원 선택 여부
+		boolean isEmployeeSelected = (vo.getSurveyParticEmpNo() != null && !vo.getSurveyParticEmpNo().isEmpty());
+		// 부서 인원을 선택했는지 여부 확인
+		boolean isDepartmentSelected = (vo.getDeptNo() != null && !vo.getDeptNo().isEmpty());
+		// 둘 다 선택했는지 여부 확인
+		boolean isBothSelected = (isEmployeeSelected && isDepartmentSelected);
+		log.info("여기 지나가유");
+		int result = 0;
+		if (isBothSelected) {
+
+			log.info("직원과 부서를 모두 선택했습니다." + "11");
+			log.info("vo.deptNo ------>" + vo.getDeptNo());
+			log.info("vo.getSurveyParticEmpNo---> " + vo.getSurveyParticEmpNo());
+			String deptNo = vo.getDeptNo();
+			String EmpNo = vo.getSurveyParticEmpNo();
+			String[] parts = deptNo.split(",");
+			// 해당 부서의 인원들 전원 집합
+			for (String part : parts) {
+				log.info("part ---> " + part);
+				List<SurveyParticVO> Deptvo = this.surveyMapper.collectDept(part);
+				log.info("DeptVo ------> " + Deptvo);
+
+				// 집합시킨 인원들 sql에 넣기
+				for (SurveyParticVO deptVO : Deptvo) {
+					log.info("surveyParticNo: " + deptVO.getSurveyParticNo());
+					SurveyParticVO partVO = new SurveyParticVO();
+					partVO.setSurveyNo(String.valueOf(MaxSurveyNo));
+					partVO.setSurveyParticEmpNo(deptVO.getSurveyParticNo());
+					log.info("partVO---> " + partVO);
+					result += this.surveyMapper.insertSurveyPartic(partVO);
+				}
+			}
+			parts = EmpNo.split(",");
+			for (String part : parts) {
+				log.info("empNo 분리--->" + part);
+				SurveyParticVO partVO = new SurveyParticVO();
+				partVO.setSurveyNo(String.valueOf(MaxSurveyNo));
+				partVO.setSurveyParticEmpNo(part);
+				log.info("partVO 인원 ----> " + partVO);
+				result += this.surveyMapper.insertSurveyPartic(partVO);
+			}
+			// 직원 넣기
+		} else if (isEmployeeSelected) {
+			log.info("직원을 선택했습니다." + "11");
+			log.info("vo.deptNo ------>" + vo.getDeptNo());
+			String EmpNo = vo.getSurveyParticEmpNo();
+			String[] parts = EmpNo.split(",");
+			// 인원 DB에 넣기
+			for (String part : parts) {
+				log.info("empNo 분리--->" + part);
+				SurveyParticVO partVO = new SurveyParticVO();
+				partVO.setSurveyNo(String.valueOf(MaxSurveyNo));
+				partVO.setSurveyParticEmpNo(part);
+				log.info("partVO 인원 ----> " + partVO);
+				result += this.surveyMapper.insertSurveyPartic(partVO);
+			}
+
+			// 부서의 인원 넣기
+		} else if (isDepartmentSelected) {
+			log.info("부서를 선택했습니다." + "11");
+			String deptNo = vo.getDeptNo();
+			String[] parts = deptNo.split(",");
+			// 해당 부서의 인원들 전원 집합
+			for (String part : parts) {
+				log.info("part ---> " + part);
+				List<SurveyParticVO> Deptvo = this.surveyMapper.collectDept(part);
+				log.info("DeptVo ------> " + Deptvo);
+
+				// 집합시킨 인원들 sql에 넣기
+				for (SurveyParticVO deptVO : Deptvo) {
+					log.info("surveyParticNo: " + deptVO.getSurveyParticNo());
+					SurveyParticVO partVO = new SurveyParticVO();
+					partVO.setSurveyNo(String.valueOf(MaxSurveyNo));
+					partVO.setSurveyParticEmpNo(deptVO.getSurveyParticNo());
+					log.info("partVO---> " + partVO);
+					result += this.surveyMapper.insertSurveyPartic(partVO);
+				}
+			}
+		}
+
+		// 질문 넣기-------------
+		int QuestionResult = 0;
+		List<SurveyQuestionVO> aaa = vo.getSurveyQuestionList();
+		for (SurveyQuestionVO surveyQuestionVO : aaa) {
+			log.info("surveyQuestionVO---> " + surveyQuestionVO);
+			// 기본키 주고
+			surveyQuestionVO.setSurveyNo(String.valueOf(MaxSurveyNo));
+			log.info("surveyQuestionVO surveyNo 추가한 VO---> " + surveyQuestionVO);
+			// SurveyQuestionVO(surveyNo=null, surveyQuestionNo=null,
+			// surveyQuestionTypeCd=1, surveyQuestionSj=1111111111, surveyQuestionId=1)
+			QuestionResult += this.surveyMapper.createQuestion(surveyQuestionVO);
+		}
+		log.info("QuestionResult -------> " + QuestionResult);
+
+		/*
+		 * surveyChoiceList=[ SurveyChoiceVO(surveyNo=null,
+		 * surveyQuestionId=1,surveyChoiceNo=null, surveyChoiceSj=[11111111ㅂㅂㅂㅂㅂ]),
+		 * SurveyChoiceVO(surveyNo=null, surveyQuestionId=2,
+		 * surveyChoiceNo=null,surveyChoiceSj=[222222ㅈㅈㅈㅈㅈ, 222222222ㄷㄷㄷㄷㄷㄷㄷ]),
+		 * SurveyChoiceVO(surveyNo=null, surveyQuestionId=3,
+		 * surveyChoiceNo=null,surveyChoiceSj=[333333ㅂㅂㅂㅂ]),
+		 * SurveyChoiceVO(surveyNo=null,surveyQuestionId=4, surveyChoiceNo=null,
+		 * surveyChoiceSj=[4444ㅁㅁㅁㅁ,44444ㄴㄴㄴㄴㄴ, 4444444ㅊㅊㅊㅊㅊ]) ],
+		 */
+
+		// SURVEY_CHOICE 데이터 삽입--------------------
+		List<SurveyChoiceVO> test = vo.getSurveyChoiceList();
+		int ChoiceResult = 0;
+		for (SurveyChoiceVO bb : test) {
+			log.info("bb---> " + bb.getSurveyChoiceSj());
+			log.info("bb----> " + bb.getSurveyQuestionId());
+			
+			// 서술일 경우 choiceSj---> null insert시키면 안됌
+			if (bb.getSurveyChoiceSj() != null) {
+				SurveyChoiceVO surveyChVO = new SurveyChoiceVO();
+				surveyChVO.setSurveyQuestionId(bb.getSurveyQuestionId());
+				surveyChVO.setSurveyNo(String.valueOf(MaxSurveyNo));
+				log.info("surveyChVO -----> " + surveyChVO);
+				for (String cc : bb.getSurveyChoiceSj()) {
+					log.info("cc----->" + cc);
+					surveyChVO.setSurveySj(cc);
+
+					log.info("surveyChVO ------> " + surveyChVO);
+					ChoiceResult += this.surveyMapper.createChoice(surveyChVO);
+				}
+			} else {
+				log.info("서술형이 하나있습니다.");
+			}
+		}
+
+		return result;
+	}
+
+	/*
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * // 직원 선택 여부 boolean isEmployeeSelected = (vo.getSurveyParticEmpNo() != null
+	 * && !vo.getSurveyParticEmpNo().isEmpty()); // 부서 인원을 선택했는지 여부 확인 boolean
+	 * isDepartmentSelected = (vo.getDeptNo() != null && !vo.getDeptNo().isEmpty());
+	 * // 둘 다 선택했는지 여부 확인 boolean isBothSelected = (isEmployeeSelected &&
+	 * isDepartmentSelected); log.info("여기 지나가유");
+	 * 
+	 * if (isBothSelected) { log.info("직원과 부서를 모두 선택했습니다."+"11"); } else if
+	 * (isEmployeeSelected) { log.info("직원을 선택했습니다."+"11"); } else if
+	 * (isDepartmentSelected) { log.info("부서를 선택했습니다."+"11"); }
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 */
+
+}

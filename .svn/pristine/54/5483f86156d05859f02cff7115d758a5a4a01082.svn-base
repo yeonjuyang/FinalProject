@@ -1,0 +1,93 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<%@ include file="/WEB-INF/views/tiles/taglib.jsp"%>
+<script src="/resources/js/header_chatting.js"></script>
+<style>
+.xi-bell{
+	position: relative;
+}
+.note-num {
+    position: absolute;
+    top: -3px;
+    right: 16px;
+    z-index: 3;
+    height: 15px;
+    width: 15px;
+    line-height: 20px;
+    text-align: center;
+    background-color: red;
+    border-radius: 15px;
+    display: inline-block;
+    font-size: 0.7rem;
+}
+</style>
+<header class="custom">
+	  <a href="/home" class="logo">WORKFOREST</a>
+	  <div class="search-bar">
+	      <input type="text" placeholder="Search">
+	  </div>
+	  <p class="header-txt">${empNm}님, 오늘도 힘차게 화이팅하세요!</p>
+	  <ul class="wf-util">
+	      <li>
+	          <a href="javascript:void(0)" title="채팅">
+	              <i class="xi-wechat"></i>
+	          </a>
+	      </li>
+	      <li>
+	          <a href="javascript:void(0)" title="알림">
+	              <i class="xi-bell"><span class="note-num">3</span></i>
+	          </a>
+	          <div class="wf-menu-dropdown">
+	              <ul class="alarm-list">
+	                  <li>
+	                      <img src="/resources/img/icon/avatar.png" class="user-img">
+	                      <div>
+	                          <span class="tit">[일정등록]'주간회의' 일정이
+	                              등록되었습니다.</span>
+	                          <p>
+	                              <span class="date">2024-03-03 11:30</span>
+	                              <span class="employee">양연주 사장</span>
+	                          </p>
+	                      </div>
+	                  </li>
+	                  <li>
+	                      <img src="/resources/img/icon/avatar.png" class="user-img">
+	                      <div>
+	                          <span class="tit">[일정등록]'주간회의' 일정이
+	                              등록되었습니다.</span>
+	                          <p>
+	                              <span class="date">2024-03-03 11:30</span>
+	                              <span class="employee">양연주 사장</span>
+	                          </p>
+	                      </div>
+	                  </li>
+	              </ul>
+	          </div>
+	      </li>
+	      <li>
+	          <a href="javascript:void(0)" title="설정">
+	              <i class="xi-cog"></i>
+	              
+	              
+	          </a>
+	      </li>
+	      <li>
+	          <a href="javascript:void(0)" class="user-img-icon" title="사용자">
+	           <img src="/resources/img/icon/${proflImageUrl }" class="user-img">
+	          </a>
+	          <div class="wf-menu-dropdown">
+	              <div class="wf-flex-box center">
+	                  <img src="/resources/img/icon/${proflImageUrl }" class="user-img">
+	                  
+	                  <div>
+	                      <span class="user-info">${deptNm}</span>
+	                      <span class="user-name">${empNm} ${rspnsblCtgryNm}</span>
+	                  </div>
+	              </div>
+	              <div class="menu-wrap">
+	                  <a href="/emp/detailLogin"+ class="menu-tit my-profile">내 프로필</a>
+	                  <a href="/" class="menu-tit logout">로그아웃</a>
+	              </div>
+	          </div>
+	      </li>
+	  </ul>
+</header>

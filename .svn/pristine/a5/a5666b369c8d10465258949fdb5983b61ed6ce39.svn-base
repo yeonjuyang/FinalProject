@@ -1,0 +1,10 @@
+package com.team1.workforest.vacation.vo;
+
+import lombok.Data;
+
+@Data
+public class EmpVacationManageVO {
+	private String empNo;			// 사원 번호
+	private String vcatnCtgryNo;	// 휴가 종류 번호
+	private int remainCnt;			// 잔여 수
+}

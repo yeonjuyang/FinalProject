@@ -1,0 +1,123 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<div class="wf-tit-wrap">
+    <h1 class="page-tit">자원 대여</h1>
+    <div class="side-util">
+        <button type="button" class="btn2" id="">자원 대여</button>
+    </div>
+</div>
+<div class="tab-type tab-type2">
+    <div class="tab-menu">
+        <!-- "active"가 추가되면 메뉴가 활성화됩니다. -->
+        <button data-tab="tab1" type="button" class="tab-btn active">대여 현황</button>
+        <button data-tab="tab2" type="button" class="tab-btn">내 대여</button>
+        <div class="tab-indicator"></div>
+    </div>
+
+    <!-- tab1  -->
+    <div data-tab="tab1" class="tab-content active">
+        <div class="tab-board-lst">
+            <div class="wf-content-wrap">
+                <div class="wf-content-area" id="calbox">
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- tab2  -->
+    <div data-tab="tab2" class="tab-content">
+        <div class="tab-board-lst">
+            <div class="wf-content-area">
+                <table class="wf-table">
+                    <colgroup>
+                        <col style="width: 20%" />
+                        <col style="width: 20%" />
+                        <col style="width: 20%" />
+                        <col style="width: 20%" />
+                        <col style="width: 20%" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>종류</th>
+                            <th>예약일시</th>
+                            <th>사용목적</th>
+                            <th>제목</th>
+                            <th>제목</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <p>모든글은 p태그로 감싸주세요 <span class="wf-badge1">Primary</span></p>
+                            </td>
+                            <td>
+                                <p>모든글은 p태그로 감싸주세요</p>
+                            </td>
+                            <td>
+                                <p>모든글은 p태그로 감싸주세요</p>
+                            </td>
+                            <td>
+                                <p>
+                                    길면 말줄임으로 표시됩니다. 길면 말줄임으로 표시됩니다.길면 말줄임으로
+                                    표시됩니다.길면 말줄임으로 표시됩니다.길면 말줄임으로 표시됩니다.길면 말줄임으로
+                                    표시됩니다.길면 말줄임으로 표시됩니다.길면 말줄임으로 표시됩니다.길면 말줄임으로
+                                    표시됩니다.길면 말줄임으로 표시됩니다.길면 말줄임으로 표시됩니다.길면 말줄임으로
+                                    표시됩니다.
+                                </p>
+                            </td>
+                            <td>
+                                <p>모든글은 p태그로 감싸주세요</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p>모든글은 p태그로 감싸주세요 <span class="wf-badge2">상태</span></p>
+                            </td>
+                            <td>
+                                <p>모든글은 p태그로 감싸주세요</p>
+                            </td>
+                            <td>
+                                <p>모든글은 p태그로 감싸주세요</p>
+                            </td>
+                            <td>
+                                <p>
+                                    길면 말줄임으로 표시됩니다. 길면 말줄임으로 표시됩니다.길면 말줄임으로
+                                    표시됩니다.길면 말줄임으로 표시됩니다.길면 말줄임으로 표시됩니다.길면 말줄임으로
+                                    표시됩니다.길면 말줄임으로 표시됩니다.길면 말줄임으로 표시됩니다.길면 말줄임으로
+                                    표시됩니다.길면 말줄임으로 표시됩니다.길면 말줄임으로 표시됩니다.길면 말줄임으로
+                                    표시됩니다.
+                                </p>
+                            </td>
+                            <td>
+                                <p>모든글은 p태그로 감싸주세요</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p>모든글은 p태그로 감싸주세요 <span class="wf-badge3">상태</span></p>
+                            </td>
+                            <td>
+                                <p>모든글은 p태그로 감싸주세요</p>
+                            </td>
+                            <td>
+                                <p>모든글은 p태그로 감싸주세요</p>
+                            </td>
+                            <td>
+                                <p>
+                                    길면 말줄임으로 표시됩니다. 길면 말줄임으로 표시됩니다.길면 말줄임으로
+                                    표시됩니다.길면 말줄임으로 표시됩니다.길면 말줄임으로 표시됩니다.길면 말줄임으로
+                                    표시됩니다.길면 말줄임으로 표시됩니다.길면 말줄임으로 표시됩니다.길면 말줄임으로
+                                    표시됩니다.길면 말줄임으로 표시됩니다.길면 말줄임으로 표시됩니다.길면 말줄임으로
+                                    표시됩니다.
+                                </p>
+                            </td>
+                            <td>
+                                <p>모든글은 p태그로 감싸주세요</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

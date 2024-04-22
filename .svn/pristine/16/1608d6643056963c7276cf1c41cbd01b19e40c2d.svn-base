@@ -1,0 +1,37 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/views/tiles/taglib.jsp"%>
+<link rel="icon" href="${_img}/favicon.png">
+<link rel="stylesheet" href="${_css}/common.css" />
+<link rel="stylesheet" href="${_css}/jquery.gridster.css" />
+<link rel="stylesheet" href="${_css}/bootstrap.css" />
+<link rel="stylesheet" href="${_css}/sweetalert2.min.css" />
+<script src="${_js}/jquery-3.7.0.min.js"></script>
+<script src="${_js}/common.js"></script>
+<script src="${_js}/jquery-ui.js"></script>
+<script src="${_js}/stripe-gradient.js"></script>
+<script src="${_js}/ckeditor.js"></script>
+<script src="${_js}/bootstrap.min.js"></script>
+<script src="${_js}/bootstrap.bundle.min.js"></script>
+<%-- <script src="${_js}/bootstrap.esm.min.js"></script> --%>
+<script src="${_js}/message.js"></script>
+<script src="${_js}/sweetalert2.min.js"></script>
+<script src="${_js}/html2canvas.min.js"></script>
+<script src="${_js}/jspdf.umd.min.js"></script>
+
+
+<!-- 추가한것들 -->
+<!--  조직도 jstree -->
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script> -->
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.15/jstree.min.js"></script>
+<link rel="stylesheet" href="//static.jstree.com/3.3.15/assets/bootstrap/css/bootstrap.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.15/themes/default/style.min.css" /> 
+
+<!-- 추가한것들 -->
+<link rel="stylesheet" href="${_css}/project/detail.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/spectrum/1.8.1/spectrum.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectrum/1.8.1/spectrum.min.css">
+<script src="/resources/gantt/codebase/dhtmlxgantt.js"></script>
+<link href="/resources/gantt/codebase/dhtmlxgantt.css" rel="stylesheet">
+<script src="/resources/gantt/codebase/dhtmlxgantt.js?v=8.0.6"></script>
+<script src="/resources/gantt/samples/common/testdata.js?v=8.0.6"></script> 
+<link rel="stylesheet" href="https://docs.dhtmlx.com/gantt/codebase/skins/dhtmlxgantt_material.css"> 

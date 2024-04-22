@@ -1,0 +1,74 @@
+@charset "UTF-8";
+
+:root {
+    --color-mysch: #32b677;
+    --color-teamsch: #029be6;
+    --color-deptsch: #7987ca;
+    --color-compsch: #f5521c;
+}
+
+#calctgrbox {
+    height: 200px;
+    width: 10%;
+}
+
+#calbox {
+    width: 90%;
+}
+
+.category-ul {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
+}
+
+.category-li {
+    margin-left: 0 !important;
+    width: 80%;
+}
+
+.circle {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    margin-left: auto;
+}
+
+#mySchCircle {
+    background-color: var(--color-mysch);
+}
+
+#teamSchCircle {
+    background-color: var(--color-teamsch);
+}
+
+#deptSchCircle {
+    background-color: var(--color-deptsch);
+}
+
+#compSchCircle {
+    background-color: var(--color-compsch);
+}
+
+/* 팀원 이름 박스 */
+#schEmpNameBox {
+    display: none;
+}
+/* 수정 관련 버튼 */
+#updateBtnGroup {
+    display: none;
+}
+
+/* 일요일 날짜 빨간색 */
+.fc-day-sun a {
+    color: red;
+    text-decoration: none;
+}
+
+/* 토요일 날짜 파란색 */
+.fc-day-sat a {
+    color: blue;
+    text-decoration: none;
+}

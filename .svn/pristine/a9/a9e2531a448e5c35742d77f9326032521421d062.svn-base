@@ -1,0 +1,9 @@
+package com.team1.workforest.dashboard.service;
+
+import com.team1.workforest.dashboard.vo.DashboardVO;
+
+public interface DashboardService {
+
+	int updateDashboard(DashboardVO dashboardVO);
+
+}

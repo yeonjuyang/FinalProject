@@ -1,0 +1,155 @@
+$(function () {
+
+
+    function dateConverter(date) {
+        return date.substring(0, 10);
+    }
+
+    // 객체는 함수(forEach등등)를 직접 호출할 수 없다. 객체의 키와 값에 접근해서 반복문 수행
+
+    let apvVoAllList = [];
+
+    for (let apvListOne in sortedData) {
+        apvVoAllList.push(sortedData[apvListOne]);
+    }
+
+
+    apvVoAllList.forEach((apvVoList, i) => {
+        console.log("apvVoList -> ", apvVoList);
+
+        let HTML;
+
+        for (let apvVo in apvVoList) {
+
+            let docFormNo;
+            switch (apvVoList[apvVo].docFormNo) {
+                case "1":
+                    docFormNo = "품의서";
+                    break;
+                case "2":
+                    docFormNo = "출장신청서";
+                    break;
+                case "3":
+                    docFormNo = "도서구입신청서";
+                    break;
+
+                default:
+                    break;
+            }
+
+            console.log("apvVO ->", apvVoList[apvVo]);
+
+            HTML = `
+            <ul class="approval-process-wrap">
+                <li class="process-icon">
+                    <div class="icon"></div>
+                </li>
+                <li>
+                    <div class="apv-type">
+                        <span class="type-img">
+                            <img src="/resources/img/icon/icon2.png" alt="">
+                        </span>
+                        <span class="type-name">${docFormNo}</span>
+                    </div>
+                    <div class="apv-info">
+                        <span class="tit">${apvVoList[apvVo].apvSj}</span>
+                        <span class="date">${dateConverter(`${apvVoList[apvVo].drftDate}`)}</span>
+                    </div>
+                    <ul class="timeline">
+                        <!-- completed / wf-progress / pending -->
+                        <li class="completed level1">
+                            <div class="icon-box">
+                                <span class="icon"></span>
+                            </div>
+                            <div class="emp-box">
+                                <span class="img-wrap">
+                                    <img src="/resources/img/icon/avatar.png" alt="">
+                                </span>
+                                <span class="name">이소망 대리</span>
+                            </div>
+                        </li>
+                        <li class="wf-progress level2">
+                            <div class="icon-box">
+                                <span class="icon"></span>
+                            </div>
+                            <div class="emp-box">
+                                <span class="img-wrap">
+                                    <img src="/resources/img/icon/avatar.png" alt="">
+                                </span>
+                                <span class="name">박서준 팀장</span>
+                            </div>
+                        </li>
+                        <li class="pending level3">
+                            <div class="icon-box">
+                                <span class="icon"></span>
+                            </div>
+                            <div class="emp-box">
+                                <span class="img-wrap">
+                                    <img src="/resources/img/icon/avatar.png" alt="">
+                                </span>
+                                <span class="name">이효리 사장</span>
+                            </div>
+                        </li>
+                    </ul>
+                </li>
+            </ul>`;
+
+            $('.process-cont').append(HTML);
+        }
+
+    });
+
+});
+
+
+function data1(name) {
+    return `
+    <li class="completed level1">
+    <div class="icon-box">
+        <span class="icon"></span>
+    </div>
+    <div class="emp-box">
+        <span class="img-wrap">
+            <img src="/resources/img/icon/avatar.png" alt="">
+        </span>
+        <span class="name">${name}</span>
+    </div>
+</li>
+    `;
+}
+
+function data2(name) {
+    return `
+
+    <li class="wf-progress level2">
+    <div class="icon-box">
+        <span class="icon"></span>
+    </div>
+    <div class="emp-box">
+        <span class="img-wrap">
+            <img src="/resources/img/icon/avatar.png" alt="">
+        </span>
+        <span class="name">${name}</span>
+    </div>
+</li>
+    `;
+}
+
+function data3(name) {
+    return `
+        <li class="pending level3">
+        <div class="icon-box">
+            <span class="icon"></span>
+        </div>
+        <div class="emp-box">
+            <span class="img-wrap">
+                <img src="/resources/img/icon/avatar.png" alt="">
+            </span>
+            <span class="name">${name}</span>
+        </div>
+    </li>
+    `;
+}
+
+
+

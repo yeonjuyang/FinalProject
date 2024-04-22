@@ -1,0 +1,73 @@
+package com.team1.workforest.menu.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.team1.workforest.employee.vo.EmployeeVO;
+import com.team1.workforest.menu.service.MenuService;
+import com.team1.workforest.vo.MenuVO;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/menu")
+public class MenuController {
+	@Autowired
+	MenuService menuService;
+	
+	
+	
+	@GetMapping("/glance")
+	public String glance() {
+		return "menu/glance";
+	}
+	
+	
+	@ResponseBody	
+	@GetMapping("/selectMenu")
+	public List<MenuVO> selectMenu(){
+		
+		 List<MenuVO> list= this.menuService.selectMenu();
+		 
+		 return list;
+	}
+	
+	
+	@ResponseBody
+	@PostMapping("/insertGlance")
+	public int insertGlance(@RequestBody MenuVO vo) {
+		log.info("insertGlance"+vo);
+		log.info("insertGlance",vo);
+		int result=this.menuService.insertGlance(vo);
+		return result;
+	}
+	
+	@ResponseBody	
+	@PostMapping("/selectGlance")
+	public List<MenuVO> selectGlance(@RequestBody MenuVO vo){
+		
+		 List<MenuVO> list= this.menuService.selectGlance(vo);
+		 
+		 return list;
+	}
+	
+	
+	@ResponseBody	
+	@PostMapping("/selectEmail")
+	public List<MenuVO> selectEmail(@RequestBody EmployeeVO vo){
+		
+		 List<MenuVO> list= this.menuService.selectEmail(vo);
+		 
+		 return list;
+	}
+	
+	
+}

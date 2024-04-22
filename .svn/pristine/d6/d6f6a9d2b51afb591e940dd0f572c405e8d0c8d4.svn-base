@@ -1,0 +1,56 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"%> <%@ page session="false"%> <%@ taglib uri="http://java.sun.com/jsp/jstl/core"
+prefix="c"%>
+<style>
+    .wf-table-container {
+        max-height: 200px; /* 테이블의 최대 높이 */
+        overflow-y: auto; /* 세로 스크롤이 필요할 때만 표시 */
+    }
+    .wf-table {
+        width: 100%; /* 테이블 너비 100%로 설정 */
+    }
+</style>
+<div class="wf-box-wrap">
+    <div class="wf-box custom">
+        <h1 class="wf-box-tit">출/퇴근</h1>
+    </div>
+    <div class="wf-box custom">
+        <h1 class="wf-box-tit">프로젝트</h1>
+    </div>
+    <div class="wf-box custom">
+        <h1 class="wf-box-tit">업무</h1>
+    </div>
+    <div class="wf-box custom">
+        <h1 class="wf-box-tit">메일</h1>
+    </div>
+    <div class="wf-box custom">
+        <h1 class="wf-box-tit">공지사항</h1>
+    </div>
+    <div class="wf-box custom">
+        <h1 class="wf-box-tit">결재함</h1>
+    </div>
+    <div class="wf-box custom">
+        <h1 class="wf-box-tit">일정</h1>
+    </div>
+    <div class="wf-box custom">
+        <h1 class="wf-box-tit">IT/컴퓨터 기사 <i class="xi-caret-down-square"></i></h1>
+        <div class="wf-content-wrap">
+            <div class="wf-table-container">
+                <table class="wf-table">
+                    <c:forEach var="news" items="${newsList}" varStatus="stat">
+                        <tr>
+                            <td>
+                                <p>
+                                    <a href="${news.url}">${news.subject}</a>
+                                </p>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="wf-box custom">
+        <h1 class="wf-box-tit">메뉴 바로가기(head)</h1>
+        <p>ex) 결재, 일정, 주소록, 회의실 예약</p>
+    </div>
+</div>

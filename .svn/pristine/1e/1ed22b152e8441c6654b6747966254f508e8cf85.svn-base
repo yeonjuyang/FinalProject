@@ -1,0 +1,47 @@
+package com.team1.workforest.util;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
+import com.team1.workforest.schedule.vo.ScheduleVO;
+
+public class ScheduleUtil {
+	// 체크박스 선택에 따라 받은 리스트에 일정 색상을 추가하고 json형태로 변환해 리턴하기 위한 유틸
+	public static void convertAndgetSchedules(List<ScheduleVO> inputScheduleList, String schType, JSONArray jsonArr) {
+        for (ScheduleVO schedule : inputScheduleList) {
+            JSONObject jsonObj = new JSONObject();
+            jsonObj.put("schNo", schedule.getSchdulNo());
+            jsonObj.put("empNo", schedule.getEmpNo());
+            jsonObj.put("deptNo", schedule.getDeptNo());
+            jsonObj.put("schSeCd", schedule.getSchdulSeCd());
+            jsonObj.put("title", schedule.getSchdulSj());
+            jsonObj.put("start", schedule.getSchdulBeginDate());
+            jsonObj.put("end", schedule.getSchdulEndDate());
+            jsonObj.put("location", schedule.getSchdulLoc());
+            jsonObj.put("content", schedule.getSchdulCn());
+            jsonObj.put("schType", schType);
+            jsonArr.add(jsonObj);
+        }
+    }
+	
+	public static String convertDate(String inputDateStr) {
+        try {
+            // 입력 날짜 문자열을 Date 객체로 변환
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            Date date = inputFormat.parse(inputDateStr);
+
+            // Date 객체를 ISO 8601 형식으로 포맷팅
+            SimpleDateFormat outFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            return outFormat.format(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+}

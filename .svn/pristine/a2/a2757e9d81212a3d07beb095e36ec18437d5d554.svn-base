@@ -1,0 +1,71 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<%@ include file="/WEB-INF/views/tiles/taglib.jsp"%>
+
+<header class="custom">
+	  <a href="/" class="logo">WORKFOREST</a>
+	  <div class="search-bar">
+	      <input type="text" placeholder="Search">
+	  </div>
+	  <p class="header-txt">김대덕님, 오늘도 힘차게 화이팅하세요!</p>
+	  <ul class="wf-util">
+	      <li>
+	          <a href="javascript:void(0)" title="채팅">
+	              <i class="xi-wechat"></i>
+	          </a>
+	      </li>
+	      <li>
+	          <a href="javascript:void(0)" title="알림">
+	              <i class="xi-bell"></i>
+	          </a>
+	          <div class="wf-menu-dropdown">
+	              <ul class="alarm-list">
+	                  <li>
+	                      <img src="/resources/img/icon/avatar.png" class="user-img">
+	                      <div>
+	                          <span class="tit">[일정등록]'주간회의' 일정이
+	                              등록되었습니다.</span>
+	                          <p>
+	                              <span class="date">2024-03-03 11:30</span>
+	                              <span class="employee">양연주 사장</span>
+	                          </p>
+	                      </div>
+	                  </li>
+	                  <li>
+	                      <img src="/resources/img/icon/avatar.png" class="user-img">
+	                      <div>
+	                          <span class="tit">[일정등록]'주간회의' 일정이
+	                              등록되었습니다.</span>
+	                          <p>
+	                              <span class="date">2024-03-03 11:30</span>
+	                              <span class="employee">양연주 사장</span>
+	                          </p>
+	                      </div>
+	                  </li>
+	              </ul>
+	          </div>
+	      </li>
+	      <li>
+	          <a href="javascript:void(0)" title="설정">
+	              <i class="xi-cog"></i>
+	          </a>
+	      </li>
+	      <li>
+	          <a href="javascript:void(0)" class="user-img-icon" title="사용자">
+	              <img src="/resources/img/icon/avatar.png" class="user-img">
+	          </a>
+	          <div class="wf-menu-dropdown">
+	              <div class="wf-flex-box">
+	                  <img src="/resources/img/icon/avatar.png" class="user-img">
+	                  <div>
+	                      <span class="user-info">연구개발본부 개발1팀</span>
+	                      <span class="user-name">김대덕 사원</span>
+	                  </div>
+	              </div>
+	              <div class="menu-wrap">
+	                  <a href="/emp/empInfo" class="menu-tit my-profile">내 프로필</a>
+	                  <a href="#" class="menu-tit logout">로그아웃</a>
+	              </div>
+	          </div>
+	      </li>
+	  </ul>
+</header>

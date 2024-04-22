@@ -1,0 +1,256 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!-- Javascript -->
+<script src="${pageContext.request.contextPath}/resources/script/common/commonForSchAndRsv.js" defer></script>
+<script>
+    $(function () {
+        // 회의실 예약 목록 불러오기
+        adminGetMtrResves(1, "", "");
+
+        // 예약 현황 탭 클릭하면 회의실 예약 목록 불러오기
+        $("#mtrRsvBtn").on("click", function () {
+            adminGetMtrResves(1, "", "");
+        });
+
+        // 지난 예약 탭 클릭하면 지난 회의식 예약 목록 불러오기
+        $("#pastMtrRsvtBtn").on("click", function () {
+            adminGetPastMtrResves();
+        });
+
+        // 검색 버튼 클릭하면
+        $("#searchBtn").on("click", function () {
+            console.log("search buton clicked");
+            let searchOption = $("#searchOption").val();
+            let keyword = $("#keyword").val().trim();
+            adminGetMtrResves(1, searchOption, keyword);
+        });
+    });
+
+    // 회의실 예약 목록 불러오기
+    function adminGetMtrResves(currentPage, searchOption, keyword) {
+        let data = {
+            currentPage: currentPage,
+            searchOption: searchOption,
+            keyword: keyword,
+        };
+        $.ajax({
+            url: "/admin/reservations/mtr",
+            type: "GET",
+            data: data,
+            dataType: "json",
+            success: function (rsvs) {
+                console.log("rsvs : ", rsvs);
+                $("#mtrRsvBody").empty();
+                if (!rsvs.content.length) {
+                    let rowStr = `<tr>
+                                        <td colspan="7">
+                                            <p>저장된 회의실 예약이 없습니다.</p>
+                                        </td>
+                                    </tr>`;
+                    $("#mtrRsvBody").append(rowStr);
+                } else {
+                    $.each(rsvs.content, function (index, rsv) {
+                        let rowStr = "";
+                        // 팀원 정보 불러와서 채우기
+                        getEmpInfo(rsv.empNo, function (empInfo) {
+                            let deptNm = empInfo.deptNm;
+                            let empNm = empInfo.empNm;
+                            let position = empInfo.position;
+                            let rspnsblCtgryNm = empInfo.rspnsblCtgryNm;
+                            if (rspnsblCtgryNm != "팀원") {
+                                position = rspnsblCtgryNm;
+                            }
+                            rowStr += ` <tr>
+                                                <td>
+                                                    <p>\${rsv.rnum}</p>
+                                                </td>
+                                                <td>
+                                                    <p>\${rsv.mtrNm}</p>
+                                                </td>
+                                                <td>
+                                                    <p>\${rsv.mtrLoc}</p>
+                                                </td>
+                                                <td>
+                                                    <p>\${empNm} \${position}(\${deptNm})</p>
+                                                </td>
+                                                <td>
+                                                    <p>\${rsv.resveBeginDate.substr(0,16)}-\${rsv.resveEndDate.substr(11,5)}</p>
+                                                </td>
+                                                <td>
+                                                    <p>\${rsv.resveCn}</p>
+                                                </td>
+                                                <td>
+                                                    <p>
+                                                        <button type="button" class="btn3 listDelBtn" data-id="\${rsv.mtrResveNo}">예약 취소</button>
+                                                    </p>
+                                                </td>
+                                            </tr>`;
+                        });
+                        $("#mtrRsvBody").append(rowStr);
+                        $("#divPaging").html(rsvs.pagingArea);
+                    });
+                }
+            },
+        });
+    }
+
+    function adminGetPastMtrResves() {
+        let searchOption = $("#searchOption").val();
+        let keyword = $("#keyword").val();
+        let currentPage = "1";
+
+        let data = {
+            searchOption: searchOption,
+            keyword: keyword,
+            currentPage: currentPage,
+        };
+        $.ajax({
+            url: "/admin/reservations/mtr/past",
+            type: "GET",
+            data: data,
+            dataType: "json",
+            success: function (rsvs) {
+                console.log("rsvs : ", rsvs);
+            },
+        });
+    }
+</script>
+<!--------------------------------- body 시작 --------------------------------->
+<div class="wf-tit-wrap">
+    <h1 class="page-tit">회의실 예약 관리</h1>
+</div>
+<div class="wf-content-wrap">
+    <div class="tab-type tab-type2">
+        <div class="tab-menu">
+            <!-- "active"가 추가되면 메뉴가 활성화됩니다. -->
+            <button data-tab="tab1" type="button" class="tab-btn active" id="mtrRsvBtn">예약 현황</button>
+            <button data-tab="tab2" type="button" class="tab-btn" id="pastMtrRsvtBtn">지난 예약</button>
+            <div class="tab-indicator"></div>
+        </div>
+
+        <!-- tab1  -->
+        <div data-tab="tab1" class="tab-content active">
+            <div class="tab-board-lst">
+                <div class="wf-content-area" id="calbox">
+                    <table class="wf-table">
+                        <colgroup>
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 20%" />
+                            <col style="width: 20%" />
+                            <col style="width: 20%" />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>번호</th>
+                                <th>종류</th>
+                                <th>위치</th>
+                                <th>예약자</th>
+                                <th>예약일시</th>
+                                <th>사용목적</th>
+                                <th>상태변경</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mtrRsvBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- 페이지네이션 시작 -->
+                <nav class="wf-pagination-wrap">
+                    <div class="row justify-content-center" id="divPaging"></div>
+                </nav>
+                <!-- 페이지네이션 끝 -->
+
+                <!-- 검색영역 시작 -->
+                <div class="wf-search-area">
+                    <div class="select-box">
+                        <select id="searchOption">
+                            <option value="empNm">예약자명</option>
+                            <option value="resveCn">사용목적</option>
+                        </select>
+                    </div>
+                    <input type="text" id="keyword" placeholder="검색할 내용을 입력해주세요" />
+                    <button type="button" class="btn4" id="searchBtn">
+                        <i class="xi-search"></i>
+                    </button>
+                </div>
+                <!-- 검색영역 끝 -->
+            </div>
+        </div>
+
+        <!-- tab2  -->
+        <div data-tab="tab2" class="tab-content">
+            <div class="tab-board-lst">
+                <div class="wf-content-area" id="calbox">
+                    <table class="wf-table">
+                        <colgroup>
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 20%" />
+                            <col style="width: 20%" />
+                            <col style="width: 20%" />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>번호</th>
+                                <th>종류</th>
+                                <th>위치</th>
+                                <th>예약자</th>
+                                <th>예약일시</th>
+                                <th>사용목적</th>
+                                <th>상태변경</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pastMtrRsvBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- 페이지네이션 시작 -->
+                <nav class="wf-pagination-wrap">
+                    <ul class="pagination">
+                        <li class="page-item">
+                            <a class="page-link prev" href="#">
+                                <i class="xi-angle-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item active">
+                            <a class="page-link" href="#">1</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">2</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">3</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link next" href="#">
+                                <i class="xi-angle-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- 페이지네이션 끝 -->
+
+                <!-- 검색영역 시작 -->
+                <div class="wf-search-area">
+                    <div class="select-box">
+                        <select name="" id="">
+                            <option value="">예약자명</option>
+                            <option value="">사용목적</option>
+                        </select>
+                    </div>
+                    <input type="text" placeholder="검색할 내용을 입력해주세요" />
+                    <button type="button" class="btn4" id="pastSearchBtn">
+                        <i class="xi-search"></i>
+                    </button>
+                </div>
+                <!-- 검색영역 끝 -->
+            </div>
+        </div>
+    </div>
+
+    <!--------------------------------- body 끝 --------------------------------->
+</div>

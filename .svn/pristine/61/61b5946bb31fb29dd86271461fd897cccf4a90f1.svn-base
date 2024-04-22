@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.team1.workforest.vacation.mapper.VacationMapper">
+
+	<!-- 내 휴가 목록 가져오기 -->
+	<select id="getMyVacationList" parameterType="empVacationManageVO" resultType="empVacationManageVO">
+		SELECT    
+		          M.EMP_NO			<!-- 사원 번호 -->
+		        , V.VCATN_CTGRY_NO	<!-- 휴가 번호 -->
+		        , V.VCATN_CTGRY_SJ	<!-- 휴가 제목 -->
+		        , V.VCATN_CTGRY_CN	<!-- 휴가 내용 -->
+		        , M.REMAIN_CNT		<!-- 남은 개수 -->
+		FROM 
+	        	EMP_VACATION_MANAGE M
+	    JOIN 
+	    		VACATION_CATEGORY V ON M.VCATN_CTGRY_NO = V.VCATN_CTGRY_NO
+	    WHERE 
+	    		M.EMP_NO = #{empNo}
+	    AND
+	    		M.GIVE_YEAR = #{giveYear}
+	    ORDER BY 
+	    		V.VCATN_CTGRY_NO ASC
+	
+	</select>
+	
+	<!-- 내 특정 휴가 조회 -->
+	<select id="getMyVacation" parameterType="empVacationManageVO" resultType="empVacationManageVO">
+		SELECT    
+		          M.EMP_NO			<!-- 사원 번호 -->
+		        , V.VCATN_CTGRY_NO	<!-- 휴가 번호 -->
+		        , V.VCATN_CTGRY_SJ	<!-- 휴가 제목 -->
+		        , V.VCATN_CTGRY_CN	<!-- 휴가 내용 -->
+		        , M.REMAIN_CNT		<!-- 남은 개수 -->
+		FROM 
+	        	EMP_VACATION_MANAGE M
+	    JOIN 
+	    		VACATION_CATEGORY V ON M.VCATN_CTGRY_NO = V.VCATN_CTGRY_NO
+	    WHERE 
+	    		M.EMP_NO = #{empNo}
+	    AND
+	    		M.GIVE_YEAR = #{giveYear}
+	    AND 	
+	    		V.VCATN_CTGRY_NO = #{vcatnCtgryNo}
+	</select>
+	
+	<!-- 결재 라인 불러오기 -->
+	<select id="getApvLine" parameterType="String" resultType="empVO">
+		SELECT 
+				  E.EMP_NO				<!-- 사원 번호 -->
+				, E.EMP_NM				<!-- 사원 이름 -->
+				, R.RSPNSBL_CTGRY_NM 	<!-- 직책명 -->
+		FROM 
+				EMPLOYEE E 
+		JOIN 
+				RESPONSIBILITY_CATEGORY R ON E.RSPNSBL_CD = R.RSPNSBL_CD
+		WHERE 
+				EMP_NO = (SELECT SUPRR_EMP_NO FROM EMPLOYEE WHERE EMP_NO=#{empNo})
+	</select>
+	
+	<!-- 휴가 기록 가져오기 -->
+	<select id="getMyVacationRecordList" parameterType="vacationRecordVO" resultType="vacationRecordVO">
+		SELECT 
+                  A.APV_NO			<!-- 결재 번호 -->
+                , A.APV_STTUS_CD	<!-- 결재 상태(Y) -->
+				, R.VCATN_USE_DATE	<!-- 휴가 사용 일자 -->
+				, R.VCATN_CTGRY_NO	<!-- 휴가 종류 번호 -->
+				, R.VCATN_SE_CD		<!-- 휴가 구분 코드 -->
+				, R.VCATN_CN		<!-- 휴가 내용 -->
+		FROM 
+				VACATION_RECORD R
+        JOIN 
+        		APV_LINE A ON R.APV_NO = A.APV_NO
+		WHERE 
+				R.EMP_NO= #{empNo} 
+		AND 
+				R.GIVE_YEAR = #{giveYear}
+		AND	
+				A.APV_SE_CD = '3'
+	</select>
+	
+	<!-- 종일 연차 카운트 -->
+	<select id="getAllDayVacationRecordsCount" parameterType="vacationRecordVO" resultType="int">
+		SELECT
+				COUNT(*) 
+		FROM 
+				VACATION_RECORD 
+		WHERE 
+				VCATN_CTGRY_NO = '1' 
+		AND 
+				VCATN_SE_CD = '1' 
+		AND 
+				EMP_NO= #{empNo} 
+		AND 
+				VCATN_USE_DATE LIKE #{giveYear} || '%'
+	
+	</select>
+	
+	<!-- 반차 카운트 -->
+	<select id="getHalfDayVacationRecordsCount" parameterType="vacationRecordVO" resultType="int">
+		SELECT
+				COUNT(*) 
+		FROM 
+				VACATION_RECORD 
+		WHERE 
+				VCATN_CTGRY_NO = '1' 
+		AND 
+				VCATN_SE_CD != '1' 
+		AND 
+				EMP_NO= #{empNo} 
+		AND 
+				VCATN_USE_DATE LIKE #{giveYear} || '%'		
+	</select>
+
+</mapper>

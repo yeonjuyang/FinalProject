@@ -1,0 +1,95 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>    
+    
+    
+    
+<!-- =============== body 시작 =============== -->
+<!-- =============== 상단타이틀영역 시작 =============== -->
+<div class="wf-tit-wrap">
+	<h1 class="page-tit">건의게시판</h1>
+	<div class="wf-util">
+		<button type="button" class="btn4" id="noticeUpdate"
+			style="display: none;">수정</button>
+		<button type="button" class="btn3" id="noticeDelete"
+			style="display: none;">삭제</button>
+		<button type="button" class="btn5"
+			onclick="location.href='http://localhost/notice/list/'">목록</button>
+	</div>
+</div>
+
+<!-- =============== 상단타이틀영역 끝 =============== -->
+<!-- =============== 컨텐츠 영역 시작 =============== -->
+<div class="wf-content-wrap">
+	<div class="wf-flex-box between">
+		<div class="wf-content-area" style="flex: 1;">
+			<!-- wf-insert-form2에 "detail"추가해주세요 -->
+			<ul class="wf-insert-form3 detail">
+				<li>
+					<div class="detail-tit">
+						<p class="tit">${noticeDetail.noticeBrdSj }</p>
+					</div>
+				</li>
+				<li>
+
+					<div class="form3-head-wrap">
+						<div class="user-info">
+							<span class="user-thumb"> <img src="/img/icon/avatar.png"
+								alt="예시이미지" />
+							</span>
+							<div>
+								<span class="user-name">${noticeDetail.empNm }</span>
+							</div>
+						</div>
+						<p class="date">${noticeDetail.writngDate }</p>
+						<p>조회수 ${noticeDetail.rdcnt }</p>
+					</div>
+				</li>
+				<li>
+					<p class="detail-content">${noticeDetail.noticeBrdCn }</p>
+				</li>
+
+
+			</ul>
+
+
+			<!-- 댓글, 코멘트 영역 시작 -->
+			<div class="comment-area">
+			<!-- 
+				<ul>
+					<div id="suggestReplyList"></div>
+				</ul>
+			 -->
+				<div id="deleteModal"></div>
+
+				<div class="input-wrap">
+					<span class="user-thumb"> <img src="/img/icon/avatar.png"
+						alt="예시이미지" />
+					</span> <input type="text" placeholder="댓글을 입력하세요" id="noticeReplyInsert" />
+					<input type="hidden" id="empNo" name="empNo"
+						value="<%=session.getAttribute(" empNo")%>">
+					<button class="btn4" id="Replycheck">등록</button>
+				</div>
+			</div>
+			<!-- 댓글, 코멘트 영역 끝 -->
+		</div>
+		<div class="wf-content-area" style="width: 310px;">
+			<h1 class="heading2">첨부파일</h1>
+			<div class="custom-box">
+				<ul class="file-lst bul-lst01">
+					<c:forEach var="attachlistVO" items="${attachdata}"
+						varStatus="stat">
+						<li><span class="file-name">${attachlistVO.atchmnflOriginNm}</span>
+							<a href="/resources/upload${attachlistVO.atchmnflUrl}"
+							class="file-download" download></a></li>
+					</c:forEach>
+				</ul>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+<!-- =============== 컨텐츠 영역 끝 =============== -->
+<!-- =============== body 끝 =============== -->

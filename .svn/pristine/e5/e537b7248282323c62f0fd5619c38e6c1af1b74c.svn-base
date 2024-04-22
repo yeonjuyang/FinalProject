@@ -1,0 +1,115 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<%@ include file="/WEB-INF/views/tiles/taglib.jsp"%>
+<script src="${_script}/common/util.js"></script>
+<script src="${_script}/approval/html.js"></script>
+<script src="${_script}/approval/main.js"></script>
+<script src="${_script}/approval/sign.js"></script>
+
+<script>
+
+	
+	
+	// 결재 진행 현황 데이터
+	const jsonData = ${ Json };
+	console.log(jsonData);
+	
+	let sortedData = jsonData.reduce((acc, current)=>{
+		if(!acc[current.apvNo]){
+			acc[current.apvNo] = [];
+		}
+		acc[current.apvNo].push(current);
+		return acc;
+	}, {});
+	console.log("sortedData : ", sortedData);
+	
+	
+	
+</script>
+
+<%-- <input type="hidden" value="${totalCnt}" id="totalCnt"> --%>
+<!-- =============== 상단타이틀영역 시작 =============== -->
+<div class="wf-tit-wrap">
+	<h1 class="page-tit">전자결재</h1>
+	<div class="side-util">
+    	<a href="/approval/createView" class="btn2">결재 작성</a>
+	</div>
+</div>
+<!-- =============== 상단타이틀영역 끝 =============== -->
+<!-- =============== 컨텐츠 영역 시작 =============== -->
+
+<div class="wf-content-wrap approval-cont-wrap">
+   <div class="wf-flex-box between">
+
+      <article class="left">
+          <div class="wf-content-area status-box-area">
+              <div class="status-box" >
+			      <a href="/approval/listView?tabId=1">
+				      <div class="info-wrap">
+	                      <p class="tit">대기 문서</p>
+	                      <div class="count" id="pendingCnt"></div>
+	                  </div>
+			      </a>
+              </div>
+              <div class="status-box">
+              	  <a href="/approval/listView?tabId=2">
+	              	  <div class="info-wrap">
+	                      <p class="tit">진행 문서</p>
+	                      <div class="count" id="progressCnt"></div>
+	                  </div>
+              	  </a>
+              </div>
+              <div class="status-box">
+				  <a href="/approval/listView?tabId=3">
+	                  <div class="info-wrap">
+	                      <p class="tit">완료 문서</p>
+	                      <div class="count" id="completedCnt"></div>
+	                  </div>
+				  </a>
+              </div>
+              <div class="status-box">
+              	  <a href="/approval/listView?tabId=4">
+	                  <div class="info-wrap">
+	                      <p class="tit">반려 문서</p>
+	                      <div class="count" id="rejectedCnt"></div>
+	                  </div>
+              	  </a>
+              </div>
+          </div>
+          <div class="wf-content-area process-area">
+              <p class="heading1">결재 진행 현황</p>
+              <div class="approval-process">
+                  <section>
+                      <div class="date-top">2024-03-30 토요일</div>
+                      <div class="process-cont">
+                          <div class="process-bar"></div>
+                      </div>
+                  </section>
+              </div>
+          </div>
+      </article>
+      <article class="right">
+          <div class="wf-content-area" id="completed">
+              <p class="heading1">결재 완료</p>
+              <ul class="form-list"></ul>
+          </div>
+          <div class="wf-content-area" id="temp">
+              <p class="heading1">임시보관함</p>
+              <ul class="form-list"></ul>
+          </div>
+          <div class="wf-content-area sign-area">
+              <p class="heading1">전자서명</p>
+              <div class="sign-cont">
+                  <canvas class="sign-pad"></canvas>
+              </div>
+              <div class="button-wrap">
+                  <button type="button" class="btn5" id="img_save_btn" style="margin-right: auto;">이미지로 저장</button>
+                  <button type="button" class="btn1" id="remove_btn">지우기</button>
+                  <!-- <button type="button" class="btn1">취소</button> -->
+                  <button type="button" class="btn4" id="sign_save_btn">저장</button>
+              </div>
+          </div>
+      </article>
+  </div>
+	
+</div>
+<!-- =============== 컨텐츠 영역 끝 =============== -->

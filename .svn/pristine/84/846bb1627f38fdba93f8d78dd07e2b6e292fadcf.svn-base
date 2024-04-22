@@ -1,0 +1,17 @@
+package com.team1.workforest.mail.vo;
+
+import java.util.Date;
+
+import lombok.Data;
+
+@Data
+public class EmailVO {
+	private String emailNo;
+	private String senderEmplNo;
+	private String emailSj;
+	private String emailCn;
+	private String sendDate;
+	private String tmprStre;
+	private String atchmnflNo;
+	private Date delDate;
+}

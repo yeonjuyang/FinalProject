@@ -1,0 +1,49 @@
+package com.team1.workforest.approval.mapper;
+
+import java.util.List;
+import java.util.Map;
+
+import com.team1.workforest.approval.vo.ApvBkmkVO;
+import com.team1.workforest.approval.vo.ApvLineBkmkVO;
+import com.team1.workforest.approval.vo.ApvLineVO;
+import com.team1.workforest.approval.vo.ApvReferVO;
+import com.team1.workforest.approval.vo.ApvVO;
+
+public interface ApprovalMapper {
+
+	// 기안 상신
+	public int create(ApvVO apvVo);
+	
+	// 결재 상세1
+	public ApvVO approvalDetailView1(Map<String, Object> map);
+	
+	// 결재 상세2
+	public List<ApvLineVO> approvalDetailView2(int apvNo);
+	
+	// 결재라인 등록
+	public int createApvLine(List<ApvLineVO> apvLineList);
+	
+	// 참조자 등록
+	public int createRefer(List<ApvReferVO> apvReferList);
+
+	// 즐겨찾기 저장
+	public int createBkmk(Map<String, Object> bkmkMap);
+	
+	// 즐겨찾기 상세 저장
+	public int createBkmkDetail(Map<String, Object> bkmkMap);
+
+	// 즐겨찾기 목록 조회
+	public List<ApvBkmkVO> getBkmkList();
+
+	// 즐겨찾기 상세 조회
+	public List<ApvBkmkVO> getBkmkDetail(int bkmkNo);
+
+	// 즐겨찾기 삭제
+	public int deleteBkmk(int bkmkNo);
+
+	// 즐겨찾기 수정
+	public int updateBkmk(ApvLineBkmkVO bkmkVO);
+
+
+
+}

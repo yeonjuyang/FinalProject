@@ -1,0 +1,10 @@
+
+
+
+const getParamMap = function() {
+	return location.search.replace('?', '').split('&').reduce((acc, e) => {
+	    let [k, v] = e.split('=');
+	    acc[k] = v;
+	    return acc;
+	}, {});
+}

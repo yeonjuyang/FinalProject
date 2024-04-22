@@ -1,0 +1,281 @@
+package com.team1.workforest.approval.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team1.workforest.approval.service.ApprovalService;
+import com.team1.workforest.approval.vo.ApvBkmkVO;
+import com.team1.workforest.approval.vo.ApvLineBkmkVO;
+import com.team1.workforest.approval.vo.ApvLineVO;
+import com.team1.workforest.approval.vo.ApvReferVO;
+import com.team1.workforest.approval.vo.ApvVO;
+import com.team1.workforest.vo.CommonCodeVO;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/approval")
+public class ApprovalController {
+	
+	@Autowired 
+	ApprovalService approvalService;
+
+	// 직원 목록 조회
+	@ResponseBody
+	@GetMapping("/getEmpList")	
+	public List<Map<String, Object>> getEmpList(){
+		
+		List<Map<String, Object>> empMapList = approvalService.getEmpList();
+		log.info("empMapList : {} ", empMapList);
+		
+		return empMapList;
+	}
+	
+	// 결재 메인 VIEW
+	@GetMapping("/mainView")
+	public String mainView(Model model) throws JsonProcessingException {
+		
+		List<ApvVO> progressList = approvalService.getProgress();
+		
+		//model.addAttribute("progressList", progressList);
+		model.addAttribute("Json", new ObjectMapper().writeValueAsString(progressList));
+		
+		return "approval/main";
+	}
+	
+	// 결재 등록 VIEW
+	@GetMapping("/createView")
+	public String createView() {
+		return "approval/create";
+	}
+	
+	// 결재(승인)
+	@ResponseBody
+	@PostMapping("/approval")
+	public int approval(@RequestBody int apvNo) {
+		log.info("결재번호 체크 -> " + apvNo);
+		
+		int result = approvalService.approval(apvNo);
+		
+		return result;
+	}
+
+	// 기안 상신(파일포함)
+	@ResponseBody
+	@PostMapping("/create")
+	public int create(@RequestPart(value="files", required=false) MultipartFile[] files,
+					  @RequestPart("data") Map<String, Object> apvMap,
+					  @RequestPart("apvEtc") List<Map<String, Object>> apvEtc) {
+		
+		log.debug("apvMap:{} ", apvMap);
+		log.debug("apvEtc:{} ", apvEtc);
+		
+		int result = approvalService.create(files, apvMap, apvEtc);
+				
+		return result;
+	}
+	
+	// 기안 상신 (파일 첨부 전 코드)
+//	@ResponseBody
+//	@PostMapping("/create")
+//	public int create(@RequestBody Map<String, Object> apvMap) {
+//		
+//		int result = approvalService.create(apvMap);
+//		
+//		return result;
+//	}
+	
+	// 임시저장
+//	@ResponseBody
+//	@PostMapping("/create/temp")
+//	public int create() {
+//		
+//	}
+	
+	// 기안 수정
+	@PutMapping("/update")
+	public String update() {
+		return "OK";
+	}
+	
+	// 결재 상세 VIEW
+	@GetMapping("/approvalDetailView")
+	public String approvalDetailView(@RequestParam int apvNo,	
+									Model model) {
+		
+	    ApvVO apvVO = approvalService.approvalDetailView1(apvNo);
+	    log.info("apvVO 체크 : {} ", apvVO);
+	    
+	    List<ApvLineVO> apvLineList = approvalService.approvalDetailView2(apvNo);
+		log.info("apvLineList 체크 : {} ", apvLineList);
+		
+		List<ApvReferVO> apvReferVOList = approvalService.approvalDetailView3(apvNo);
+		log.info("apvReferVOList 체크 : {} ", apvReferVOList);
+		
+		model.addAttribute("apvVO", apvVO);
+		model.addAttribute("apvLineList", apvLineList);
+		model.addAttribute("apvReferVOList", apvReferVOList);
+		
+		return "approval/detail";
+	}
+	
+	// 결재라인 구분코드 조회
+	@ResponseBody
+	@GetMapping("/getCommonCode")
+	public List<CommonCodeVO> getCommonCode(){
+		List<CommonCodeVO> commonCodeList = approvalService.getCommonCode();
+		log.info("commonCodeList : {}", commonCodeList);
+		return commonCodeList;
+	}
+	
+	// 즐겨찾기 저장
+	@ResponseBody
+	@PostMapping("/createBkmk")
+	public int createBkmk(@RequestBody Map<String, Object> bkmkMap) {
+		int result = approvalService.createBkmk(bkmkMap);
+		return result;
+	}	
+	
+	// 즐겨찾기 목록 조회
+	@ResponseBody
+	@GetMapping("/getBkmkList")
+	public List<ApvBkmkVO> getBkmkList() {
+		List<ApvBkmkVO> getBkmkList = approvalService.getBkmkList();
+		
+		return getBkmkList;
+	}
+	
+	// 즐겨찾기 상세 조회
+	@ResponseBody
+	@GetMapping("/getBkmkDetail")
+	public List<ApvBkmkVO> getBkmkDetail(@RequestParam int bkmkNo) {
+		List<ApvBkmkVO> apvBkmkDetail = approvalService.getBkmkDetail(bkmkNo);
+		
+		return apvBkmkDetail;
+	}
+	
+	// 즐겨찾기 삭제
+	@ResponseBody
+	@DeleteMapping("/deleteBkmk")
+	public int deleteBkmk(@RequestBody int bkmkNo) {
+		int result = approvalService.deleteBkmk(bkmkNo);
+		return result;
+	}
+	
+	// 즐겨찾기 수정
+	@ResponseBody
+	@PutMapping("/updateBkmk")
+	public int updateBkmk(@RequestBody ApvLineBkmkVO bkmkVO) {
+		int result = approvalService.updateBkmk(bkmkVO);
+		return result;
+	}
+
+	// 내 문서함 VIEW
+	@GetMapping("/listView")
+	public String listView() {
+		
+		return "approval/myList";
+	}
+	
+	// 내 문서함 조회
+	@ResponseBody
+	@GetMapping("/listView/myList")
+	public List<ApvVO> getListView(@RequestParam String tab){
+		log.info("tab -> {}", tab);
+		
+		// 결재 대기
+		if ("tab1".equals(tab)) {
+		  	
+			List<ApvVO> pendingList = approvalService.getPending();
+			log.info("pendingList : {} ", pendingList);
+			return pendingList;
+		  	
+	    // 결재 완료	
+		} else if ("tab2".equals(tab)) {
+		  	
+			List<ApvVO> completedList = approvalService.getCompleted();
+			log.info("completedList : {} ", completedList);
+			return completedList;
+		  	
+		// 반려	
+		} else if ("tab3".equals(tab)) {
+			
+			List<ApvVO> refuseList = approvalService.getRefuseList();
+			log.info("refuseList : {} ", refuseList);
+			return refuseList;
+		  	
+		  // 회수
+		} else if ("tab4".equals(tab)) {
+		
+			List<ApvVO> docReturnList = approvalService.getDocReturn();
+			log.info("docReturnList : {}, ",docReturnList);
+			return docReturnList;
+			
+		// 임시 저장함	
+		} else if ("tab5".equals(tab)) {
+			
+			return null;
+			
+		}
+		return null; 
+	}
+	
+	
+	// 임시 저장문서 삭제
+	@DeleteMapping("/deleteTemp")
+//	public String deleteTemp(@RequestBody String apvNo) {
+//		return "OK";
+//	}
+	
+	// 부서 문서함 VIEW
+	@GetMapping("/deptListView")
+	public String deptListView() {
+		return "approval/deptList";
+	}
+	
+	// 참조 문서함 VIEW
+	@GetMapping("/referListView")
+	public String referListView() {
+		return "approval/referList";
+	}
+	
+	// 반려
+	@ResponseBody
+	@PutMapping("/refuse")
+	public int refuse(@RequestBody int apvNo) {
+		
+		int result = approvalService.refuse(apvNo);
+		
+		return result;
+	}
+	
+	// 회수
+	@ResponseBody
+	@PutMapping("/docReturn")
+	public int docReturn(@RequestBody ApvLineVO apvLineVO) {
+			
+		log.info("apvLineVO -> {}", apvLineVO);
+		
+		int result = approvalService.docReturn(apvLineVO);
+		
+		return result;
+	}
+
+}

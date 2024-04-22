@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.team1.workforest.approval.mapper.ApprovalMapper">
+	
+	<!-- 결재와 결재라인 다중 insert 되어야함 -->
+	<insert id="create" parameterType="Hashmap">
+		<selectKey resultType="int" order="BEFORE" keyProperty="apvNo">
+			SELECT NVL(MAX(APV_NO),0)+1 FROM APV
+		</selectKey>
+		INSERT INTO APV (
+							APV_NO,          <!-- 결재번호 -->
+						    EMP_NO,          <!-- 작성자사번 -->
+						    DOC_FORM_NO,     <!-- 문서양식번호 -->
+						    STTUS_CD,        <!-- 상태코드 -->
+						    APV_SJ,          <!-- 결재 제목 -->
+						    APV_CN,          <!-- 결재 내용 -->
+						    DRFT_DATE      <!-- 기안 일자 -->
+					    )
+		VALUES(#{apvNo}, #{empNo}, #{docFormNo}, #{sttusCd}, #{apvSj}, #{apvCn}, SYSDATE)
+	</insert>
+	
+</mapper>

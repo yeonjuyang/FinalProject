@@ -1,0 +1,16 @@
+package com.team1.workforest.duty.vo;
+
+import java.util.Date;
+
+import lombok.Data;
+
+@Data
+public class DutyVO {
+	private String dutyNo; // 업무번호
+	private String empNo; // 사원번호
+	private String dutySj; // 업무 명
+	private String dutyCn; // 업무 내용
+	private Date sendDate; // 송신일
+	private Date closDate; // 업무종료일
+	private String atchmnflNo; // 첨부파일명
+}
