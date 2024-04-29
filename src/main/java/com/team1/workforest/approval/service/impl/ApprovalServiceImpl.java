@@ -719,104 +719,118 @@ public class ApprovalServiceImpl implements ApprovalService {
 		int check = vacationMapper.checkVcatnApvComplete(apvNo);
 		if (check == 1) {
 			List<VacationRecordVO> records = vacationMapper.getVcatn(apvNo);
-			
-			// [현장] 
-			// 웹소켓 알람 보내기
-			List<WebSocketSession> list = ChatHandler.list;
-			TextMessage message = new TextMessage(" :%" + records.get(0).getEmpNo() + ":% 신청한 휴가가 승인되었습니다. :%approvalReceive");
-			
-			for (WebSocketSession webSocketSession : list) {
-				try {
-					webSocketSession.sendMessage(message);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+			if (!records.isEmpty()) {
+				// [현장] 웹소켓 알람 전송
+				sendVacationApprovalNotification(records);
+				// 일정 구분하고, 일정에 추가
+				classifyAndInsertSchedule(records);
+				// 휴가 잔여수 업데이트 해야하는 휴가인지 판단하여, 업데이트
+				updateVacationCountIfNeeded(records);
+
 			}
 
-			// 휴가수 계산
-			float vcatnCnt = 0;
-			for (int i = 0; i < records.size(); i++) {
-				if (records.get(i).getVcatnSeCd().equals("1")) {
-					vcatnCnt += 1;
-					// [현장]
-					// 연차 사용시 출퇴근목록에 insert
-					Map<String,String> map = new HashMap<String, String>();
-					map.put("empNo", records.get(i).getEmpNo());
-					map.put("vcatnSeCd", records.get(i).getVcatnSeCd());
-					map.put("attendTime", records.get(i).getVcatnUseDate() + " 09:00");
-					map.put("lvffcTime", records.get(i).getVcatnUseDate() + " 18:00");
-					vacationMapper.createAttendance(map);
-				} else {
-					vcatnCnt += 0.5;
-				}
-			}
-			String beginDate = "";
-			String endDate = "";
-			String allDayCd = "";
-
-			// 일정 구분
-			// 1. 하루 이상의 종일 일정
-			if (vcatnCnt % 1 == 0 && vcatnCnt >= 1) {
-				beginDate = records.get(0).getVcatnUseDate();
-				endDate = records.get(records.size() - 1).getVcatnUseDate();
-				allDayCd = "1";
-				// 2. 오후 반차 + 종일 연차
-			} else if (vcatnCnt % 1 != 0 && vcatnCnt >= 1 && records.get(0).getVcatnSeCd().equals("3")) {
-				beginDate = records.get(0).getVcatnUseDate() + " 14:00";
-				endDate = records.get(records.size() - 1).getVcatnUseDate() + " 24:00";
-				allDayCd = "0";
-				// 3. 종일 연차 + 오전 반차
-			} else if (vcatnCnt % 1 != 0 && vcatnCnt >= 1
-					&& records.get(records.size() - 1).getVcatnSeCd().equals("2")) {
-				beginDate = records.get(0).getVcatnUseDate();
-				endDate = records.get(records.size() - 1).getVcatnUseDate() + " 14:00";
-				allDayCd = "0";
-				// 4. 오후 반차 + 종일 연차 + 오전 연차
-			} else if (vcatnCnt % 1 == 0 && vcatnCnt >= 1 && records.get(0).getVcatnSeCd().equals("3")) {
-				beginDate = records.get(0).getVcatnUseDate() + " 14:00";
-				endDate = records.get(records.size() - 1).getVcatnUseDate() + " 14:00";
-				allDayCd = "0";
-				// 5. 오전 반차
-			} else if (records.size() == 1 && records.get(0).getVcatnSeCd().equals("2")) {
-				beginDate = records.get(0).getVcatnUseDate() + " 09:00";
-				endDate = records.get(0).getVcatnUseDate() + " 14:00";
-				allDayCd = "0";
-				// 6. 오후 반차
-			} else if (records.size() == 1 && records.get(0).getVcatnSeCd().equals("3")) {
-				beginDate = records.get(0).getVcatnUseDate() + " 14:00";
-				endDate = records.get(0).getVcatnUseDate() + " 18:00";
-				allDayCd = "0";
-			}
-
-			// 휴가 종류
-			String vcatnCategory = records.get(0).getVcatnCtgryNo();
-			String categoryStr = "";
-			VacationCategory category = VacationCategory.fromValue(vcatnCategory);
-			categoryStr = category.getDescription();
-
-			// 개인 일정에 추가
-			ScheduleVO scheduleVO = new ScheduleVO();
-			scheduleVO.setEmpNo(records.get(0).getEmpNo());
-			scheduleVO.setSchdulSeCd("1");
-			scheduleVO.setSchdulBeginDate(beginDate);
-			scheduleVO.setSchdulEndDate(endDate);
-			scheduleVO.setSchdulSj(categoryStr);
-			scheduleVO.setAllDayCd(allDayCd);
-			scheduleMapper.createSchedule(scheduleVO);
-			
-
-			// 휴가 잔여수를 업데이트 해야하는 휴가인지 판단
-			if (vcatnCategory.equals("1") || vcatnCategory.equals("2") || vcatnCategory.equals("3")
-					|| vcatnCategory.equals("4")) {
-				EmpVacationManageVO empVacationManageVO = new EmpVacationManageVO();
-				empVacationManageVO.setGiveYear(records.get(0).getGiveYear());
-				empVacationManageVO.setEmpNo(records.get(0).getEmpNo());
-				empVacationManageVO.setVcatnCtgryNo(vcatnCategory);
-				empVacationManageVO.setRemainCnt(vcatnCnt);
-				// 휴가 잔여수 업데이트
-				vacationMapper.updateVcatnCount(empVacationManageVO);
-			}
 		}
+	}
+
+	// [연주]
+	// 일정 구분하고, 일정에 추가
+	public void classifyAndInsertSchedule(List<VacationRecordVO> records) {
+		// 휴가수 계산
+		float vcatnCnt = calculateVacationCount(records);
+
+		String beginDate = "";
+		String endDate = "";
+		String allDayCd = "";
+
+		// 일정 구분
+		// 1. 하루 이상의 종일 일정
+		if (vcatnCnt % 1 == 0 && vcatnCnt >= 1) {
+			beginDate = records.get(0).getVcatnUseDate();
+			endDate = records.get(records.size() - 1).getVcatnUseDate();
+			allDayCd = "1";
+			// 2. 오후 반차 + 종일 연차
+		} else if (vcatnCnt % 1 != 0 && vcatnCnt >= 1 && records.get(0).getVcatnSeCd().equals("3")) {
+			beginDate = records.get(0).getVcatnUseDate() + " 14:00";
+			endDate = records.get(records.size() - 1).getVcatnUseDate() + " 24:00";
+			allDayCd = "0";
+			// 3. 종일 연차 + 오전 반차
+		} else if (vcatnCnt % 1 != 0 && vcatnCnt >= 1 && records.get(records.size() - 1).getVcatnSeCd().equals("2")) {
+			beginDate = records.get(0).getVcatnUseDate();
+			endDate = records.get(records.size() - 1).getVcatnUseDate() + " 14:00";
+			allDayCd = "0";
+			// 4. 오후 반차 + 종일 연차 + 오전 연차
+		} else if (vcatnCnt % 1 == 0 && vcatnCnt >= 1 && records.get(0).getVcatnSeCd().equals("3")) {
+			beginDate = records.get(0).getVcatnUseDate() + " 14:00";
+			endDate = records.get(records.size() - 1).getVcatnUseDate() + " 14:00";
+			allDayCd = "0";
+			// 5. 오전 반차
+		} else if (records.size() == 1 && records.get(0).getVcatnSeCd().equals("2")) {
+			beginDate = records.get(0).getVcatnUseDate() + " 09:00";
+			endDate = records.get(0).getVcatnUseDate() + " 14:00";
+			allDayCd = "0";
+			// 6. 오후 반차
+		} else if (records.size() == 1 && records.get(0).getVcatnSeCd().equals("3")) {
+			beginDate = records.get(0).getVcatnUseDate() + " 14:00";
+			endDate = records.get(0).getVcatnUseDate() + " 18:00";
+			allDayCd = "0";
+
+		}
+
+		// 휴가 종류
+		String vcatnCategory = records.get(0).getVcatnCtgryNo();
+		String categoryStr = VacationCategory.fromValue(vcatnCategory).getDescription();
+		
+		// 휴가를 일정에 추가
+		addSchedule(records, categoryStr, beginDate, endDate, allDayCd);
+	}
+	
+	// [연주]
+	// 휴가수 계산
+	public float calculateVacationCount(List<VacationRecordVO> records) {
+	    float vcatnCnt = 0;
+	    for (VacationRecordVO record : records) {
+	        if ("1".equals(record.getVcatnSeCd())) {
+	            vcatnCnt += 1;
+	            
+	            // [현장]
+				// 연차 사용시 출퇴근목록에 insert
+				insertAttendance(record);				
+	        } else {
+	            vcatnCnt += 0.5;
+	        }
+	    }	    
+	    return vcatnCnt;
+	}
+	
+	// [연주]
+	// 휴가를 일정에 추가
+	private void addSchedule(List<VacationRecordVO> records, String categoryStr, String beginDate, String endDate, String allDayCd) {
+	    ScheduleVO scheduleVO = new ScheduleVO();
+	    scheduleVO.setEmpNo(records.get(0).getEmpNo());
+	    scheduleVO.setSchdulSeCd("1");
+	    scheduleVO.setSchdulBeginDate(beginDate);
+	    scheduleVO.setSchdulEndDate(endDate);
+	    scheduleVO.setSchdulSj(categoryStr);
+	    scheduleVO.setAllDayCd(allDayCd);
+	    scheduleMapper.createSchedule(scheduleVO);
+	}
+	
+	// [연주]
+	// 휴가 잔여수 업데이트 해야하는 휴가인지 판단하여, 업데이트
+	public void updateVacationCountIfNeeded(List<VacationRecordVO> records) {
+		String vcatnCategory = records.get(0).getVcatnCtgryNo();
+		// 휴가 잔여수를 업데이트 해야하는 휴가인지 판단
+		if ("1".equals(vcatnCategory) || "2".equals(vcatnCategory) || "3".equals(vcatnCategory) || "4".equals(vcatnCategory)) {
+	        float vcatnCnt = calculateVacationCount(records);
+	        EmpVacationManageVO empVacationManageVO = new EmpVacationManageVO();
+			empVacationManageVO.setGiveYear(records.get(0).getGiveYear());
+			empVacationManageVO.setEmpNo(records.get(0).getEmpNo());
+			empVacationManageVO.setVcatnCtgryNo(vcatnCategory);
+			empVacationManageVO.setRemainCnt(vcatnCnt);
+			
+			// 휴가 잔여수 업데이트
+			vacationMapper.updateVcatnCount(empVacationManageVO);
+	    }
 	}
 
 	// [연주]
@@ -837,8 +851,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		        String endDate="";
 		        String destination="";
 		        
-		        for (Map<String, Object> jsonMap : jsonMapList) {
-		        	
+		        for (Map<String, Object> jsonMap : jsonMapList) {        	
 		        	if(jsonMap.get("empId") != null) {
 				        empId = (String) jsonMap.get("empId");		        		
 		        	}
@@ -853,8 +866,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		        	}
 				}
 		        
-		        ScheduleVO scheduleVO = new ScheduleVO();
-		        
+		        ScheduleVO scheduleVO = new ScheduleVO();		        
 		        scheduleVO.setEmpNo(empId);
 		        scheduleVO.setSchdulSeCd("1");
 		        scheduleVO.setSchdulBeginDate(startDate);
@@ -869,14 +881,37 @@ public class ApprovalServiceImpl implements ApprovalService {
 
 		    } catch (Exception e) {
 		        e.printStackTrace();
-		        // 예외 처리 필요
 		    }
 		}
-
 	}
 
+	// [현장]
+	// 웹소켓 알람 보내기
+	public void sendVacationApprovalNotification(List<VacationRecordVO> records) {
+		List<WebSocketSession> list = ChatHandler.list;
+		TextMessage message = new TextMessage(
+				" :%" + records.get(0).getEmpNo() + ":% 신청한 휴가가 승인되었습니다. :%approvalReceive");
+
+		for (WebSocketSession webSocketSession : list) {
+			try {
+				webSocketSession.sendMessage(message);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 	
-	
+	// [현장]
+	// 연차 사용시 출퇴근목록에 insert
+	public void insertAttendance(VacationRecordVO record) {
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("empNo", record.getEmpNo());
+		map.put("vcatnSeCd", record.getVcatnSeCd());
+		map.put("attendTime", record.getVcatnUseDate() + " 09:00");
+		map.put("lvffcTime", record.getVcatnUseDate() + " 18:00");
+		vacationMapper.createAttendance(map);
+	}
+		
 	// 연/월/일 폴더 생성
 	public String getFolder() {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");

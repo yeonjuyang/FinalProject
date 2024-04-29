@@ -33,6 +33,7 @@ public class MtrResveServiceImpl implements MtrResveService{
 
 		List<MtrReservationVO> mtrResveList = mtrResveMapper.getMtrResveList(mtrReservationVO);
 
+		// 캘린더에 랜더링하기 위한 데이터로 포맷
 		JSONArray jsonArr = new JSONArray();
 
 		for (MtrReservationVO mtrResve : mtrResveList) {
@@ -40,7 +41,9 @@ public class MtrResveServiceImpl implements MtrResveService{
 			EmployeeVO empVO = commonMapper.getEmpInfo(empNo);
 			String empNm = empVO.getEmpNm();
 			String position = empVO.getPosition();
-			String rspnsblCtgryNm = empVO.getRspnsblCtgryNm();
+			String rspnsblCtgryNm = empVO.getRspnsblCtgryNm();\
+			
+			// 사원이 직책이 있는 경우, 직급 말고 직책을 표시하도록 함
 			if(!rspnsblCtgryNm.equals("팀원")) {
 				position = rspnsblCtgryNm;
 			}
