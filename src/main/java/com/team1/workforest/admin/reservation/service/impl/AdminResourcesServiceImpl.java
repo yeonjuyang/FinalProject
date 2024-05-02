@@ -34,6 +34,7 @@ public class AdminResourcesServiceImpl implements AdminResourcesService{
 	
 	@Override
 	public int createMtr(MtrVO mtrVO) {
+		// 파일 업로드
 		MultipartFile uploadFile = mtrVO.getUploadFile();		
 		String uploadFileName = uploadFileAndReturnFilename(uploadFile);
 
@@ -68,7 +69,16 @@ public class AdminResourcesServiceImpl implements AdminResourcesService{
 
 	@Override
 	public int updateMtr(MtrVO mtrVO) {
+		// 업데이트할 파일이 있다면
 		if (mtrVO.getUploadFile() != null) {
+			
+			// 삭제할 파일 이름 가져오기
+			String deleteFileName = adminResourcesMapper.findMtrFileName(mtrVO.getMtrNo());
+			log.info("deleteFilename : {}", deleteFileName);
+			// 파일 삭제
+			FileToAwsUtil.deleteFromS3(deleteFileName);
+			
+			// 파일 업로드
 			MultipartFile uploadFile = mtrVO.getUploadFile();
 			String uploadFileName = uploadFileAndReturnFilename(uploadFile);
 
@@ -105,10 +115,14 @@ public class AdminResourcesServiceImpl implements AdminResourcesService{
 
 	@Override
 	public int deleteMtr(String mtrNo) {
+		// 삭제할 파일 이름 가져오기
+		String deleteFileName = adminResourcesMapper.findMtrFileName(mtrNo);
+		log.info("deleteFilename : {}", deleteFileName);
+		// 파일 삭제
+		FileToAwsUtil.deleteFromS3(deleteFileName);
+		
 		int result = adminResourcesMapper.deleteMtr(mtrNo);
-		
-		result += adminResourcesMapper.deleteMtrEquipment(mtrNo);
-		
+				
 		return result;
 	}
 
@@ -131,7 +145,14 @@ public class AdminResourcesServiceImpl implements AdminResourcesService{
 
 	@Override
 	public int updateCar(CarVO carVO) {
-		if(carVO.getUploadFile() != null) {			
+		// 업데이트할 파일이 있다면
+		if(carVO.getUploadFile() != null) {		
+			// 삭제할 파일 이름 가져오기
+			String deleteFileName = adminResourcesMapper.findCarFileName(carVO.getCarNo());
+			log.info("deleteFilename : {}", deleteFileName);
+			// 파일 삭제
+			FileToAwsUtil.deleteFromS3(deleteFileName);
+						
 			MultipartFile uploadFile = carVO.getUploadFile();
 			String uploadFileName = uploadFileAndReturnFilename(uploadFile);
 
@@ -145,6 +166,12 @@ public class AdminResourcesServiceImpl implements AdminResourcesService{
 
 	@Override
 	public int deleteCar(String carNo) {
+		// 삭제할 파일 이름 가져오기
+		String deleteFileName = adminResourcesMapper.findCarFileName(carNo);
+		log.info("deleteFilename : {}", deleteFileName);
+		// 파일 삭제
+		FileToAwsUtil.deleteFromS3(deleteFileName);
+		
 		return adminResourcesMapper.deleteCar(carNo);
 	}
 
@@ -181,5 +208,4 @@ public class AdminResourcesServiceImpl implements AdminResourcesService{
 		
 		return uploadFileName;
 	}
-
 }

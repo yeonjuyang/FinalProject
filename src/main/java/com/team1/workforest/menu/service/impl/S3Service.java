@@ -169,7 +169,7 @@ public class S3Service  {
         List<Date> dates= new ArrayList<>();
         // AWS 액세스 키 설정
         String accessKeyId = "";
-   	    String secretAccessKey = "";
+	    String secretAccessKey = "";
 
         // S3 클라이언트 생성
         AmazonS3 s3Client = AmazonS3ClientBuilder.standard()

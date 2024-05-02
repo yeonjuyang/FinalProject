@@ -100,8 +100,8 @@ public class MenuController {
 	
 	@PostMapping("/uploadFile")
 	public String uploadFile(MenuVO vo) throws IOException {
-	    String accessKeyId = "AKIAZQ3DREBNLHW5DO7N";
-	    String secretAccessKey = "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";
+		String accessKeyId = "";
+	    String secretAccessKey = "";
 	    
 	    // S3 클라이언트를 생성합니다
 	    AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
@@ -138,8 +138,8 @@ public class MenuController {
 	@ResponseBody
 	@PostMapping("/deleteFile")
 	public String deleteFile(@RequestBody MenuVO vo) {
-		String accessKeyId = "AKIAZQ3DREBNLHW5DO7N";
-	    String secretAccessKey = "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";
+		String accessKeyId = "";
+	    String secretAccessKey = "";
 	    log.info("deleteFile"+vo.getPageUrl());
 	    // S3 클라이언트를 생성합니다
 	    AmazonS3 s3Client = AmazonS3ClientBuilder.standard()

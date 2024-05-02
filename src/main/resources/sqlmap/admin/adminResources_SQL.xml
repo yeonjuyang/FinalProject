@@ -171,4 +171,24 @@
 				CAR_NO = #{carNo}
 	</delete>
 	
+	<!-- 회의실 파일이름 가져오기 -->
+	<select id="findMtrFileName" resultType="String">
+		SELECT 
+	   			PHOTO_URL			<!-- 사진 URL -->		
+		FROM 
+    			MEETINGROOM 
+    	WHERE
+				MTR_NO = #{mtrNo}			
+	</select>
+	
+	<!-- 차량 파일이름 가져오기 -->
+	<select id="findCarFileName" resultType="String">
+		SELECT 
+	   			PHOTO_URL			<!-- 사진 URL -->		
+		FROM 
+    			FROM CAR
+		WHERE 
+				CAR_NO = #{carNo}		
+	</select>
+	
 </mapper>

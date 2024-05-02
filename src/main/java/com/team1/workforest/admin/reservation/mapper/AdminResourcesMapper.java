@@ -31,4 +31,8 @@ public interface AdminResourcesMapper {
 	public int updateMtrEquipment(MtrEquipmentVO mtrEquipmentVO);
 
 	public int deleteMtrEquipment(String mtrNo);
+
+	public String findMtrFileName(String mtrNo);
+
+	public String findCarFileName(String carNo);
 }

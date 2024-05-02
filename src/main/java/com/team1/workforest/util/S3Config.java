@@ -39,8 +39,8 @@ public class S3Config {
     
     public static  String connectToS3() {
     	   // AWS 자격 증명을 설정합니다
-	    String accessKeyId = "AKIAZQ3DREBNLHW5DO7N";
-	    String secretAccessKey = "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";
+    	String accessKeyId = "";
+	    String secretAccessKey = "";
 
 	    // S3 클라이언트를 생성합니다
 	    AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
